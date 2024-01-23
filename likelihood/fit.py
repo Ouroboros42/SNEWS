@@ -63,8 +63,9 @@ scan_steps = 400 #  .2/200 1 millisecond steps
 scan_step_size = scan_window/scan_steps
 
 # read in arguments
-filenameb = sys.argv[1]
-filenamec = sys.argv[2]
+output_prepath = sys.argv[1]
+filenameb = sys.argv[2]
+filenamec = sys.argv[3]
 
 print(" Running " + sys.argv[0] + " on " + host)
 print(" File Names are : " + filenameb + " " + filenamec)
@@ -117,8 +118,6 @@ print(" Prename : " + prename)
 prename += "-cut" + str(truncate)
 prename += "-binw" + str(bin_size) + "-b" + str(bb) + "-c" + str(bc)+ '-step' + str(scan_step_size)
 predir = bdetname+"-"+cdetname
-# on pplxintX machines this is the output area -
-output_prepath = sys.argv[1]
 #output_prepath = "/home/azfarl/snewpdag/analysis/outest2/"
 #output_prepath = "/home/azfarl/snewpdag/analysis/outest3/"
 output_dir = output_prepath + predir + "-binw" + str(bin_size) + "-b" + str(bb) + "-c" + str(bc)+'-step' + str(scan_step_size)
