@@ -118,7 +118,7 @@ prename += "-cut" + str(truncate)
 prename += "-binw" + str(bin_size) + "-b" + str(bb) + "-c" + str(bc)+ '-step' + str(scan_step_size)
 predir = bdetname+"-"+cdetname
 # on pplxintX machines this is the output area -
-output_prepath = "/data/lsst/azfar/snewpdag/output/"
+output_prepath = sys.argv[1]
 #output_prepath = "/home/azfarl/snewpdag/analysis/outest2/"
 #output_prepath = "/home/azfarl/snewpdag/analysis/outest3/"
 output_dir = output_prepath + predir + "-binw" + str(bin_size) + "-b" + str(bb) + "-c" + str(bc)+'-step' + str(scan_step_size)
