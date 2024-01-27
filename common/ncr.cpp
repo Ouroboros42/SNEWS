@@ -1,3 +1,5 @@
+#include "common.hpp"
+
 #include <algorithm>
 #include <iostream>
 
