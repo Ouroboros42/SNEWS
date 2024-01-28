@@ -1,17 +1,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-float choose(int n, int r);
+#include<array>
+#include<vector>
 
-class Histogram {
-    private:
-        int nbins;
-        float hi;
-        float lo;
-        float * hist;
-        int datsize;
-    public:
-        Histogram(float * data, int ndat, int inNbins, float inLo, float inHi);
-};
+float combinations_split(int r1, int r2);
+
+float combinations(int n, int r);
 
 #endif
