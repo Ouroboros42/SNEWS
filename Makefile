@@ -45,4 +45,4 @@ objects: $(OBJS)
 
 # Run all tests
 tests: build/common_test.exe
-	$<
+	for test_exe in $^ ; do ./$$test_exe; done
