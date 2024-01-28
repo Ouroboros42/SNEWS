@@ -5,8 +5,12 @@
 
 using namespace std;
 
-float choose(int n, int r) {
-    r = min(r, n-r); // Take advantage of nCr = nC(n-r)
+float combinations_split(int r1, int r2) {
+    return combinations(r1 + r2, min(r1, r2));
+}
+
+float combinations(int n, int r) {
+    if (r < 0) return 0;
 
     // (n-r)! has been factored out of n!, product all remaining terms
     float out = 1;
