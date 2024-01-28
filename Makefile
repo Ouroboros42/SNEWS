@@ -6,6 +6,7 @@ targ_from_cpp = $(addprefix build/,$(1:.cpp=.o))
 # Generate file path of dependency for a given object file
 deps_from_obj = $(1:.o=.d)
 
+# File Lists:
 # All c++ sources to compile
 CPP_SRCS = $(wildcard **/*.cpp)
 # All objects to compile
@@ -25,15 +26,23 @@ build/%.o : %.cpp
 	mkdir -p $(dir $@)
 	$(CCOMPILE) -c $< -o $@ -MMD -MP -MT $@
 
-.PHONY = clean, wipe, objects
+build/common_test.exe : $(filter build/common/%.o,$(OBJS))
+	$(CCOMPILE) -o $@ $^
+
+
+.PHONY = clean, wipe, objects, tests
 
 # Remove all objects and dependency files
 clean:
-	rm -f $(OBJS) $(DEPS)
+	find ./build/ -name '*.[od]' -delete
 
 # Completely empty /build/ except for the .gitignore
 wipe:
-	find ./build/* ! -name '*.gitignore' -delete
+	find ./build/ ! -name 'build' ! -name '*.gitignore' -delete
 
 # Compile all object files
 objects: $(OBJS)
+
+# Run all tests
+tests: build/common_test.exe
+	$<
