@@ -1,10 +1,39 @@
-.PHONY = objects
+CCOMPILE = g++
 
-obj_targs = $(addsuffix .o,$(basename $(1)))
+# Functions:
+# Generate file path of object for a given source file
+targ_from_cpp = $(addprefix build/,$(1:.cpp=.o))
+# Generate file path of dependency for a given object file
+deps_from_obj = $(1:.o=.d)
 
-common_srcs = $(wildcard common/*.cpp)
-common_targs = $(call obj_targs,$(common_srcs))
+# All c++ sources to compile
+CPP_SRCS = $(wildcard **/*.cpp)
+# All objects to compile
+OBJS = $(call targ_from_cpp,$(CPP_SRCS))
+# All dependencies to read
+DEPS = $(call deps_from_obj,$(OBJS))
 
-$(common_targs): common/common.hpp
+# Reads dependencies of each object that has already been compiled
+# - Allows modifications to headers to be detected so objects can be recompiled
+-include $(DEPS)
 
-objects: $(common_targs)
+# Compile c++ sources to object files
+# - Make directory to store output
+# - Compile object
+# - Register dependencies (eg headers) to a '.d' file
+build/%.o : %.cpp
+	mkdir -p $(dir $@)
+	$(CCOMPILE) -c $< -o $@ -MMD -MP -MT $@
+
+.PHONY = clean, wipe, objects
+
+# Remove all objects and dependency files
+clean:
+	rm -f $(OBJS) $(DEPS)
+
+# Completely empty /build/ except for the .gitignore
+wipe:
+	find ./build/* ! -name '*.gitignore' -delete
+
+# Compile all object files
+objects: $(OBJS)
