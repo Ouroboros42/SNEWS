@@ -23,18 +23,16 @@ template <int NBins> class Histogram {
 
     public:
         Histogram(float lo, float hi) : lo{lo}, hi{hi}, delta{(hi-lo)/NBins}, bins{{}} /*Initialise bins to 0*/ {}
-        Histogram(float lo, float hi, vector<float> data) : Histogram(lo, hi) {
-            this->addData(data);
-        }   
+        Histogram(float lo, float hi, vector<float> data) : Histogram(lo, hi) { addData(data); }   
 
-        inline float getHi() { return this->hi; }
-        inline float getLo() { return this->lo; }
-        inline float getDelta() { return this->delta; }
-        inline array<int, NBins> getBins() { return this->bins; }        
+        inline float getHi() { return hi; }
+        inline float getLo() { return lo; }
+        inline float getDelta() { return delta; }
+        inline array<int, NBins> getBins() { return bins; }        
 
         void addData(vector<float> data) {
             for(float datum : data) {
-                ++bins[this->binOf(datum)];
+                ++bins[binOf(datum)];
             }
         }
 };
