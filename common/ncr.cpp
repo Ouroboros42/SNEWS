@@ -1,12 +1,9 @@
 #include "common.hpp"
 
 #include <algorithm>
-#include <iostream>
-
-using namespace std;
 
 float combinations_split(int r1, int r2) {
-    return combinations(r1 + r2, min(r1, r2));
+    return combinations(r1 + r2, std::min(r1, r2));
 }
 
 float combinations(int n, int r) {
