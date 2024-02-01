@@ -9,16 +9,41 @@
 #include <cmath>
 
 TEST_CASE ("Benchmarks") {
-    BENCHMARK("Big Pascal") {
-        size_t n = 400, m = 30000;
+    size_t n = 400, m = 30000;
 
+    size_t break_index = m;
+
+    BENCHMARK("Big Pascal") {
         mat rhombus = pascal_rhombus(n, m);
         for (size_t i = 0; i < m; i++) {
             if (isinf(rhombus[n-1][i])) {
-                cout << "\nBreaks at " << (n - 1) << "C" << i;
+                break_index = min(break_index, i);
                 break;
             }
         }
         return rhombus;
     };
+
+    if(break_index < m) {
+        cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
+    }
+
+    break_index = m;
+
+    BENCHMARK("Big scaled Pascal 0.9*0.9") {
+        scalar a = 0.9, b = 0.9;
+
+        mat rhombus = scaled_rhombus(n, m, a, b);
+        for (size_t i = 0; i < m; i++) {
+            if (isinf(rhombus[n-1][i])) {
+                break_index = min(break_index, i);
+                break;
+            }
+        }
+        return rhombus;
+    };
+
+    if(break_index < m) {
+        cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
+    }
 }
