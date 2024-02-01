@@ -10,7 +10,6 @@ def makeTriangle(m, n):
     return p
 
 
-
 def check(p, m, n):
     for i in range(m+n):
         for j in range(n):
@@ -21,7 +20,6 @@ def check(p, m, n):
                 print(i, j)
                 print(math.comb(i+j, j), p[i][j])
     return
-
 
 
 
