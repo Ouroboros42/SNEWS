@@ -6,10 +6,14 @@
 
 using namespace std;
 
+typedef double scalar;
+typedef vector<scalar> vec;
+typedef vector<vector<scalar>> mat;
+
 float combinations_split(int r1, int r2);
 
 float combinations(int n, int r);
 
-vector<vector<float>> pascal_rhombus(size_t n_rows, size_t n_cols);
+mat pascal_rhombus(size_t n_rows, size_t n_cols);
 
 #endif
