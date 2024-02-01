@@ -8,11 +8,13 @@ deps_from_obj = $(1:.o=.d)
 
 # File Lists:
 # All c++ sources to compile
-CPP_SRCS = $(wildcard **/*.cpp)
+CPP_SRCS = $(shell find -name '*.cpp' -printf '%P ')
 # All objects to compile
 OBJS = $(call targ_from_cpp,$(CPP_SRCS))
 # All dependencies to read
 DEPS = $(call deps_from_obj,$(OBJS))
+# Common cpp files 
+COMMON_OBJS = $(filter-out build/common/testing/%,$(filter build/common/%.o,$(OBJS)))
 
 # Reads dependencies of each object that has already been compiled
 # - Allows modifications to headers to be detected so objects can be recompiled
@@ -26,11 +28,11 @@ build/%.o : %.cpp
 	mkdir -p $(dir $@)
 	$(CCOMPILE) -c $< -o $@ -MMD -MP -MT $@
 
-build/common_test.exe : $(filter build/common/%.o,$(OBJS))
+build/common_%.exe : build/common/testing/%.o $(COMMON_OBJS)
 	$(CCOMPILE) -o $@ $^
 
 
-.PHONY = clean, wipe, objects, tests
+.PHONY = clean, wipe, objects, tests, common_bench
 
 # Remove all objects and dependency files
 clean:
@@ -44,5 +46,8 @@ wipe:
 objects: $(OBJS)
 
 # Run all tests
-tests: build/common_test.exe
+tests: build/common_unittests.exe
 	for test_exe in $^ ; do ./$$test_exe; done
+
+common_bench: build/common_benchmarks.exe
+	$<

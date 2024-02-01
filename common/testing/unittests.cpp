@@ -1,10 +1,10 @@
 #define CATCH_CONFIG_MAIN
 
 #include "Catch2/catch.hpp"
-#include "common.hpp"
-#include "histogram.hpp"
+#include "../common.hpp"
+#include "../histogram.hpp"
 
-#include<iostream>
+#include <iostream>
 #include <cmath>
 
 float true_ncr(float n, float r) {
@@ -14,7 +14,6 @@ float true_ncr(float n, float r) {
 auto ncr_matcher(float n, float r) {
     return Catch::Matchers::WithinRel(true_ncr(n, r), 0.001f);
 }
-
 
 TEST_CASE("True ncr tests") {
     REQUIRE_THAT(10., ncr_matcher(5, 3));
