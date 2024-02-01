@@ -11,9 +11,14 @@ float true_ncr(scalar n, scalar r) {
     return 1/((n+1)*beta(n-r+1, r+1)); // tgamma(n + 1) / (tgamma(n - r + 1) * tgamma(r + 1));
 }
 
-float log_true_ncr(scalar n, scalar r) {
-    return lgamma(n + 1) - lgamma(n - r + 1) - lgamma(r + 1);
+float log_true_factorial(scalar n) {
+    return lgamma(n + 1);
 }
+
+float log_true_ncr(scalar n, scalar r) {
+    return log_true_factorial(n) - log_true_factorial(n - r) - log_true_factorial(r);
+}
+
 
 auto approx_match(scalar target) {
     return Catch::Matchers::WithinRel(target , 0.001);
@@ -86,4 +91,14 @@ TEST_CASE("Histogram construction") {
     REQUIRE(hist.getBins()[3] == 0);
     // ...
     REQUIRE(hist.getBins()[9] == 1);
+}
+
+TEST_CASE("Log factorial cache accuracy") {
+    size_t n = 30;
+
+    auto cache = FactorialCache(n);
+    for (size_t i = 1; i <= n; i++) {
+        REQUIRE_THAT(cache.log(i), approx_match(log(i)));
+        REQUIRE_THAT(cache.log_factorial(i), approx_match(log_true_factorial(i)));
+    }
 }

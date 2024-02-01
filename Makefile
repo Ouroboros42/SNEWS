@@ -32,13 +32,7 @@ build/common_%.exe : build/common/testing/%.o $(COMMON_OBJS)
 	$(CCOMPILE) -o $@ $^
 
 
-.PHONY = clean, wipe, objects, tests, common_bench, cacheFactorials, test2
-
-
-test2:
-	echo $(OBJS)
-	echo $(DEPS)
-	echo hello
+.PHONY = clean, wipe, objects, tests, common_bench
 
 # Remove all objects and dependency files
 clean:
@@ -54,13 +48,6 @@ objects: $(OBJS)
 # Run all tests
 tests: build/common_unittests.exe
 	for test_exe in $^ ; do ./$$test_exe; done
-
-cacheFactorials: build/cacheFactorials.exe
-	$<
-
-build/cacheFactorials.exe: build/GPUExperimentation/cacheFactorials.o
-	$(CCOMPILE) -o $@ $^
-
 
 common_bench: build/common_benchmarks.exe
 	$<
