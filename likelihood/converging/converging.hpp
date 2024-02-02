@@ -3,11 +3,13 @@
 
 #include "../../common/common.hpp"
 
+#include <functional>
+
 /*
-Evaluates the log(sum: exp(Mij)exp(Vi)exp(Uj))
-Optimised for terms converging for large i, j
-rel_accuracy determines minimum relative size (compared to total) of terms to be calculated
+Evaluates the log(sum over 0<=i<n, 0<=j<m: exp(terms(i, j)))
+Assumes terms converge for increasing i, j
+rel_accuracy should correspond approximately to proportional error on result - will be much more reliable for strictly positive terms
 */
-scalar log_mvv_contract(mat M, vec V, vec U, scalar rel_accuracy);
+scalar log_converging_double_sum(size_t n, size_t m, function<scalar(size_t i, size_t j)> terms, scalar rel_accuracy);
 
 #endif

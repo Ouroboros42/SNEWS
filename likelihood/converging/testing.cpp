@@ -15,5 +15,8 @@ TEST_CASE("Converging exponentials") {
 
     scalar eps = 0.1;
 
-    REQUIRE_THAT(log_mvv_contract(zeros, e1, e2, eps), Catch::Matchers::WithinRel(a + b, eps));
+    REQUIRE_THAT(
+        log_converging_double_sum(n, m, [e1, e2](size_t i, size_t j) { return e1[i] + e2[j]; }, eps), 
+        Catch::Matchers::WithinRel(a + b, eps)
+    );
 }
