@@ -104,7 +104,7 @@ TEST_CASE("Log factorial cache accuracy") {
     }
 
     scalar x = 5;
-    
+
     vec exp_x_series = cache.exp_series(x);
     scalar tot = 0;
     for (scalar term : exp_x_series) {
@@ -112,4 +112,15 @@ TEST_CASE("Log factorial cache accuracy") {
     }
 
     REQUIRE_THAT(tot, approx_match(exp(x)));
+}
+
+TEST_CASE("log binomial cache test") {
+    size_t n = 100;
+    FactorialCache cache(n);
+
+    for (size_t t = 0; t <= n; t++) {
+        for (size_t r = 0; r <= t; r++) {
+            REQUIRE_THAT(cache.log_binomial(t-r, r), approx_match(log_true_ncr(t, r)));
+        }
+    }
 }

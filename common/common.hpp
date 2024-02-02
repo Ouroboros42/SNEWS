@@ -38,6 +38,9 @@ public:
 
     // Construct the series log(x^n / n!) up to size
     vec exp_series(scalar x);
+
+    // log((r+s) C r)
+    scalar log_binomial(size_t r, size_t s);
 };
 
 #endif

@@ -31,3 +31,7 @@ vec FactorialCache::exp_series(scalar x) {
 
     return expansion;
 }
+
+scalar FactorialCache::log_binomial(size_t r, size_t s) {
+    return log_factorial(r + s) - log_factorial(r) - log_factorial(s);
+}
