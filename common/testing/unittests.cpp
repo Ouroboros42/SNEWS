@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <numeric>
 
 float true_ncr(scalar n, scalar r) {
     return 1/((n+1)*beta(n-r+1, r+1)); // tgamma(n + 1) / (tgamma(n - r + 1) * tgamma(r + 1));
@@ -94,11 +95,21 @@ TEST_CASE("Histogram construction") {
 }
 
 TEST_CASE("Log factorial cache accuracy") {
-    size_t n = 30;
+    size_t n = 50;
 
     auto cache = FactorialCache(n);
     for (size_t i = 1; i <= n; i++) {
         REQUIRE_THAT(cache.log(i), approx_match(log(i)));
         REQUIRE_THAT(cache.log_factorial(i), approx_match(log_true_factorial(i)));
     }
+
+    scalar x = 5;
+    
+    vec exp_x_series = cache.exp_series(x);
+    scalar tot = 0;
+    for (scalar term : exp_x_series) {
+        tot += exp(term);
+    }
+
+    REQUIRE_THAT(tot, approx_match(exp(x)));
 }

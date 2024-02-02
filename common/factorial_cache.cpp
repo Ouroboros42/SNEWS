@@ -20,3 +20,14 @@ void FactorialCache::buildVectors() {
         LogFactorialVector[i - 1] = running_sum;
     }
 }
+
+vec FactorialCache::exp_series(scalar x) {
+    scalar log_x = log(x);
+    vec expansion(max_n);
+
+    for (size_t i = 0; i < max_n; i++) {
+        expansion[i] = (i * log_x) - log_factorial(i);
+    }
+
+    return expansion;
+}
