@@ -4,10 +4,10 @@
 #include "../../common/common.hpp"
 
 /*
-Evaluates the sum: Mij Vi Uj
+Evaluates the log(sum: exp(Mij)exp(Vi)exp(Uj))
 Optimised for terms converging for large i, j
-Accuracy determines minimum relative size of terms to be calculated
+rel_accuracy determines minimum relative size (compared to total) of terms to be calculated
 */
-scalar mvv_contract(mat M, vec V, vec U, scalar accuracy);
+scalar log_mvv_contract(mat M, vec V, vec U, scalar rel_accuracy);
 
 #endif

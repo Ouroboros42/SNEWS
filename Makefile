@@ -31,6 +31,9 @@ build/%.o : %.cpp
 build/common_%.exe : build/common/testing/%.o $(COMMON_OBJS)
 	$(CCOMPILE) -o $@ $^
 
+build/likelihood_%_tests.exe : build/likelihood/%/testing.o $(filter-out build/likelihood/%/testing.o,$(filter build/likelihood/%,$(OBJS))) $(COMMON_OBJS)
+	$(CCOMPILE) -o $@ $^
+
 
 .PHONY = clean, wipe, objects, tests, common_bench
 
@@ -46,7 +49,7 @@ wipe:
 objects: $(OBJS)
 
 # Run all tests
-tests: build/common_unittests.exe
+tests: build/common_unittests.exe build/likelihood_converging_tests.exe
 	for test_exe in $^ ; do ./$$test_exe; done
 
 common_bench: build/common_benchmarks.exe

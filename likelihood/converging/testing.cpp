@@ -5,12 +5,15 @@
 #include "converging.hpp"
 
 TEST_CASE("Converging exponentials") {
-    size_t n = 10, m = 20;
+    size_t n = 100, m = 100;
     scalar a = 3, b = 5;
 
-    mat ones(n, vec(m, 1));
-    vec e1 = vec(n), e2 = vec(m);
+    FactorialCache cache(max(n, m)); 
 
-    e1[0] = e2[0] = 1;
-     
+    mat zeros(n, vec(m, 0));
+    vec e1 = cache.exp_series(a), e2 = cache.exp_series(b);
+
+    scalar eps = 0.1;
+
+    REQUIRE_THAT(log_mvv_contract(zeros, e1, e2, eps), Catch::Matchers::WithinRel(a + b, eps));
 }
