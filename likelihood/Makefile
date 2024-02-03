@@ -1,22 +1,35 @@
-# Location of cpp source files
-SOURCE_ROOT = src
+# Location of whole project
+ROOT = .
+
+# Directory of cpp source files
+SOURCE_DIR = src
 
 # Directory in source root for files with main
-ENTRY_DIR = entrypoints
+ENTRY_DIR = $(SOURCE_DIR)/entrypoints
 
 # Directories in entry dir for tests and benchmarks 
 TEST_DIR = tests
 BENCH_DIR = benchmarks
 
-# Location of external libaries
-LIBS_ROOT = libs
+# Directory of external libaries
+LIBS_DIR = libs
 
-# Location to put build products
-BUILD_ROOT = build
+# Directory to put build products
+BUILD_DIR = build
 
 # Directories in build dir for objects and executables
 OBJ_DIR = partial
 EXE_DIR = run
+
+# Generated paths:
+SOURCE_ROOT = $(ROOT)/$(SOURCE_DIR)
+BUILD_ROOT = $(ROOT)/$(BUILD_DIR)
+LIBS_ROOT = $(ROOT)/$(LIBS_DIR)
+OBJ_ROOT = $(BUILD_ROOT)/$(OBJ_DIR)
+EXE_ROOT = $(BUILD_ROOT)/$(EXE_DIR)
+ENTRY_OBJ_ROOT = $(OBJ_ROOT)/$(ENTRY_DIR)
+TEST_EXE_ROOT = $(EXE_ROOT)/$(TEST_DIR)
+BENCH_EXE_ROOT = $(EXE_ROOT)/$(BENCH_DIR)
 
 # Paths to search for gcc includes
 C_INCLUDES = $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
@@ -24,29 +37,22 @@ C_INCLUDES = $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
 # Command to compile c++
 C_COMPILE = g++ $(addprefix -I,$(C_INCLUDES))
 
-# Generated paths:
-OBJ_ROOT = $(BUILD_ROOT)/$(OBJ_DIR)
-EXE_ROOT = $(BUILD_ROOT)/$(EXE_DIR)
-ENTRY_OBJ_ROOT = $(OBJ_ROOT)/$(ENTRY_DIR)
-TEST_EXE_ROOT = $(EXE_ROOT)/$(TEST_DIR)
-BENCH_EXE_ROOT = $(EXE_ROOT)/$(BENCH_DIR)
-
 # Functions:
 # Generate file path of object for a given source file
-obj_from_cpp = $(1:$(SOURCE_ROOT)%.cpp=$(OBJ_ROOT)%.o)
+obj_from_cpp = $(1:$(ROOT)/%.cpp=$(OBJ_ROOT)/%.o)
 
 # Generate file path of dependency list for a given object file
-deps_from_obj = $(1:.o=.d)
+deps_from_obj = $(1:%.o=%.d)
 
 # Generate file path of target executable for given entrypoint object file
 exe_from_obj = $(1:$(OBJ_ROOT)/$(ENTRY_DIR)/%.o=$(EXE_ROOT)/%.exe)
 
 # Run all executables listed in argument
-run_all = for exe in $1 ; do ./$$exe; done
+run_all = for exe in $1 ; do $$exe; done
 
 # File Lists:
 # All c++ sources to compile
-CPP_SRCS = $(shell find -name '*.cpp' -printf '%P ')
+CPP_SRCS = $(shell find $(ROOT) -name '*.cpp')
 # All objects to compile
 OBJS = $(call obj_from_cpp,$(CPP_SRCS))
 # All dependencies to read
@@ -68,7 +74,7 @@ BENCH_EXES = $(filter $(BENCH_EXE_ROOT)/%,$(EXES))
 # - Make directory to store output
 # - Compile object
 # - Register dependencies (eg headers) to a '.d' file
-$(OBJ_ROOT)/%.o : $(SOURCE_ROOT)/%.cpp
+$(OBJ_ROOT)/%.o : $(ROOT)/%.cpp
 	mkdir -p $(dir $@)
 	$(C_COMPILE) -c $< -o $@ -MMD -MP -MT $@
 
