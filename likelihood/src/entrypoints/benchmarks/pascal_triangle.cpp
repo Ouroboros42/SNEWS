@@ -1,9 +1,8 @@
 #define CATCH_CONFIG_MAIN
-
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 
-#include "Catch2/catch.hpp"
-#include "../common.hpp"
+#include "catch.hpp"
+#include "common.hpp"
 
 #include <iostream>
 #include <cmath>

@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
-#include "Catch2/catch.hpp"
+#include "catch.hpp"
 
-#include "converging.hpp"
+#include "converging/converging.hpp"
 
 TEST_CASE("Converging exponentials") {
     size_t n = 100, m = 100;

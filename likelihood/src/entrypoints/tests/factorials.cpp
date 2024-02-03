@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
-#include "Catch2/catch.hpp"
-#include "../common.hpp"
-#include "../histogram.hpp"
+#include "catch.hpp"
+#include "common.hpp"
+#include "histogram.hpp"
 
 #include <iostream>
 #include <cmath>
