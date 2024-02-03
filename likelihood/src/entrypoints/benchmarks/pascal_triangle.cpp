@@ -2,7 +2,7 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 
 #include "catch.hpp"
-#include "core.hpp"
+#include "pascal.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -15,7 +15,7 @@ TEST_CASE ("Benchmarks") {
     BENCHMARK("Big Pascal") {
         mat rhombus = pascal_rhombus(n, m);
         for (size_t i = 0; i < m; i++) {
-            if (isinf(rhombus[n-1][i])) {
+            if (std::isinf(rhombus[n-1][i])) {
                 break_index = std::min(break_index, i);
                 break;
             }
@@ -34,7 +34,7 @@ TEST_CASE ("Benchmarks") {
 
         mat rhombus = scaled_rhombus(n, m, a, b);
         for (size_t i = 0; i < m; i++) {
-            if (isinf(rhombus[n-1][i])) {
+            if (std::isinf(rhombus[n-1][i])) {
                 break_index = std::min(break_index, i);
                 break;
             }
