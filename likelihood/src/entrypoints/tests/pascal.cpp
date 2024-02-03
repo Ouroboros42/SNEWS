@@ -2,8 +2,8 @@
 
 #include "catch.hpp"
 
-#include "pascal.hpp"
-#include "binomials.hpp"
+#include "surplus/pascal.hpp"
+#include "surplus/binomials.hpp"
 
 // void print_2D(mat arr) {
 //     for (vec row : arr) {

@@ -2,7 +2,7 @@
 
 #include "catch.hpp"
 
-#include "binomials.hpp"
+#include "surplus/binomials.hpp"
 #include "caching/factorials.hpp"
 
 #include <iostream>

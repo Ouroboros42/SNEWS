@@ -2,7 +2,7 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 
 #include "catch.hpp"
-#include "pascal.hpp"
+#include "surplus/pascal.hpp"
 
 #include <iostream>
 #include <cmath>
