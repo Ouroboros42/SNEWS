@@ -1,4 +1,4 @@
-#include "core.hpp"
+#include "pascal.hpp"
 
 #include<iostream>
 

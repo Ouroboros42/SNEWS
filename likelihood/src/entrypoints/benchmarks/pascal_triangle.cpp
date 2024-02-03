@@ -16,7 +16,7 @@ TEST_CASE ("Benchmarks") {
         mat rhombus = pascal_rhombus(n, m);
         for (size_t i = 0; i < m; i++) {
             if (isinf(rhombus[n-1][i])) {
-                break_index = min(break_index, i);
+                break_index = std::min(break_index, i);
                 break;
             }
         }
@@ -24,7 +24,7 @@ TEST_CASE ("Benchmarks") {
     };
 
     if(break_index < m) {
-        cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
+        std::cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
     }
 
     break_index = m;
@@ -35,7 +35,7 @@ TEST_CASE ("Benchmarks") {
         mat rhombus = scaled_rhombus(n, m, a, b);
         for (size_t i = 0; i < m; i++) {
             if (isinf(rhombus[n-1][i])) {
-                break_index = min(break_index, i);
+                break_index = std::min(break_index, i);
                 break;
             }
         }
@@ -43,6 +43,6 @@ TEST_CASE ("Benchmarks") {
     };
 
     if(break_index < m) {
-        cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
+        std::cout << "\nBreaks at " << (n - 1) << "C" << break_index << "\n";
     }
 }

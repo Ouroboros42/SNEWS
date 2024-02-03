@@ -1,9 +1,6 @@
-#include "core.hpp"
+#include "factorial_cache.hpp"
 
-#include <iostream>
 #include <cmath>
-#include <vector>
-#include <chrono>
 
 FactorialCache::FactorialCache(size_t max_n)
 : max_n(max_n), LogNumberVector(max_n), LogFactorialVector(max_n) {

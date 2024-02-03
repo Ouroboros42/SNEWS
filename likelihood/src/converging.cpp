@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-scalar log_converging_double_sum(size_t n, size_t m, function<scalar(size_t i, size_t j)> terms, scalar rel_accuracy) {
+scalar log_converging_double_sum(size_t n, size_t m, std::function<scalar(size_t i, size_t j)> terms, scalar rel_accuracy) {
     scalar log_total = terms(0, 0);
     scalar log_eps = log(rel_accuracy / n / m); // Account for potentially many terms of similar order by increasing per-term accuracy
 

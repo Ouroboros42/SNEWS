@@ -2,13 +2,14 @@
 
 #include "catch.hpp"
 
-#include "converging/converging.hpp"
+#include "term_cache.hpp"
+#include "converging.hpp"
 
 TEST_CASE("Converging exponentials") {
     size_t n = 100, m = 100;
     scalar a = 3, b = 5;
 
-    FactorialCache cache(max(n, m)); 
+    FactorialCache cache(std::max(n, m)); 
 
     mat zeros(n, vec(m, 0));
     vec e1 = cache.exp_series(a, n), 
