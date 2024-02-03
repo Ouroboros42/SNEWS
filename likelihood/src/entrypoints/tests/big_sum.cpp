@@ -2,7 +2,7 @@
 
 #include "catch.hpp"
 
-#include "term_cache.hpp"
+#include "caching/terms.hpp"
 #include "converging.hpp"
 
 TEST_CASE("Converging exponentials") {

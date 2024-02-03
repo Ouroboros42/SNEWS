@@ -1,7 +1,7 @@
 #ifndef TERM_CACHE_H
 #define TERM_CACHE_H
 
-#include "factorial_cache.hpp"
+#include "factorials.hpp"
 
 #include <functional>
 

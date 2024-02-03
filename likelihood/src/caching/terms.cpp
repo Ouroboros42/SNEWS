@@ -1,4 +1,4 @@
-#include "term_cache.hpp"
+#include "terms.hpp"
 
 #include <iostream>
 

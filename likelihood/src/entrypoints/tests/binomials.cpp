@@ -3,7 +3,7 @@
 #include "catch.hpp"
 
 #include "binomials.hpp"
-#include "factorial_cache.hpp"
+#include "caching/factorials.hpp"
 
 #include <iostream>
 #include <cmath>

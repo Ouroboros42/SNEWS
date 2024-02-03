@@ -1,4 +1,4 @@
-#include "factorial_cache.hpp"
+#include "factorials.hpp"
 
 #include <cmath>
 
