@@ -56,7 +56,7 @@ $(EXE_ROOT)/%.exe : $(ENTRY_OBJ_ROOT)/%.o $(COMPONENT_OBJS)
 	mkdir -p $(dir $@)
 	$(CCOMPILE) -o $@ $^
 
-.PHONY = clean, wipe, objects, tests, benches
+.PHONY = clean, wipe, objects, executables, tests, benches
 
 # Remove all objects and dependency files
 clean:
@@ -68,6 +68,9 @@ wipe:
 
 # Compile all object files
 objects: $(OBJS)
+
+# Compile all executables
+executables: $(EXES)
 
 # Run all tests
 tests: $(TEST_EXES)
