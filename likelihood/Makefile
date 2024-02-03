@@ -1,18 +1,30 @@
+# Location of cpp source files
 SOURCE_ROOT = src
 
+# Directory in source root for files with main
 ENTRY_DIR = entrypoints
+
+# Directories in entry dir for tests and benchmarks 
 TEST_DIR = tests
 BENCH_DIR = benchmarks
 
+# Location to put build products
 BUILD_ROOT = build
 
-OBJ_ROOT = $(BUILD_ROOT)/partial
-EXE_ROOT = $(BUILD_ROOT)/run
+# Directories in build dir for objects and executables
+OBJ_DIR = partial
+EXE_DIR = run
 
-CCOMPILE = g++ -I$(SOURCE_ROOT) -I../Catch2
+# Paths to search for gcc includes
+C_INCLUDES = $(SOURCE_ROOT) ../Catch2
 
+# Command to compile c++
+C_COMPILE = g++ $(addprefix -I,$(C_INCLUDES))
+
+# Generated paths:
+OBJ_ROOT = $(BUILD_ROOT)/$(OBJ_DIR)
+EXE_ROOT = $(BUILD_ROOT)/$(EXE_DIR)
 ENTRY_OBJ_ROOT = $(OBJ_ROOT)/$(ENTRY_DIR)
-
 TEST_EXE_ROOT = $(EXE_ROOT)/$(TEST_DIR)
 BENCH_EXE_ROOT = $(EXE_ROOT)/$(BENCH_DIR)
 
@@ -20,9 +32,10 @@ BENCH_EXE_ROOT = $(EXE_ROOT)/$(BENCH_DIR)
 # Generate file path of object for a given source file
 obj_from_cpp = $(1:$(SOURCE_ROOT)%.cpp=$(OBJ_ROOT)%.o)
 
-# Generate file path of dependency for a given object file
+# Generate file path of dependency list for a given object file
 deps_from_obj = $(1:.o=.d)
 
+# Generate file path of target executable for given entrypoint object file
 exe_from_obj = $(1:$(OBJ_ROOT)/$(ENTRY_DIR)/%.o=$(EXE_ROOT)/%.exe)
 
 # File Lists:
@@ -32,12 +45,13 @@ CPP_SRCS = $(shell find -name '*.cpp' -printf '%P ')
 OBJS = $(call obj_from_cpp,$(CPP_SRCS))
 # All dependencies to read
 DEPS = $(call deps_from_obj,$(OBJS))
-
+# Reuseable objects to compile into all executables
 COMPONENT_OBJS = $(filter-out $(ENTRY_OBJ_ROOT)/%,$(OBJS))
-
+# All executables to compile
 EXES = $(call exe_from_obj,$(filter $(ENTRY_OBJ_ROOT)/%,$(OBJS)))
-
+# Executables with unit tests
 TEST_EXES = $(filter $(TEST_EXE_ROOT)/%,$(EXES))
+# Executables with benchmarks
 BENCH_EXES = $(filter $(BENCH_EXE_ROOT)/%,$(EXES))
 
 # Reads dependencies of each object that has already been compiled
@@ -50,12 +64,16 @@ BENCH_EXES = $(filter $(BENCH_EXE_ROOT)/%,$(EXES))
 # - Register dependencies (eg headers) to a '.d' file
 $(OBJ_ROOT)/%.o : $(SOURCE_ROOT)/%.cpp
 	mkdir -p $(dir $@)
-	$(CCOMPILE) -c $< -o $@ -MMD -MP -MT $@
+	$(C_COMPILE) -c $< -o $@ -MMD -MP -MT $@
 
+# Compile c++ objects to executable
+# - Make directory to store output
+# - Compile one file from entrypoints with all reuseable objects to a '.exe'
 $(EXE_ROOT)/%.exe : $(ENTRY_OBJ_ROOT)/%.o $(COMPONENT_OBJS)
 	mkdir -p $(dir $@)
-	$(CCOMPILE) -o $@ $^
+	$(C_COMPILE) -o $@ $^
 
+# Shorthand commands
 .PHONY = clean, wipe, objects, executables, tests, benches
 
 # Remove all objects and dependency files
