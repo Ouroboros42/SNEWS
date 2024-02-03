@@ -38,6 +38,9 @@ deps_from_obj = $(1:.o=.d)
 # Generate file path of target executable for given entrypoint object file
 exe_from_obj = $(1:$(OBJ_ROOT)/$(ENTRY_DIR)/%.o=$(EXE_ROOT)/%.exe)
 
+# Run all executables listed in argument
+run_all = for exe in $1 ; do ./$$exe; done
+
 # File Lists:
 # All c++ sources to compile
 CPP_SRCS = $(shell find -name '*.cpp' -printf '%P ')
@@ -73,8 +76,13 @@ $(EXE_ROOT)/%.exe : $(ENTRY_OBJ_ROOT)/%.o $(COMPONENT_OBJS)
 	mkdir -p $(dir $@)
 	$(C_COMPILE) -o $@ $^
 
+# Tracks last time tests were run for mods command
+build/last_test: $(TEST_EXES) $(BENCH_EXES)
+	touch $@
+	$(call run_all,$?)
+
 # Shorthand commands
-.PHONY = clean, wipe, objects, executables, tests, benches
+.PHONY = clean, wipe, objects, executables, tests, benches, mods
 
 # Remove all objects and dependency files
 clean:
@@ -82,7 +90,7 @@ clean:
 
 # Completely empty /build/ except for the .gitignore
 wipe:
-	find $(BUILD_ROOT) ! -name 'build' ! -name '*.gitignore' -delete
+	find $(BUILD_ROOT) ! -wholename '$(BUILD_ROOT)' ! -name '*.gitignore' -delete
 
 # Compile all object files
 objects: $(OBJS)
@@ -92,8 +100,11 @@ executables: $(EXES)
 
 # Run all tests
 tests: $(TEST_EXES)
-	for test_exe in $^ ; do ./$$test_exe; done
+	$(call run_all,$^)
 
 # Run all benchmarks
 benches: $(BENCH_EXES)
-	for bench_exe in $^ ; do ./$$bench_exe; done
+	$(call run_all,$^)
+
+# Run all modified tests and benchmarks
+mods: build/last_test
