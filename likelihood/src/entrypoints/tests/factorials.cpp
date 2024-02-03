@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-#include "common.hpp"
+#include "core.hpp"
 #include "histogram.hpp"
 
 #include <iostream>

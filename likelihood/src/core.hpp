@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef CORE_H
+#define CORE_H
 
 #include<array>
 #include<vector>

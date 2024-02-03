@@ -1,7 +1,7 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
-#include "common.hpp"
+#include "core.hpp"
 
 #include <iostream>
 

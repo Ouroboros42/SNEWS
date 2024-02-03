@@ -1,7 +1,7 @@
 #ifndef CONVERGING_H
 #define CONVERGING_H
 
-#include "common.hpp"
+#include "core.hpp"
 
 #include <functional>
 

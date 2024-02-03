@@ -2,7 +2,7 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 
 #include "catch.hpp"
-#include "common.hpp"
+#include "core.hpp"
 
 #include <iostream>
 #include <cmath>
