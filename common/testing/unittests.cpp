@@ -105,7 +105,7 @@ TEST_CASE("Log factorial cache accuracy") {
 
     scalar x = 5;
 
-    vec exp_x_series = cache.exp_series(x);
+    vec exp_x_series = cache.exp_series(x, n-1);
     scalar tot = 0;
     for (scalar term : exp_x_series) {
         tot += exp(term);

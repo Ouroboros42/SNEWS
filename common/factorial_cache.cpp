@@ -5,14 +5,8 @@
 #include <vector>
 #include <chrono>
 
-FactorialCache::FactorialCache(size_t max_n) : max_n(max_n) {
-    LogNumberVector = vec(max_n);
-    LogFactorialVector = vec(max_n);
-
-    buildVectors();
-}
-
-void FactorialCache::buildVectors() {
+FactorialCache::FactorialCache(size_t max_n)
+: max_n(max_n), LogNumberVector(max_n), LogFactorialVector(max_n) {
     double running_sum = 0;
 
     for (int i = 1; i <= max_n; ++i) {
@@ -21,11 +15,11 @@ void FactorialCache::buildVectors() {
     }
 }
 
-vec FactorialCache::exp_series(scalar x) {
+vec FactorialCache::exp_series(scalar x, size_t n_terms) {
     scalar log_x = log(x);
-    vec expansion(max_n);
+    vec expansion(n_terms);
 
-    for (size_t i = 0; i < max_n; i++) {
+    for (size_t i = 0; i < n_terms; i++) {
         expansion[i] = (i * log_x) - log_factorial(i);
     }
 

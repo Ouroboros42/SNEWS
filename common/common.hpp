@@ -23,7 +23,6 @@ private:
     size_t max_n;
     vec LogNumberVector;
     vec LogFactorialVector;
-    void buildVectors();
 public:
     FactorialCache(size_t max_n);
 
@@ -36,8 +35,8 @@ public:
     // log(n!) for 0 <= n <= size
     inline scalar log_factorial(size_t n) { return (n == 0) ? 0 : LogFactorialVector[n-1]; }
 
-    // Construct the series log(x^n / n!) up to size
-    vec exp_series(scalar x);
+    // Construct the series log(x^n / n!) for 0 <= n < n_terms
+    vec exp_series(scalar x, size_t n_terms);
 
     // log((r+s) C r)
     scalar log_binomial(size_t r, size_t s);
