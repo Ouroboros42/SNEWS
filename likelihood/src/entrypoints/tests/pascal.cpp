@@ -1,9 +1,10 @@
 #define CATCH_CONFIG_MAIN
 
-#include "catch.hpp"
+#include <catch.hpp>
 
 #include "surplus/pascal.hpp"
 #include "surplus/binomials.hpp"
+
 
 // void print_2D(mat arr) {
 //     for (vec row : arr) {

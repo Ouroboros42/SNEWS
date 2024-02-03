@@ -8,6 +8,9 @@ ENTRY_DIR = entrypoints
 TEST_DIR = tests
 BENCH_DIR = benchmarks
 
+# Location of external libaries
+LIBS_ROOT = libs
+
 # Location to put build products
 BUILD_ROOT = build
 
@@ -16,7 +19,7 @@ OBJ_DIR = partial
 EXE_DIR = run
 
 # Paths to search for gcc includes
-C_INCLUDES = $(SOURCE_ROOT) ../Catch2
+C_INCLUDES = $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
 
 # Command to compile c++
 C_COMPILE = g++ $(addprefix -I,$(C_INCLUDES))
