@@ -3,37 +3,30 @@
 
 #include "core.hpp"
 
-#include <iostream>
+#include<vector>
 
-using namespace std;
-
-template <int NBins> class Histogram {
+class Histogram {
     private:
-        float hi;
-        float lo;
-        float delta;
-        array<int, NBins> bins;
+        scalar hi;
+        scalar lo;
+        scalar delta;
+        size_t n_bins;
+        std::vector<size_t> bins;
 
-// Because this is a template class, function definitions have to be in the header file, very sinful
-        int binOf(float datum) {
-            if (datum == hi) return NBins - 1; // Make last bin inclusive of boundary
-
-            return (datum - lo)/delta; // TODO May need to be explicitly rounded if compiler implementation is weird?
-        }
+        size_t binOf(scalar datum);
 
     public:
-        Histogram(float lo, float hi) : lo{lo}, hi{hi}, delta{(hi-lo)/NBins}, bins{{}} /*Initialise bins to 0*/ {}
-        Histogram(float lo, float hi, vector<float> data) : Histogram(lo, hi) { addData(data); }   
+        Histogram(size_t n_bins, scalar lo, scalar hi);
+        Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> data);
 
-        inline float getHi() { return hi; }
-        inline float getLo() { return lo; }
-        inline float getDelta() { return delta; }
-        inline array<int, NBins> getBins() { return bins; }        
+        inline scalar getHi() { return hi; }
+        inline scalar getLo() { return lo; }
+        inline scalar getDelta() { return delta; }
+        inline size_t getNBins() { return n_bins; }
+        inline scalar getBin(size_t n) { return bins[n]; }      
 
-        void addData(vector<float> data) {
-            for(float datum : data) {
-                ++bins[binOf(datum)];
-            }
-        }
+        void addDatum(scalar datum);
+        void addData(std::vector<scalar> data);
 };
+
 #endif
