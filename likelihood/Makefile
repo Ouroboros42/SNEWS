@@ -37,6 +37,9 @@ C_INCLUDES = $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
 # Command to compile c++
 C_COMPILE = g++ $(addprefix -I,$(C_INCLUDES))
 
+# Arguments passed to test exes
+TEST_ARGS = -d yes
+
 # Functions:
 # Generate file path of object for a given source file
 obj_from_cpp = $(1:$(ROOT)/%.cpp=$(OBJ_ROOT)/%.o)
@@ -48,7 +51,9 @@ deps_from_obj = $(1:%.o=%.d)
 exe_from_obj = $(1:$(OBJ_ROOT)/$(ENTRY_DIR)/%.o=$(EXE_ROOT)/%.exe)
 
 # Run all executables listed in argument
-run_all = for exe in $1 ; do $$exe; done
+run_all = for exe in $1 ; do $$exe $2; done
+
+run_tests = $(call run_all,$1,$(TEST_ARGS))
 
 # File Lists:
 # All c++ sources to compile
@@ -86,9 +91,9 @@ $(EXE_ROOT)/%.exe : $(ENTRY_OBJ_ROOT)/%.o $(COMPONENT_OBJS)
 	$(C_COMPILE) -o $@ $^
 
 # Tracks last time tests were run for mods command
-build/last_test: $(TEST_EXES) $(BENCH_EXES)
+build/last_test: $(TEST_EXES)
 	touch $@
-	$(call run_all,$?)
+	$(call run_tests,$?)
 
 # Shorthand commands
 .PHONY = clean, wipe, objects, executables, tests, benches, mods
@@ -109,11 +114,11 @@ executables: $(EXES)
 
 # Run all tests
 tests: $(TEST_EXES)
-	$(call run_all,$^)
+	$(call run_tests,$^)
 
 # Run all benchmarks
 benches: $(BENCH_EXES)
-	$(call run_all,$^)
+	$(call run_tests,$^)
 
 # Run all modified tests and benchmarks
 mods: build/last_test
