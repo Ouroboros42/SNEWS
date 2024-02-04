@@ -19,6 +19,8 @@ class BinLikelihoodCache : public FactorialCache {
         BinLikelihoodCache(size_t max_count_1, size_t max_count_2, scalar detector_const_1, scalar detector_const_2);
 
         std::function<scalar(size_t i, size_t j)> log_sum_terms(size_t count_1, size_t count_2);
+
+        scalar log_converging_internal_likelihood(size_t count_1, size_t count_2, scalar log_rel_accuracy);
 };
 
 #endif

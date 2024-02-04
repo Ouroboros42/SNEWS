@@ -17,7 +17,7 @@ TEST_CASE("Converging exponentials") {
     auto log_product_terms = [e1, e2](size_t i, size_t j) { return e1[i] + e2[j]; }; // log of terms in product of (e ^ a)(e ^ b)
 
     scalar epsilon = 0.1;
-    scalar log_total = log_converging_double_sum(n, m, log_product_terms, epsilon); // Approximately log(e^a * e^b) = a + b 
+    scalar log_total = log_converging_double_sum(n, m, log_product_terms, std::log(epsilon / n / m)); // Approximately log(e^a * e^b) = a + b 
 
     REQUIRE_THAT(log_total, Catch::Matchers::WithinRel(a + b, epsilon));
 }
