@@ -5,7 +5,11 @@
 #include "histogram.hpp"
 
 TEST_CASE("Histogram construction") {
-    Histogram hist(10, 0., 10., {1., 1.2, 1.3, 2.4, 10.});
+    Histogram hist(10, 0, 10);
+
+    vec data = {1, 1.2, 1.3, -30, 2.4, 10, 100};
+    REQUIRE(hist.addData(data) == 5);
+
     REQUIRE(hist.getLo() == 0.);
     REQUIRE(hist.getHi() == 10.);
     REQUIRE(hist.getDelta() == 1.);

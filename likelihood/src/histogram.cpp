@@ -9,17 +9,22 @@ Histogram::Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> da
 }
 
 size_t Histogram::binOf(scalar datum) {
-    if (datum == hi) return n_bins - 1; // Make last bin inclusive of boundary
+    if (datum == hi) return getNBins() - 1; // Make last bin inclusive of boundary
 
     return (datum - lo)/delta; // TODO May need to be explicitly rounded if compiler implementation is weird?
 }
 
-void Histogram::addDatum(scalar datum) {
-    ++bins[binOf(datum)];
+bool Histogram::addDatum(scalar datum) {
+    size_t bin_i = binOf(datum);
+    bool in_range = (0 <= bin_i) && (bin_i < getNBins());
+    if (in_range) { ++bins.at(bin_i); }
+    return in_range;
 }
 
-void Histogram::addData(std::vector<scalar> data) {
+size_t Histogram::addData(std::vector<scalar> data) {
+    size_t n_in_range = 0;
     for(scalar datum : data) {
-        addDatum(datum);
+        if (addDatum(datum)) { n_in_range++; }
     }
+    return n_in_range;
 }
