@@ -7,8 +7,12 @@
 TEST_CASE("Histogram construction") {
     Histogram hist(10, 0, 10);
 
-    vec data = {1, 1.2, 1.3, -30, 2.4, 10, 100};
-    REQUIRE(hist.addData(data) == 5);
+    vec data_a = { 1, 1.2, 1.3 };
+    vec data_b = { -30, 2.4, 10, 100 };
+    REQUIRE(hist.addData(data_a) == 3);
+    REQUIRE(hist.addData(data_b) == 2);
+
+    REQUIRE(hist.getNData() == 5);
 
     REQUIRE(hist.getLo() == 0.);
     REQUIRE(hist.getHi() == 10.);

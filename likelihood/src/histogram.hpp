@@ -11,6 +11,7 @@ class Histogram {
         scalar lo;
         scalar delta;
         std::vector<size_t> bins;
+        size_t n_data;
 
         size_t binOf(scalar datum);
 
@@ -22,7 +23,8 @@ class Histogram {
         inline scalar getLo() { return lo; }
         inline scalar getDelta() { return delta; }
         inline size_t getNBins() { return bins.size(); }
-        inline scalar getBin(size_t n) { return bins[n]; }      
+        inline scalar getBin(size_t n) { return bins[n]; }
+        inline size_t getNData() { return n_data; }    
 
         bool addDatum(scalar datum);
         size_t addData(std::vector<scalar> data);

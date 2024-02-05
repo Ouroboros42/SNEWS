@@ -1,7 +1,9 @@
 #include "histogram.hpp"
 
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi)
-: lo(lo), hi(hi), delta((hi-lo)/n_bins), bins(n_bins) /*Initialise bins to 0*/ {}
+: lo(lo), hi(hi), delta((hi-lo)/n_bins),
+bins(n_bins), /*Initialise bins to 0*/
+n_data(0) {}
 
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> data)
 : Histogram(n_bins, lo, hi) {
@@ -17,7 +19,10 @@ size_t Histogram::binOf(scalar datum) {
 bool Histogram::addDatum(scalar datum) {
     size_t bin_i = binOf(datum);
     bool in_range = (0 <= bin_i) && (bin_i < getNBins());
-    if (in_range) { ++bins.at(bin_i); }
+    if (in_range) {
+        ++bins.at(bin_i);
+        ++n_data;
+    }
     return in_range;
 }
 
