@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <iterator>
+#include <sstream>
+#include <string>
 
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi)
 : lo(lo), hi(hi), delta((hi-lo)/n_bins),
@@ -39,4 +41,14 @@ size_t Histogram::add_data(std::vector<scalar> data) {
 
 size_t Histogram::max_bin() {
     return *std::max_element(bins.begin(), bins.end());
+}
+
+
+std::string Histogram::display() {
+    std::stringstream out;
+    out << "Hist: |";
+    for (size_t bin: bins) {
+        out << bin << "|";
+    }
+    return out.str();
 }

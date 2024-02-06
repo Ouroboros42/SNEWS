@@ -4,6 +4,7 @@
 #include "core.hpp"
 
 #include<vector>
+#include<string>
 
 class Histogram {
     private:
@@ -30,6 +31,8 @@ class Histogram {
 
         bool add_datum(scalar datum);
         size_t add_data(std::vector<scalar> data);
+
+        std::string display();
 };
 
 #endif
