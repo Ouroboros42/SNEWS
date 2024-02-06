@@ -5,7 +5,6 @@
 #include "surplus/binomials.hpp"
 #include "caching/factorials.hpp"
 
-#include <iostream>
 #include <cmath>
 #include <numeric>
 

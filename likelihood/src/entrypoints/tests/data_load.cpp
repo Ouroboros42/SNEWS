@@ -3,7 +3,6 @@
 #include "file_read/data_load.hpp"
 
 #include <catch.hpp>
-#include <json.hpp>
 
 #include <fstream>
 #include <iostream>
