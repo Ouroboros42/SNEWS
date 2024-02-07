@@ -25,8 +25,7 @@ bool Histogram::add_datum(scalar datum) {
     size_t bin_i = binOf(datum);
     bool in_range = (0 <= bin_i) && (bin_i < size());
     if (in_range) {
-        ++bins.at(bin_i);
-        ++n_data;
+        inc_bin(bin_i);
     }
     return in_range;
 }
@@ -43,6 +42,9 @@ size_t Histogram::max_bin() {
     return *std::max_element(bins.begin(), bins.end());
 }
 
+scalar Histogram::range() {
+    return hi - lo;
+}
 
 std::string Histogram::display() {
     std::stringstream out;

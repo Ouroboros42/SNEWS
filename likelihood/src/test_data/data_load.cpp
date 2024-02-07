@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <random>
 
 std::string detector_name(Detector detector) {
     switch (detector) {
@@ -69,3 +70,17 @@ background_rate_ms(background_rate)
 {}
 
 DetectorSignal::DetectorSignal(Detector detector) : DetectorSignal(get_data(data_path(detector)), detector_name(detector), background_rates_ms(detector)) {};
+
+size_t rand_int(size_t ceil) {
+    return std::rand() % ceil;
+}
+
+size_t add_background(Histogram& hist, scalar background_rate) {
+    size_t n_events = background_rate * hist.range();
+
+    for (size_t i = 0; i < n_events; i++) {
+        hist.inc_bin(rand_int(hist.size()));
+    }
+
+    return n_events;
+}

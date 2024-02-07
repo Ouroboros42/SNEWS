@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
 
-#include "file_read/data_load.hpp"
+#include "test_data/data_load.hpp"
 
 #include <catch.hpp>
 
@@ -13,4 +13,10 @@ TEST_CASE("Simple read") {
     REQUIRE(skdata.true_time == 1635744156.3231735);
     REQUIRE(skdata.time_series.size() > 1000);
     REQUIRE(skdata.background_rate_ms == 0.0003);
+}
+
+TEST_CASE("Add background") {
+    Histogram hist(10, -5, 5);
+    std::cout << add_background(hist, 1) << std::endl;
+    REQUIRE(hist.get_n_data() == 10);
 }

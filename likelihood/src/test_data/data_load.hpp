@@ -2,6 +2,7 @@
 #define DATA_LOAD_H
 
 #include "core.hpp"
+#include "histogram.hpp"
 
 #include <json.hpp>
 
@@ -35,5 +36,7 @@ struct DetectorSignal {
 
     DetectorSignal(Detector detector);
 };
+
+size_t add_background(Histogram& hist, scalar background_rate);
 
 #endif

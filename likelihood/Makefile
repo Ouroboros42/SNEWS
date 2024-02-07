@@ -136,5 +136,5 @@ benches: $(BENCH_EXES)
 # Run all modified tests and benchmarks
 mods: build/last_test
 
-end2end : build/run/wet_run.exe
+end2end : build/run/end2end.exe
 	$<

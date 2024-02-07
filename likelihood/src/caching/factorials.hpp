@@ -9,7 +9,10 @@ private:
     vec LogNumberVector;
     vec LogFactorialVector;
 public:
+    FactorialCache();
     FactorialCache(size_t max_n);
+
+    void build_upto(size_t new_max_n);
 
     // largest n for which log(n!) is stored
     size_t size();
@@ -18,7 +21,10 @@ public:
     inline scalar log(size_t n) { return LogNumberVector[n-1]; }
     
     // log(n!) for 0 <= n <= size
-    inline scalar log_factorial(size_t n) { return (n == 0) ? 0 : LogFactorialVector[n-1]; }
+    inline scalar log_factorial(size_t n) { return LogFactorialVector[n]; }
+
+    // log(x^n / n!)
+    scalar log_exp_series_term(scalar log_x, size_t index);
 
     // Construct the series log(x^n / n!) for 0 <= n < n_terms
     vec exp_series(scalar x, size_t n_terms);
