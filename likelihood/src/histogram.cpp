@@ -5,11 +5,13 @@
 #include <sstream>
 #include <string>
 
+// default constructor
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi)
 : lo(lo), hi(hi), delta((hi-lo)/n_bins),
 bins(n_bins), /*Initialise bins to 0*/
 n_data(0) {}
 
+// constructor with data
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> data)
 : Histogram(n_bins, lo, hi) {
     add_data(data);
