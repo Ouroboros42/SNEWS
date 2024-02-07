@@ -22,11 +22,11 @@ std::string detector_name(Detector detector) {
 scalar background_rates_ms(Detector detector) {  // TODO Confirm accuracy
     switch (detector) { 
         case Detector::IceCube:
-            return 0.0003;
+            return 1500;
         case Detector::SNOPlus:
-            return 0.0001;
-        case Detector::SuperK:
             return 0.0003;
+        case Detector::SuperK:
+            return 0.0001;
         default:
             throw std::invalid_argument("Undefined detector");
     }

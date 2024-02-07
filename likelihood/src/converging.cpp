@@ -29,3 +29,24 @@ scalar log_converging_double_sum(size_t n, size_t m, std::function<scalar(size_t
 
     return log_total;
 }
+
+scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2, scalar log_accuracy) {
+    // Scale termwise accuracy to number of terms to achieve reliable overall accuracy
+    return log_converging_double_sum(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
+}
+
+scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar background_rate_2, Histogram time_dist_1, Histogram time_dist_2, size_t n_bins, scalar log_accuracy) {
+    scalar log_bin_accuracy = log_accuracy; // TODO Identify correct error propagation
+
+    DetectorComparison comp(background_rate_1, background_rate_2, time_dist_1, time_dist_2);
+
+    scalar total = comp.log_likelihood_prefactor(time_dist_1.get_n_data(), time_dist_2.get_n_data());
+
+    cache.build_upto(time_dist_1.max_bin() + time_dist_2.max_bin());
+
+    for (size_t i = 0; i < n_bins; i++) {
+        total += log_converging_bin_likelihood(cache, comp, time_dist_1.get_bin(i), time_dist_2.get_bin(i), log_bin_accuracy);
+    }
+
+    return total;
+}

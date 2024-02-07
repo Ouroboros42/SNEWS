@@ -1,7 +1,6 @@
 #include "core.hpp"
 #include "test_data/data_load.hpp"
-#include "caching/terms.hpp"
-#include "inference.hpp"
+#include "converging.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -18,20 +17,24 @@ void print_vec(vec elems) {
 }
 
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::SNOPlus, detector2 = Detector::IceCube;
+    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
     DetectorSignal data1(detector1), data2(detector2);
 
-    std::cout << data2.time_series.size();
+    FactorialCache cache;
+
+    scalar log_accuracy = -5;
 
     size_t n_bins = 2000;
     scalar period = 20;
 
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
-    size_t n = 1000;
+    size_t n = 50;
+
     vec likelihoods(n), offsets(n);
 
     for (size_t i = 0; i < n; i++) {
+        std::cout << "i = " << i << std::endl;
 
         scalar start = std::max(data1.start_time, data2.start_time);
         scalar end = start + period;
@@ -41,27 +44,17 @@ int main(int argc, char* argv[]) {
 
         Histogram hist1(n_bins, start, end, data1.time_series), hist2(n_bins, start + offset, end + offset, data2.time_series);
 
-        scalar background_1 = background_rates_ms(detector1), background_2 = background_rates_ms(detector2);
+        scalar background_1 = 1000 * background_rates_ms(detector1), background_2 = 1000 * background_rates_ms(detector2);
 
         add_background(hist1, background_1);
         add_background(hist2, background_2);
-
-        scalar ratio = sensitivity_ratio(hist2.get_n_data(), hist1.get_n_data(), period, background_2, background_1);
 
         // std::cout << hist1.max_bin();
         // std::cout << hist2.max_bin();
 
         // std::cout << "\n" << hist1.display() << "\n" << hist2.display();
 
-        BinLikelihoodCache cache(
-            hist1.max_bin(),
-            hist2.max_bin(),
-            background_1 / hist1.get_delta(),
-            background_2 / hist2.get_delta(),
-            1 / (1 + ratio)
-        );
-
-        scalar likelihood = cache.log_likelihood(hist1, hist2, n_bins, -5);
+        scalar likelihood = log_likelihood(cache, background_1, background_2, hist1, hist2, n_bins, log_accuracy);
         likelihoods[i] = likelihood;
 
         // std::cout << "\n\nTime Difference = " << offset << "\nLog Likelihood = " << likelihood;

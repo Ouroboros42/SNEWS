@@ -46,6 +46,10 @@ scalar Histogram::range() {
     return hi - lo;
 }
 
+scalar Histogram::mean_rate() {
+    return n_data / range();
+}
+
 std::string Histogram::display() {
     std::stringstream out;
     out << "Hist: |";

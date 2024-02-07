@@ -35,6 +35,7 @@ class Histogram {
 
         size_t max_bin();
         scalar range();
+        scalar mean_rate();
 
         bool add_datum(scalar datum);
         size_t add_data(std::vector<scalar> data);

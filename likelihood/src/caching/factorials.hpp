@@ -15,22 +15,22 @@ public:
     void build_upto(size_t new_max_n);
 
     // largest n for which log(n!) is stored
-    size_t size();
+    size_t size() const;
 
     // log(n) for 0 < n <= size
-    inline scalar log(size_t n) { return LogNumberVector[n-1]; }
+    inline scalar log(size_t n) const { return LogNumberVector[n-1]; }
     
     // log(n!) for 0 <= n <= size
-    inline scalar log_factorial(size_t n) { return LogFactorialVector[n]; }
+    inline scalar log_factorial(size_t n) const { return LogFactorialVector[n]; }
 
     // log(x^n / n!)
-    scalar log_exp_series_term(scalar log_x, size_t index);
+    scalar log_exp_series_term(scalar log_x, size_t index) const;
 
     // Construct the series log(x^n / n!) for 0 <= n < n_terms
-    vec exp_series(scalar x, size_t n_terms);
+    vec exp_series(scalar x, size_t n_terms) const;
 
     // log((r+s) C r)
-    scalar log_binomial(size_t r, size_t s);
+    scalar log_binomial(size_t r, size_t s) const;
 };
 
 #endif

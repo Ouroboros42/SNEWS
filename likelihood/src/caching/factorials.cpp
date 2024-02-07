@@ -23,11 +23,11 @@ void FactorialCache::build_upto(size_t new_max_n) {
     }
 }
 
-scalar FactorialCache::log_exp_series_term(scalar log_x, size_t index) {
+scalar FactorialCache::log_exp_series_term(scalar log_x, size_t index) const {
     return (index * log_x) - log_factorial(index);
 }
 
-vec FactorialCache::exp_series(scalar x, size_t n_terms) {
+vec FactorialCache::exp_series(scalar x, size_t n_terms) const {
     scalar log_x = log(x);
     vec expansion(n_terms);
 
@@ -38,6 +38,6 @@ vec FactorialCache::exp_series(scalar x, size_t n_terms) {
     return expansion;
 }
 
-scalar FactorialCache::log_binomial(size_t r, size_t s) {
+scalar FactorialCache::log_binomial(size_t r, size_t s) const {
     return log_factorial(r + s) - log_factorial(r) - log_factorial(s);
 }
