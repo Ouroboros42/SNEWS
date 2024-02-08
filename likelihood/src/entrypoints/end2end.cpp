@@ -7,6 +7,10 @@
 #include <iterator>
 #include <algorithm>
 #include <random>
+#include <chrono>
+
+// If you want to run this, go to file converging.cpp and uncomment the line that builds the line.
+// It's currently commented out because it's End2EndExp build the cache only once
 
 void print_vec(vec elems) {
     std::cout << "[" << elems[0];
@@ -17,7 +21,7 @@ void print_vec(vec elems) {
 }
 
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     DetectorSignal data1(detector1), data2(detector2);
 
     FactorialCache cache;
@@ -42,12 +46,15 @@ int main(int argc, char* argv[]) {
         scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n);
         offsets[i] = offset;
 
+        auto T1 = std::chrono::high_resolution_clock::now();
         Histogram hist1(n_bins, start, end, data1.time_series), hist2(n_bins, start + offset, end + offset, data2.time_series);
 
         scalar background_1 = 1000 * background_rates_ms(detector1), background_2 = 1000 * background_rates_ms(detector2);
 
         add_background(hist1, background_1);
         add_background(hist2, background_2);
+
+        auto T2 = std::chrono::high_resolution_clock::now();
 
         // std::cout << hist1.max_bin();
         // std::cout << hist2.max_bin();
@@ -56,7 +63,10 @@ int main(int argc, char* argv[]) {
 
         scalar likelihood = log_likelihood(cache, background_1, background_2, hist1, hist2, n_bins, log_accuracy);
         likelihoods[i] = likelihood;
+        auto T3 = std::chrono::high_resolution_clock::now();
 
+        std::cout << "Time to build histograms: " << std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count() << " ms\n";
+        std::cout << "Time to compute likelihood: " << std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count() << " ms\n";
         // std::cout << "\n\nTime Difference = " << offset << "\nLog Likelihood = " << likelihood;
     }
 
