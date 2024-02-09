@@ -1,6 +1,7 @@
 #include "core.hpp"
 #include "test_data/data_load.hpp"
 #include "converging.hpp"
+#include "write_output.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -9,17 +10,8 @@
 #include <random>
 #include <chrono>
 
-
-void print_vec(vec elems) {
-    std::cout << "[" << elems[0];
-    for (size_t i = 1; i < elems.size(); i++) {
-        std::cout << ", " << elems[i];
-    }
-    std::cout << "]\n";
-}
-
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
+    Detector detector1 = Detector::SuperK, detector2 = Detector::SNOPlus;
     DetectorSignal data1(detector1), data2(detector2);
 
     FactorialCache cache;
@@ -68,18 +60,13 @@ int main(int argc, char* argv[]) {
         // std::cout << "\n\nTime Difference = " << offset << "\nLog Likelihood = " << likelihood;
     }
 
+    save_likelihoods("output/ldist.json", offsets, likelihoods);
+
     scalar max_likelihood = *std::max_element(likelihoods.begin(), likelihoods.end());
     size_t max_i = std::distance(likelihoods.begin(), std::max_element(likelihoods.begin(), likelihoods.end()));
     scalar best = offsets[max_i];
 
     scalar true_d = data2.true_time - data1.true_time;
-
-    std::cout << std::setprecision(10);
-
-    std::cout << "\nt = ";
-    print_vec(offsets);
-    std::cout <<"\nL = ";
-    print_vec(likelihoods);
 
     std::cout << "\n\nMost probable time difference = " << best;
 
