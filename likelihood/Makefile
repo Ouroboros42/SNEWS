@@ -40,6 +40,14 @@ C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
 # Arguments passed to test exes
 TEST_ARGS := -d yes
 
+# File to track last test
+LAST_TEST := $(BUILD_ROOT)/last_test
+
+# File to track last benchmark 
+LAST_BENCH := $(BUILD_ROOT)/last_bench
+
+COMMAND_TRACKERS := $(LAST_TEST) $(LAST_BENCH)
+
 # Functions:
 # Generate file path of object for a given source file
 obj_from_cpp = $(1:$(ROOT)/%.cpp=$(OBJ_ROOT)/%.o)
@@ -57,6 +65,9 @@ obj_from_header = $(call obj_from_cpp,$(1:%.hpp=%.cpp))
 run_all = for exe in $1 ; do $$exe $2; done
 
 run_tests = $(call run_all,$1,$(TEST_ARGS))
+
+# Remove all files in directory excluding argument 2 list
+empty_excluding = find $1 ! -wholename '$1' \( ! -type d -o -empty \)  $(foreach exclude,$2,! -path '$(exclude)') -delete
 
 # File Lists:
 # All c++ sources to compile
@@ -107,17 +118,27 @@ $(call exe_from_obj,$1) : $(call get_header_objs,$1)
 endef
 $(foreach obj,$(EXE_OBJS),$(eval $(call EXE_template,$(obj))))
 
-# Tracks last time tests were run for mods command
-build/last_test: $(TEST_EXES)
+# Tracks last time tests/benches were run for mods command
+
+$(LAST_TEST): $(TEST_EXES)
+	touch $@
+	$(call run_tests,$?)
+
+$(LAST_BENCH): $(BENCH_EXES)
 	touch $@
 	$(call run_tests,$?)
 
 # Shorthand commands
-.PHONY : clean, wipe, objects, executables, tests, benches, mods, end2end, end2endExp
+.PHONY : clean, wipe, objects, executables, tests, benches, tmods, bmods, end2end, end2endExp
 
 # Completely empty /build/ except for the .gitignore
 wipe:
-	find $(BUILD_ROOT) ! -wholename '$(BUILD_ROOT)' ! -name '*.gitignore' -delete
+	$(call empty_excluding,$(BUILD_ROOT),*.gitignore)
+
+
+# Remove unused files from /build/
+clean:
+	$(call empty_excluding,$(BUILD_ROOT),*.gitignore $(DEPS) $(OBJS) $(EXES) $(COMMAND_TRACKERS))
 
 # Compile all object files
 objects: $(OBJS)
@@ -133,8 +154,10 @@ tests: $(TEST_EXES)
 benches: $(BENCH_EXES)
 	$(call run_tests,$^)
 
-# Run all modified tests and benchmarks
-mods: build/last_test
+# Run all modified tests/benchmarks
+tmods: $(LAST_TEST)
+bmods: $(LAST_BENCH)
+mods: tmods, bmods
 
 end2end : build/run/end2end.exe
 	$<
