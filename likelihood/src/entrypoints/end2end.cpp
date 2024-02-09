@@ -9,8 +9,6 @@
 #include <random>
 #include <chrono>
 
-// If you want to run this, go to file converging.cpp and uncomment the line that builds the line.
-// It's currently commented out because it's End2EndExp build the cache only once
 
 void print_vec(vec elems) {
     std::cout << "[" << elems[0];
@@ -21,7 +19,7 @@ void print_vec(vec elems) {
 }
 
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
     DetectorSignal data1(detector1), data2(detector2);
 
     FactorialCache cache;

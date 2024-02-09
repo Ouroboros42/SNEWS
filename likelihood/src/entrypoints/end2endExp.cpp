@@ -15,8 +15,6 @@
 // In End2EndExp, we have  the first historgram (for the bigger detector, which is argument 2) generated only once
 // The histogram for the smaller detector is regenerated for each iteration of the loop and basically shaves off 200 ms from each likelihood calc
 
-// THe cache is only generated once but has basically a negligible effect because it's too quick anyway
-
 
 void print_vec(vec elems) {
     std::cout << "[" << elems[0];
@@ -33,7 +31,7 @@ int main(int argc, char* argv[]) {
     // histogram parameters
     size_t n_bins = 2000;
     scalar period = 20;
-    scalar start = std::max(data1.start_time, data2.start_time);
+    scalar start = std::max(data1.start_time, data2.start_time);  // TODO account for edge case where they have diffferent start times
 
     // computing parameters
     scalar log_accuracy = -5;
@@ -41,7 +39,7 @@ int main(int argc, char* argv[]) {
     // Sweep parameters
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
-    size_t n = 2;
+    size_t n = 50;
 
     // first offset is basically sweep_start
     scalar offset = sweep_start;
@@ -56,7 +54,7 @@ int main(int argc, char* argv[]) {
     add_background(hist1, b1);
     add_background(hist2, b2);
 
-    // build cache only once
+    // build cache
     auto Ti = std::chrono::high_resolution_clock::now();
     FactorialCache cache;
     cache.build_upto(hist1.max_bin() + hist2.max_bin());

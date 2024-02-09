@@ -55,11 +55,8 @@ scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar bac
 
     scalar total = comp.log_likelihood_prefactor(time_dist_1.get_n_data(), time_dist_2.get_n_data());
 
-    /*
-        uncomment the lines below if running end2end, not end2endExp
-    */
     // auto T1 = std::chrono::high_resolution_clock::now();
-    // cache.build_upto(time_dist_1.max_bin() + time_dist_2.max_bin());
+    cache.build_upto(time_dist_1.max_bin() + time_dist_2.max_bin());
     // auto T2 = std::chrono::high_resolution_clock::now();
     // std::cout << "Time to build cache: " << std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count() << " ms\n";
 
