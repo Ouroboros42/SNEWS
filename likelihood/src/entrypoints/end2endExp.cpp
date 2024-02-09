@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     // Sweep parameters
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
-    size_t n = 50;
+    size_t n = 2;
 
     // first offset is basically sweep_start
     scalar offset = sweep_start;
@@ -74,11 +74,11 @@ int main(int argc, char* argv[]) {
 
     for (i=1; i < n; i++) {
         std::cout << "i = " << i << std::endl;
-        std::cout << "offset = " << offset << std::endl;
         auto T1 = std::chrono::high_resolution_clock::now();
 
         // regenrate the second histogram again with new offset and add background
         offset += ((sweep_end - sweep_start) * i / n);
+        std::cout << "offset = " << offset << std::endl;
         Histogram new_hist1(n_bins, start + offset, start + period + offset, data1.time_series);
         add_background(new_hist1, b1);
 
