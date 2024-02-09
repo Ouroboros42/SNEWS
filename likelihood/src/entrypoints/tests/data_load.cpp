@@ -12,7 +12,7 @@ TEST_CASE("Simple read") {
 
     REQUIRE(skdata.true_time == 1635744156.3231735);
     REQUIRE(skdata.time_series.size() > 1000);
-    REQUIRE(skdata.background_rate_ms == 0.0003);
+    REQUIRE(skdata.background_rate_ms == 0.0001);
 }
 
 TEST_CASE("Add background") {
