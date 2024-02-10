@@ -42,11 +42,101 @@ scalar log_converging_double_sum(size_t n, size_t m, std::function<scalar(size_t
 }
 
 
-scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2, scalar log_accuracy) {
-    // Scale termwise accuracy to number of terms to achieve reliable overall accuracy
-    return log_converging_double_sum(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
+//
+//
+// start of new functions for the expanding the likelihood function around the maxima
+//
+//
+
+
+scalar log_double_sum_do_columns_right(scalar log_total, scalar start, scalar m, scalar i, std::function<scalar(size_t i, size_t j)> terms, scalar log_rel_accuracy) {
+    for (int j = start; j < m; j++) {
+        scalar log_next_term_rel = terms(i, j) - log_total;
+        if (log_next_term_rel < log_rel_accuracy) {
+            break;
+        }
+        scalar log_rel_sum = log(1 + exp(log_next_term_rel));
+        log_total += log_rel_sum;
+    }
+    return log_total;
 }
 
+scalar log_double_sum_do_columns_left(scalar log_total, scalar start, scalar i, std::function<scalar(size_t i, size_t j)> terms, scalar log_rel_accuracy) {
+    for (int j = start; j >= 0; j--) {
+        scalar log_next_term_rel = terms(i, j) - log_total;
+        if (log_next_term_rel < log_rel_accuracy) {
+            break;
+        }
+        scalar log_rel_sum = log(1 + exp(log_next_term_rel));
+        log_total += log_rel_sum;
+    }
+    return log_total;
+}
+
+
+scalar log_double_sum_do_rows(size_t n, size_t m, std::function<scalar(size_t i, size_t j)> terms, scalar log_rel_accuracy) {
+    // FIND STARTING INDEX FOR ROWS AS A FUNCTION OF M, N and CONSTANTS
+    scalar starting_row = n/2;
+
+    scalar log_total = 0;
+
+    // Go up the rows
+    for(int i = starting_row; i >= 0; i--) {
+        // FIND STARTING INDEX FOR COLUMNS AS A FUNCTION OF I, M, N and CONSTANTS
+        scalar starting_column = m/2;
+
+        // if we are not on starting row, we need to check if the first term is significant
+        if(i != starting_row) {
+            scalar log_next_term_rel = terms(i, starting_column) - log_total;
+            if (log_next_term_rel < log_rel_accuracy) {
+                break;
+            }
+            log_total += log(1 + exp(log_next_term_rel));
+        }
+        // otherwise, we can just add the first term
+        else {
+            log_total += terms(i, starting_column);
+        }
+
+        // now we can sum up the columns on either side
+        log_total += log_double_sum_do_columns_right(log_total, starting_column + 1, m, i, terms, log_rel_accuracy);
+        log_total += log_double_sum_do_columns_left(log_total, starting_column - 1, i, terms, log_rel_accuracy);
+    }
+
+    // Go down the rows
+    for(int i = starting_row + 1; i < n; i++) {
+        // FIND STARTING INDEX FOR COLUMNS AS A FUNCTION OF I, M, N and CONSTANTS
+        scalar starting_column = m/2;
+
+        // check if this row is significant
+        scalar log_next_term_rel = terms(i, starting_column) - log_total;
+        if (log_next_term_rel < log_rel_accuracy) {
+            break;
+        }
+        log_total += log(1 + exp(log_next_term_rel));
+
+        // now we can sum up the columns on either side
+        log_total += log_double_sum_do_columns_right(log_total, starting_column + 1, m, i, terms, log_rel_accuracy);
+        log_total += log_double_sum_do_columns_left(log_total, starting_column - 1, i, terms, log_rel_accuracy);
+    }
+
+    return log_total;
+}
+
+//
+//
+// End of new functions for the expanding the likelihood function around the maxima
+//
+// Call log_double_sum_do_rows instead of log_converging_double_sum, with the exact same parameters,
+// and implement starting_row and starting_column variables
+//
+//
+
+scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2, scalar log_accuracy) {
+    // Scale termwise accuracy to number of terms to achieve reliable overall accuracy
+    // return log_converging_double_sum(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
+    return log_double_sum_do_rows(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
+}
 
 scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar background_rate_2, Histogram time_dist_1, Histogram time_dist_2, size_t n_bins, scalar log_accuracy) {
     scalar log_bin_accuracy = log_accuracy; // TODO Identify correct error propagation
