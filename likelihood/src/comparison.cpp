@@ -2,6 +2,17 @@
 
 #include <cmath>
 
+scalar quadratic_low_root(scalar b, scalar c) {
+    scalar half_b = b / 2;
+    
+    return - half_b - std::sqrt(half_b * half_b - c);
+}
+
+scalar quadratic_low_root(scalar a, scalar b, scalar c) {
+    return quadratic_low_root(b / a, c / a);
+}
+
+
 DetectorComparison::DetectorComparison(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_ratio_2_to_1) : 
     log_event_likelihood_1(-std::log(1 + sensitivity_ratio_2_to_1)),
     log_event_likelihood_2(-std::log(1 + 1 / sensitivity_ratio_2_to_1)),
