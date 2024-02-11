@@ -129,7 +129,7 @@ $(LAST_BENCH): $(BENCH_EXES)
 	$(call run_tests,$?)
 
 # Shorthand commands
-.PHONY : clean, wipe, objects, executables, tests, benches, tmods, bmods, end2end, end2endExp
+.PHONY : clean wipe objects executables tests benches tmods bmods mods end2end end2endExp
 
 # Completely empty /build/ except for the .gitignore
 wipe:
@@ -157,7 +157,7 @@ benches: $(BENCH_EXES)
 # Run all modified tests/benchmarks
 tmods: $(LAST_TEST)
 bmods: $(LAST_BENCH)
-mods: tmods, bmods
+mods: tmods bmods
 
 end2end : build/run/end2end.exe
 	$<
