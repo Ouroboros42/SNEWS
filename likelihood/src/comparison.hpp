@@ -14,8 +14,10 @@ struct DetectorComparison {
         // -log(1 + a/p)
         scalar log_event_likelihood_2;
 
+        // log(b(1 + p/a))        
         scalar log_rate_const_1;
 
+        // log(q(1 + a/p))
         scalar log_rate_const_2;
     
         DetectorComparison(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_ratio_2_to_1);
