@@ -18,20 +18,5 @@ TEST_CASE("Converging exponentials") {
     scalar epsilon = 0.1;
     scalar log_total = log_converging_double_sum(n, m, log_product_terms, std::log(epsilon / n / m)); // Approximately log(e^a * e^b) = a + b 
 
-    REQUIRE_THAT(log_total, Catch::Matchers::WithinRel(a + b, epsilon));
+    CHECK_THAT(log_total, Catch::Matchers::WithinRel(a + b, epsilon));
 }
-
-// TEST_CASE("Bin likelihood bounds") {
-//     size_t n_max = 100, m_max = 200;
-//     scalar x = 0.1, y = 0.5;
-
-//     BinLikelihoodCache cache(n_max, m_max, x, y, .5);
-
-//     auto big_bin = cache.log_sum_terms(n_max, m_max);
-
-//     // Terms should be decreasing strongly
-//     REQUIRE(big_bin(0, 0) > big_bin(n_max / 2, m_max / 2));
-//     REQUIRE(big_bin(n_max / 2, m_max / 2) > big_bin(n_max, m_max));
-
-//     log_converging_double_sum(n_max, m_max, big_bin, -5);
-// }

@@ -16,17 +16,23 @@ scalar quadratic_low_root(scalar a, scalar b, scalar c);
 struct DetectorComparison {
     public:
         // -log(1 + p/a)
-        scalar log_event_likelihood_1;
+        scalar log_sensitivity_1;
         // -log(1 + a/p)
-        scalar log_event_likelihood_2;
-
-        // log(b(1 + p/a)) = log(alpha)       
+        scalar log_sensitivity_2;
+        
+        // b(1 + p/a) = alpha
+        scalar rate_const_1;  
         scalar log_rate_const_1;
 
-        // log(q(1 + a/p)) = log(rho)
+        // q(1 + a/p) = rho
+        scalar rate_const_2;
         scalar log_rate_const_2;
+
+        scalar rate_const_ratio_2_to_1;
     
         DetectorComparison(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_ratio_2_to_1);
+
+        DetectorComparison(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_1, scalar sensitivity_2);
 
         DetectorComparison(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2);
 
