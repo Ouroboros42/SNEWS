@@ -26,7 +26,7 @@ void print_vec(vec elems) {
 
 int main(int argc, char* argv[]) {
     Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
-    DetectorSignal data1(detector1), data2(detector2);
+    DetectorSignal data1(detector1, "121"), data2(detector2, "121");
 
     // histogram parameters
     size_t n_bins = 2000;

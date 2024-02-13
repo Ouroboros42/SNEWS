@@ -17,6 +17,9 @@ LIBS_DIR := libs
 # Directory to put build products
 BUILD_DIR := build
 
+# Output file dir
+OUTPUT_DIR := output
+
 # Directories in build dir for objects and executables
 OBJ_DIR := partial
 EXE_DIR := run
@@ -30,12 +33,16 @@ EXE_ROOT := $(BUILD_ROOT)/$(EXE_DIR)
 ENTRY_OBJ_ROOT := $(OBJ_ROOT)/$(ENTRY_DIR)
 TEST_EXE_ROOT := $(EXE_ROOT)/$(TEST_DIR)
 BENCH_EXE_ROOT := $(EXE_ROOT)/$(BENCH_DIR)
+OUTPUT_ROOT := $(ROOT)/$(OUTPUT_DIR)
 
 # Paths to search for gcc includes
 C_INCLUDES := $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
 
 # Command to compile c++
 C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
+
+# Run python file
+RUN_PYTHON := python
 
 # Arguments passed to test exes
 TEST_ARGS := -d yes
@@ -129,7 +136,7 @@ $(LAST_BENCH): $(BENCH_EXES)
 	$(call run_tests,$?)
 
 # Shorthand commands
-.PHONY : clean wipe objects executables tests benches tmods bmods mods end2end end2endExp
+.PHONY : clean wipe objects executables tests benches tmods bmods mods end2end end2endExp new_analysis
 
 # Completely empty /build/ except for the .gitignore
 wipe:
@@ -159,8 +166,18 @@ tmods: $(LAST_TEST)
 bmods: $(LAST_BENCH)
 mods: tmods bmods
 
+ANALYSER := $(SOURCE_ROOT)/analysis/likelihood_dist.py
+
+FIND_DAT_FILE = unset -v latest; for file in $(OUTPUT_DIR)/*; do [[ $$file -nt $$latest ]] && latest=$$file; done
+
+DO_NEW_ANALYSIS = $(FIND_DAT_FILE); $(RUN_PYTHON) $(ANALYSER) $$latest
+
+new_analysis:
+	$(DO_NEW_ANALYSIS) 
+	
 end2end : build/run/end2end.exe
 	$<
+	$(DO_NEW_ANALYSIS)
 
 end2endExp : build/run/end2endExp.exe
 	$<

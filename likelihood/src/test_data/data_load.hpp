@@ -18,7 +18,7 @@ enum Detector {
 std::string detector_name(Detector detector);
 scalar background_rates_ms(Detector detector);
 
-std::string data_path(Detector detector);
+std::string data_path(Detector detector, std::string file_id);
 
 Json::Value get_data(std::string path);
 
@@ -34,7 +34,7 @@ struct DetectorSignal {
 
     DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate);
 
-    DetectorSignal(Detector detector);
+    DetectorSignal(Detector detector, std::string file_id);
 
     size_t add_background(scalar rate, scalar start, scalar end);
 };

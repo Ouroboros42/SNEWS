@@ -11,8 +11,10 @@
 #include <chrono>
 
 int main(int argc, char* argv[]) {
+    std::string inst = "121";
+
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
-    DetectorSignal data1(detector1), data2(detector2);
+    DetectorSignal data1(detector1, inst), data2(detector2, inst);
 
     scalar background_1 = 1000 * background_rates_ms(detector1);
     scalar background_2 = 1000 * background_rates_ms(detector2);
@@ -38,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     size_t n_bins = 2000;
 
-    size_t n = 100;
+    size_t n = 400;
 
     vec likelihoods(n), offsets(n);
 
@@ -56,11 +58,6 @@ int main(int argc, char* argv[]) {
         //add_background(hist2, background_2);
         auto T2 = std::chrono::high_resolution_clock::now();
 
-        if(i == 0 || i == n-1) {
-            std::cout << "H1: " << hist1.display() << std::endl;
-            std::cout << "H2: " << hist2.display() << std::endl;
-        }
-
         // std::cout << hist1.max_bin();
         // std::cout << hist2.max_bin();
 
@@ -72,10 +69,11 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Time to build histograms: " << std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count() << " ms\n";
         std::cout << "Time to compute likelihood: " << std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count() << " ms\n";
-        // std::cout << "\n\nTime Difference = " << offset << "\nLog Likelihood = " << likelihood;
     }
 
-    save_likelihoods("output/ldist.json", offsets, likelihoods);
+    std::string outputname = "output/ldist-src=" + inst + "-steps=" + std::to_string(n) + "-bins=" + std::to_string(n_bins) + ".json";
+
+    save_likelihoods(outputname, offsets, likelihoods);
 
     scalar max_likelihood = *std::max_element(likelihoods.begin(), likelihoods.end());
     size_t max_i = std::distance(likelihoods.begin(), std::max_element(likelihoods.begin(), likelihoods.end()));
@@ -83,11 +81,11 @@ int main(int argc, char* argv[]) {
 
     scalar true_d = data2.true_time - data1.true_time;
 
+    std::cout << "\n\nMax likelihood = " << max_likelihood;
+
     std::cout << "\n\nMost probable time difference = " << best;
 
-    std::cout << "\n\nTrue time difference = " << true_d;
-
-    std::cout << "\n\nMax likelihood = " << max_likelihood;
+    std::cout << "\n\nTrue time difference = " << true_d << "\n" << std::endl;
 
     return 0;
 }

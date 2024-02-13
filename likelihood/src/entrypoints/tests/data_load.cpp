@@ -8,7 +8,7 @@
 #include <iostream>
 
 TEST_CASE("Simple read") {
-    DetectorSignal skdata(Detector::SuperK);
+    DetectorSignal skdata(Detector::SuperK, "121");
 
     REQUIRE(skdata.true_time == 1635744156.3231735);
     REQUIRE(skdata.time_series.size() > 1000);

@@ -35,8 +35,8 @@ scalar background_rates_ms(Detector detector) {  // TODO Confirm accuracy
     }
 }
 
-std::string data_path(Detector detector) {
-    return "../temp-data/nlog-dump-" + detector_name(detector) + "-json-121-0.json";
+std::string data_path(Detector detector, std::string file_id) {
+    return "../temp-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
 }
 
 Json::Value get_data(std::string path) {
@@ -80,7 +80,7 @@ true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble()),
 background_rate_ms(background_rate)
 {}
 
-DetectorSignal::DetectorSignal(Detector detector) : DetectorSignal(get_data(data_path(detector)), detector_name(detector), background_rates_ms(detector)) {};
+DetectorSignal::DetectorSignal(Detector detector, std::string file_id) : DetectorSignal(get_data(data_path(detector, file_id)), detector_name(detector), background_rates_ms(detector)) {};
 
 size_t add_background(Histogram& hist, scalar background_rate) {
     size_t n_events = background_rate * hist.range();

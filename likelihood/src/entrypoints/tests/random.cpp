@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include "random.hpp"
+#include "test_data/random.hpp"
 
 TEST_CASE("Random consistency test") {
     size_t N = 10000;
