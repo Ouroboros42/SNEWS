@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 
-#include "surplus/binomials.hpp"
 #include "caching/factorials.hpp"
 
 #include <cmath>
@@ -12,23 +11,24 @@ auto approx_match(scalar target) {
     return Catch::Matchers::WithinRel(target , 0.001);
 }
 
-TEST_CASE("True nCr known values") {
-    REQUIRE_THAT(10., approx_match(std_binomial(5, 3)));
-    REQUIRE_THAT(48620., approx_match(std_binomial(18, 9))); 
-
-    REQUIRE_THAT(log(10.), approx_match(std_log_binomial(5, 3)));
-    REQUIRE_THAT(log(48620.), approx_match(std_log_binomial(18, 9)));
+scalar std_log_factorial(scalar n) {
+    return lgamma(n + 1);
 }
 
-TEST_CASE("Single-loop nCr all low values") {
-    int N = 100;
+scalar std_binomial(scalar n, scalar r) {
+    return 1/((n+1)*std::beta(n-r+1, r+1));
+}
 
-    for (int n = 0; n < N; n++) {
-        for (int r = 0; r <= n; r++) {
-            INFO(n << "C" << r);
-            REQUIRE_THAT(binomial(n, r), approx_match(std_binomial(n, r)));
-        }
-    }
+scalar std_log_binomial(scalar n, scalar r) {
+    return std_log_factorial(n) - std_log_factorial(n - r) - std_log_factorial(r);
+}
+
+TEST_CASE("True nCr known values") {
+    CHECK_THAT(10., approx_match(std_binomial(5, 3)));
+    CHECK_THAT(48620., approx_match(std_binomial(18, 9))); 
+
+    CHECK_THAT(log(10.), approx_match(std_log_binomial(5, 3)));
+    CHECK_THAT(log(48620.), approx_match(std_log_binomial(18, 9)));
 }
 
 TEST_CASE("Log factorial cache accuracy") {
@@ -36,8 +36,8 @@ TEST_CASE("Log factorial cache accuracy") {
 
     auto cache = FactorialCache(n);
     for (size_t i = 1; i <= n; i++) {
-        REQUIRE_THAT(cache.log(i), approx_match(log(i)));
-        REQUIRE_THAT(cache.log_factorial(i), approx_match(std_log_factorial(i)));
+        CHECK_THAT(cache.log(i), approx_match(log(i)));
+        CHECK_THAT(cache.log_factorial(i), approx_match(std_log_factorial(i)));
     }
 
     scalar x = 5;
@@ -48,7 +48,7 @@ TEST_CASE("Log factorial cache accuracy") {
         tot += exp(term);
     }
 
-    REQUIRE_THAT(tot, approx_match(exp(x)));
+    CHECK_THAT(tot, approx_match(exp(x)));
 }
 
 TEST_CASE("log binomial cache test") {
@@ -57,7 +57,7 @@ TEST_CASE("log binomial cache test") {
 
     for (size_t t = 0; t <= n; t++) {
         for (size_t r = 0; r <= t; r++) {
-            REQUIRE_THAT(cache.log_binomial(t-r, r), approx_match(std_log_binomial(t, r)));
+            CHECK_THAT(cache.log_binomial(t-r, r), approx_match(std_log_binomial(t, r)));
         }
     }
 }
