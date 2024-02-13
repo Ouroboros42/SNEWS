@@ -19,9 +19,20 @@ L = data["Likelihood"]
 N = len(t)
 assert N == len(L)
 
-fig, ax1 = plt.subplots(1, 1)
+h1 = data["Histogram1"]
+h2s = data["Histograms2"]
 
-ax1.scatter(t, L)
+fig, ((ax11, ax21), (ax12, ax22), (ax13, ax23)) = plt.subplots(3, 2)
+
+bins = np.linspace(0, 20, len(h1))
+
+ax11.scatter(bins, h2s[0])
+ax12.scatter(bins, h2s[1])
+ax13.scatter(bins, h2s[2])
+
+ax21.scatter(bins, h1)
+
+ax22.scatter(t, L)
 
 # L_fft = fft.fft(L)
 # L_fft[0] = 0

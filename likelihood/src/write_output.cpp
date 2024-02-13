@@ -16,9 +16,20 @@ std::string string_vec(vec elems) {
     return out  + "]";
 }
 
-void save_likelihoods(std::string output_filename, vec time_diffs, vec likelihoods) {
+void save_likelihoods(std::string output_filename, vec time_diffs, vec likelihoods, Histogram dist1, std::vector<Histogram> dist2s) {
     std::ofstream output_file;
     output_file.open(output_filename);
-    output_file << "{ \"Time-Difference\":\n    " << string_vec(time_diffs) << "\n,\"Likelihood\":\n   " << string_vec(likelihoods) << "\n}"; 
+    output_file << "{";
+    output_file << "\"Time-Difference\":\n    " << string_vec(time_diffs) << "\n,\"Likelihood\":\n   " << string_vec(likelihoods) << ",\n";
+    output_file << "\"Histogram1\": \n" << dist1.display() << ",\n";
+    output_file << "\"Histograms2\": \n[\n";
+    for (size_t i = 0; i < dist2s.size(); i++) { 
+        if (i != 0) {
+            output_file << ",\n";
+        }
+        output_file << dist2s[i].display();
+    }
+    output_file << "\n]\n";
+    output_file << "\n}"; 
     output_file.close();
 }

@@ -74,8 +74,8 @@ scalar max_elem(vec values) {
 
 DetectorSignal::DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate) :
 time_series(read_double_array(data["timeseries"]["times"])),
-start_time(double_or_default(data["timeseries"]["start"], min_elem(time_series))),
-end_time(double_or_default(data["timeseries"]["stop"], max_elem(time_series))),
+start_time(min_elem(time_series)),
+end_time(max_elem(time_series)),
 true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble()),
 background_rate_ms(background_rate)
 {}
