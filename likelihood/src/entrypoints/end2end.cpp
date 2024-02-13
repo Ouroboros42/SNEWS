@@ -11,40 +11,55 @@
 #include <chrono>
 
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     DetectorSignal data1(detector1), data2(detector2);
+
+    scalar background_1 = 1000 * background_rates_ms(detector1);
+    scalar background_2 = 1000 * background_rates_ms(detector2);
+
+    scalar sweep_start = -0.2;
+    scalar sweep_end = 0.2;
+
+    scalar event_margin = 1;
+
+    scalar window_start = std::min(data1.start_time, data2.start_time) - event_margin;
+    scalar window_end = window_start + 20; // std::max(data1.end_time, data2.end_time) + event_margin;
+
+    // Widest range over which detector 2 signal will be binned
+    scalar window_start_min = window_start + sweep_start;
+    scalar window_end_max = window_end + sweep_end;
+
+    // data1.add_background(background_1, window_start, window_end);
+    data2.add_background(background_2, window_start_min, window_end_max);
 
     FactorialCache cache;
 
     scalar log_accuracy = -5;
 
     size_t n_bins = 2000;
-    scalar period = 20;
 
-    scalar sweep_start = -0.2;
-    scalar sweep_end = 0.2;
-    size_t n = 50;
+    size_t n = 100;
 
     vec likelihoods(n), offsets(n);
 
+    Histogram hist1(n_bins, window_start, window_end, data1.time_series);
+    add_background(hist1, background_1);
+
     for (size_t i = 0; i < n; i++) {
         std::cout << "i = " << i << std::endl;
-
-        scalar start = std::max(data1.start_time, data2.start_time);
-        scalar end = start + period;
 
         scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n);
         offsets[i] = offset;
 
         auto T1 = std::chrono::high_resolution_clock::now();
-        Histogram hist1(n_bins, start, end, data1.time_series), hist2(n_bins, start + offset, end + offset, data2.time_series);
-
-        scalar background_1 = 1000 * background_rates_ms(detector1), background_2 = 1000 * background_rates_ms(detector2);
-
-        add_background(hist1, background_1);
-        add_background(hist2, background_2);
-
+        Histogram hist2(n_bins, window_start + offset, window_end + offset, data2.time_series);
+        //add_background(hist2, background_2);
         auto T2 = std::chrono::high_resolution_clock::now();
+
+        if(i == 0 || i == n-1) {
+            std::cout << "H1: " << hist1.display() << std::endl;
+            std::cout << "H2: " << hist2.display() << std::endl;
+        }
 
         // std::cout << hist1.max_bin();
         // std::cout << hist2.max_bin();

@@ -54,9 +54,10 @@ scalar Histogram::mean_rate() {
 
 std::string Histogram::display() {
     std::stringstream out;
-    out << "Hist: |";
+    out << "[";
     for (size_t bin: bins) {
-        out << bin << "|";
+        out << bin << ", ";
     }
+    out << "]";
     return out.str();
 }

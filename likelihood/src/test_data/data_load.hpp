@@ -35,6 +35,8 @@ struct DetectorSignal {
     DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate);
 
     DetectorSignal(Detector detector);
+
+    size_t add_background(scalar rate, scalar start, scalar end);
 };
 
 size_t add_background(Histogram& hist, scalar background_rate);

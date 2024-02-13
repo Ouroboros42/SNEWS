@@ -19,7 +19,6 @@ std::string string_vec(vec elems) {
 void save_likelihoods(std::string output_filename, vec time_diffs, vec likelihoods) {
     std::ofstream output_file;
     output_file.open(output_filename);
-    output_file << "{ \"Time-Difference\": " << string_vec(time_diffs) << "," <<
-    "\"Likelihood\": " << string_vec(likelihoods) << "}"; 
+    output_file << "{ \"Time-Difference\":\n    " << string_vec(time_diffs) << "\n,\"Likelihood\":\n   " << string_vec(likelihoods) << "\n}"; 
     output_file.close();
 }

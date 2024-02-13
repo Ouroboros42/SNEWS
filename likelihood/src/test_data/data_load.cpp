@@ -1,10 +1,13 @@
 #include "data_load.hpp"
+#include "core.hpp"
+#include "random.hpp"
 
 #include <format>
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <random>
+#include <iterator>
+#include <algorithm>
 
 std::string detector_name(Detector detector) {
     switch (detector) {
@@ -61,19 +64,23 @@ std::vector<double> read_double_array(Json::Value array) {
     return out_vec;
 }
 
+scalar min_elem(vec values) {
+    return *std::min_element(std::begin(values), std::end(values));
+}
+
+scalar max_elem(vec values) {
+    return *std::max_element(std::begin(values), std::end(values));
+}
+
 DetectorSignal::DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate) :
 time_series(read_double_array(data["timeseries"]["times"])),
-start_time(double_or_default(data["timeseries"]["start"], time_series.front())),
-end_time(double_or_default(data["timeseries"]["stop"], time_series.back())),
+start_time(double_or_default(data["timeseries"]["start"], min_elem(time_series))),
+end_time(double_or_default(data["timeseries"]["stop"], max_elem(time_series))),
 true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble()),
 background_rate_ms(background_rate)
 {}
 
 DetectorSignal::DetectorSignal(Detector detector) : DetectorSignal(get_data(data_path(detector)), detector_name(detector), background_rates_ms(detector)) {};
-
-size_t rand_int(size_t ceil) {
-    return std::rand() % ceil;
-}
 
 size_t add_background(Histogram& hist, scalar background_rate) {
     size_t n_events = background_rate * hist.range();
@@ -83,4 +90,15 @@ size_t add_background(Histogram& hist, scalar background_rate) {
     }
 
     return n_events;
+}
+
+size_t DetectorSignal::add_background(scalar rate, scalar start, scalar end) {
+    size_t n_background = rate * (end - start);
+    time_series.reserve(time_series.size() + n_background);
+
+    for (size_t i = 0; i < n_background; i++) {
+        time_series.push_back(rand_in_range(start, end));
+    }
+
+    return n_background;
 }
