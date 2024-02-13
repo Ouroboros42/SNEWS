@@ -11,7 +11,7 @@
 #include <chrono>
 
 int main(int argc, char* argv[]) {
-    Detector detector1 = Detector::SuperK, detector2 = Detector::SNOPlus;
+    Detector detector1 = Detector::SuperK, detector2 = Detector::IceCube;
     DetectorSignal data1(detector1), data2(detector2);
 
     FactorialCache cache;

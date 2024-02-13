@@ -64,7 +64,7 @@ size_t DetectorComparison::lead_index_1(size_t count_1, size_t count_2) {
     );
 }
 
-size_t DetectorComparison::lead_index_2(size_t count_1, size_t count_2, size_t index_1) {
+size_t DetectorComparison::lead_index_2(size_t count_1, size_t count_2, size_t index_1) const {
     if (log_rate_const_2 < 0) { return 0; }
 
     return normalise_index(count_2,

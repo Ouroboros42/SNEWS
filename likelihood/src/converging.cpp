@@ -74,16 +74,22 @@ scalar log_double_sum_do_columns_left(scalar log_total, scalar start, scalar i, 
 }
 
 
-scalar log_double_sum_do_rows(size_t n, size_t m, std::function<scalar(size_t i, size_t j)> terms, scalar log_rel_accuracy) {
+scalar log_double_sum_do_rows(
+    size_t n, size_t m,
+    std::function<scalar(size_t i, size_t j)> terms,
+    scalar log_rel_accuracy,
+    size_t lead_i,
+    std::function<size_t(size_t i)> get_lead_j
+) {
     // FIND STARTING INDEX FOR ROWS AS A FUNCTION OF M, N and CONSTANTS
-    scalar starting_row = n/2;
+    size_t starting_row = lead_i;
 
     scalar log_total = 0;
 
     // Go up the rows
     for(int i = starting_row; i >= 0; i--) {
         // FIND STARTING INDEX FOR COLUMNS AS A FUNCTION OF I, M, N and CONSTANTS
-        scalar starting_column = m/2;
+        size_t starting_column = get_lead_j(i);
 
         // if we are not on starting row, we need to check if the first term is significant
         if(i != starting_row) {
@@ -106,7 +112,7 @@ scalar log_double_sum_do_rows(size_t n, size_t m, std::function<scalar(size_t i,
     // Go down the rows
     for(int i = starting_row + 1; i < n; i++) {
         // FIND STARTING INDEX FOR COLUMNS AS A FUNCTION OF I, M, N and CONSTANTS
-        scalar starting_column = m/2;
+        size_t starting_column = get_lead_j(i);
 
         // check if this row is significant
         scalar log_next_term_rel = terms(i, starting_column) - log_total;
@@ -135,7 +141,13 @@ scalar log_double_sum_do_rows(size_t n, size_t m, std::function<scalar(size_t i,
 scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2, scalar log_accuracy) {
     // Scale termwise accuracy to number of terms to achieve reliable overall accuracy
     // return log_converging_double_sum(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
-    return log_double_sum_do_rows(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
+    return log_double_sum_do_rows(
+        count_1, count_2,
+        log_sum_terms(cache, comp, count_1, count_2),
+        log_accuracy - cache.log(count_1) - cache.log(count_2),
+        comp.lead_index_1(count_1, count_2),
+        [comp, count_1, count_2](size_t i){ return comp.lead_index_2(count_1, count_2, i); }
+    );
 }
 
 scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar background_rate_2, Histogram time_dist_1, Histogram time_dist_2, size_t n_bins, scalar log_accuracy) {

@@ -40,7 +40,7 @@ struct DetectorComparison {
 
         size_t lead_index_1(size_t count_1, size_t count_2);
 
-        size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1);
+        size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1) const;
 };
 
 std::function<scalar(size_t i, size_t j)> log_sum_terms(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2);
