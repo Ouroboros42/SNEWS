@@ -138,7 +138,7 @@ scalar log_double_sum_do_rows(
 //
 //
 
-scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison comp, size_t count_1, size_t count_2, scalar log_accuracy) {
+scalar log_converging_bin_likelihood(FactorialCache cache, DetectorParams comp, size_t count_1, size_t count_2, scalar log_accuracy) {
     // Scale termwise accuracy to number of terms to achieve reliable overall accuracy
     // return log_converging_double_sum(count_1, count_2, log_sum_terms(cache, comp, count_1, count_2), log_accuracy - cache.log(count_1) - cache.log(count_2));
     return log_double_sum_do_rows(
@@ -153,9 +153,9 @@ scalar log_converging_bin_likelihood(FactorialCache cache, DetectorComparison co
 scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar background_rate_2, Histogram time_dist_1, Histogram time_dist_2, size_t n_bins, scalar log_accuracy) {
     scalar log_bin_accuracy = log_accuracy; // TODO Identify correct error propagation
 
-    DetectorComparison comp(background_rate_1, background_rate_2, time_dist_1, time_dist_2);
+    DetectorParams comp(background_rate_1, background_rate_2, time_dist_1, time_dist_2);
 
-    scalar total = comp.log_likelihood_prefactor(time_dist_1.get_n_data(), time_dist_2.get_n_data());
+    scalar total = comp.log_likelihood_prefactor(time_dist_1.n_data(), time_dist_2.n_data());
 
     // auto T1 = std::chrono::high_resolution_clock::now();
     cache.build_upto(time_dist_1.max_bin() + time_dist_2.max_bin());
@@ -165,7 +165,7 @@ scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar bac
     auto T3 = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < n_bins; i++) {
         //std::cout << "bin number  = " << i << "  ";
-        total += log_converging_bin_likelihood(cache, comp, time_dist_1.get_bin(i), time_dist_2.get_bin(i), log_bin_accuracy);
+        total += log_converging_bin_likelihood(cache, comp, time_dist_1[i], time_dist_2[i], log_bin_accuracy);
     }
     auto T4 = std::chrono::high_resolution_clock::now();
     std::cout << "Time to compute double sum: " << std::chrono::duration_cast<std::chrono::milliseconds>(T4 - T3).count() << " ms\n";

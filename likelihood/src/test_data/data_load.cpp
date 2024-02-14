@@ -6,8 +6,6 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <iterator>
-#include <algorithm>
 
 std::string detector_name(Detector detector) {
     switch (detector) {
@@ -22,7 +20,7 @@ std::string detector_name(Detector detector) {
     }
 }
 
-scalar background_rates_ms(Detector detector) {  // TODO Confirm accuracy
+scalar background_rates_ms(Detector detector) {
     switch (detector) { 
         case Detector::IceCube:
             return 1500;
@@ -35,7 +33,7 @@ scalar background_rates_ms(Detector detector) {  // TODO Confirm accuracy
     }
 }
 
-std::string data_path(Detector detector, std::string file_id) {
+std::string test_data_path(Detector detector, std::string file_id) {
     return "../temp-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
 }
 
@@ -64,23 +62,15 @@ std::vector<double> read_double_array(Json::Value array) {
     return out_vec;
 }
 
-scalar min_elem(vec values) {
-    return *std::min_element(std::begin(values), std::end(values));
-}
-
-scalar max_elem(vec values) {
-    return *std::max_element(std::begin(values), std::end(values));
-}
-
 DetectorSignal::DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate) :
 time_series(read_double_array(data["timeseries"]["times"])),
-start_time(min_elem(time_series)),
-end_time(max_elem(time_series)),
+start_time(min(time_series)),
+end_time(max(time_series)),
 true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble()),
 background_rate_ms(background_rate)
 {}
 
-DetectorSignal::DetectorSignal(Detector detector, std::string file_id) : DetectorSignal(get_data(data_path(detector, file_id)), detector_name(detector), background_rates_ms(detector)) {};
+DetectorSignal::DetectorSignal(Detector detector, std::string file_id) : DetectorSignal(get_data(test_data_path(detector, file_id)), detector_name(detector), background_rates_ms(detector)) {};
 
 size_t add_background(Histogram& hist, scalar background_rate) {
     size_t n_events = background_rate * hist.range();

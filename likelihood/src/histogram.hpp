@@ -7,32 +7,29 @@
 #include<string>
 #include<iostream>
 
-class Histogram {
+class Histogram : public std::vector<size_t> {
     private:
-        scalar hi;
-        scalar lo;
-        scalar delta;
-        std::vector<size_t> bins;
-        size_t n_data;
+        scalar _hi;
+        scalar _lo;
+        scalar _delta;
 
         size_t binOf(scalar datum);
 
     public:
+        // Empty histogram
         Histogram(size_t n_bins, scalar lo, scalar hi);
+        // Fill with data
         Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> data);
-        // TODO define safe copy-constructor to prevent list sharing between histograms
+        // From preset bins
+        Histogram(std::vector<size_t> bins, scalar lo, scalar hi);
 
-        inline scalar get_hi() { return hi; }
-        inline scalar get_lo() { return lo; }
-        inline scalar get_delta() { return delta; }
-        inline size_t size() { return bins.size(); }
-        inline size_t get_bin(size_t n) { return bins[n]; }
-        inline size_t get_n_data() { return n_data; }
-        inline size_t inc_bin(size_t n) {
-            ++n_data;
-            return ++bins[n];
-        }
+        inline scalar hi() { return _hi; }
+        inline scalar lo() { return _lo; }
+        inline scalar delta() { return _delta; }
+        
+        inline size_t inc_bin(size_t n) { return ++at(n); } 
 
+        size_t n_data();
         size_t max_bin();
         scalar range();
         scalar mean_rate();

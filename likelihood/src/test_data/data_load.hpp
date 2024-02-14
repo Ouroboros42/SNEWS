@@ -18,7 +18,7 @@ enum Detector {
 std::string detector_name(Detector detector);
 scalar background_rates_ms(Detector detector);
 
-std::string data_path(Detector detector, std::string file_id);
+std::string test_data_path(Detector detector, std::string file_id);
 
 Json::Value get_data(std::string path);
 

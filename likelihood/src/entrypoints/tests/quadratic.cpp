@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include "comparison.hpp"
+#include "detector_params.hpp"
 
 auto approx_match(scalar target) {
     return Catch::Matchers::WithinRel(target , 0.001);
@@ -16,7 +16,7 @@ void test_quadratic(scalar root_1, scalar root_2, scalar a) {
 
     scalar solution = quadratic_low_root(a, b, c);
 
-    REQUIRE_THAT(solution, approx_match(low_root));
+    CHECK_THAT(solution, approx_match(low_root));
 }
 
 TEST_CASE("Quadratic solutions") {

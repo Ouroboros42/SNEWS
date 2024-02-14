@@ -9,20 +9,20 @@ TEST_CASE("Histogram construction") {
 
     vec data_a = { 1, 1.2, 1.3 };
     vec data_b = { -30, 2.4, 10, 100 };
-    REQUIRE(hist.add_data(data_a) == 3);
-    REQUIRE(hist.add_data(data_b) == 2);
+    CHECK(hist.add_data(data_a) == 3);
+    CHECK(hist.add_data(data_b) == 2);
 
-    REQUIRE(hist.get_n_data() == 5);
+    CHECK(hist.n_data() == 5);
 
-    REQUIRE(hist.get_lo() == 0.);
-    REQUIRE(hist.get_hi() == 10.);
-    REQUIRE(hist.get_delta() == 1.);
+    CHECK(hist.lo() == 0.);
+    CHECK(hist.hi() == 10.);
+    CHECK(hist.delta() == 1.);
 
-    REQUIRE(hist.max_bin() == 3);
+    CHECK(hist.max_bin() == 3);
 
-    REQUIRE(hist.get_bin(0) == 0);
-    REQUIRE(hist.get_bin(1) == 3);
-    REQUIRE(hist.get_bin(2) == 1);
-    REQUIRE(hist.get_bin(3) == 0);
-    REQUIRE(hist.get_bin(9) == 1);
+    CHECK(hist[0] == 0);
+    CHECK(hist[1] == 3);
+    CHECK(hist[2] == 1);
+    CHECK(hist[3] == 0);
+    CHECK(hist[9] == 1);
 }
