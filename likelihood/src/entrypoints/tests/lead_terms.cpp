@@ -43,11 +43,11 @@ void test_lead_term(FactorialCache cache, DetectorRelation comp, size_t n, size_
     auto lead_term = approx(big_bin(lead_i, lead_j));
 
     if (lead_i > 0) {
-        CHECK(lead_term >= big_bin(lead_i - 1, lead_j));
+        CHECK(lead_term >= big_bin(lead_i - 1, comp.lead_index_2(n, m, lead_i - 1)));
     }
 
     if (lead_i < n) {
-        CHECK(lead_term >= big_bin(lead_i + 1, lead_j));
+        CHECK(lead_term >= big_bin(lead_i + 1, comp.lead_index_2(n, m, lead_i + 1)));
     }
 
     if (lead_j > 0) {

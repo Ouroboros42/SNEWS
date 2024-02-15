@@ -73,3 +73,9 @@ size_t DetectorRelation::lead_index_2(size_t count_1, size_t count_2, size_t ind
         )
     );
 }
+
+std::function<size_t(size_t index_1)> DetectorRelation::lead_index_2_getter(size_t count_1, size_t count_2) {
+    return [this, count_1, count_2] (size_t index_1) {
+        return lead_index_2(count_1, count_2, index_1);
+    };
+}

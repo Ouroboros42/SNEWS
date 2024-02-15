@@ -35,6 +35,8 @@ struct DetectorRelation {
         size_t lead_index_1(size_t count_1, size_t count_2);
 
         size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1) const;
+
+        std::function<size_t(size_t index_1)> lead_index_2_getter(size_t count_1, size_t count_2);
 };
 
 // For a = 1

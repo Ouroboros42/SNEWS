@@ -146,7 +146,7 @@ scalar log_converging_bin_likelihood(FactorialCache cache, DetectorRelation comp
         log_sum_terms(cache, comp, count_1, count_2),
         log_accuracy - cache.log(count_1) - cache.log(count_2),
         comp.lead_index_1(count_1, count_2),
-        [comp, count_1, count_2](size_t i){ return comp.lead_index_2(count_1, count_2, i); }
+        comp.lead_index_2_getter(count_1, count_2)
     );
 }
 
