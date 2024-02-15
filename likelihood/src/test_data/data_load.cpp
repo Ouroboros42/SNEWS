@@ -4,73 +4,42 @@
 
 #include <format>
 #include <string>
-#include <fstream>
 #include <iostream>
-
-std::string detector_name(Detector detector) {
-    switch (detector) {
-        case Detector::IceCube:
-            return "IC";
-        case Detector::SNOPlus:
-            return "SNOP";
-        case Detector::SuperK:
-            return "SK";
-        default:
-            throw std::invalid_argument("Undefined detector");
-    }
-}
-
-scalar background_rates_ms(Detector detector) {
-    switch (detector) { 
-        case Detector::IceCube:
-            return 1500;
-        case Detector::SNOPlus:
-            return 0.0003;
-        case Detector::SuperK:
-            return 0.0001;
-        default:
-            throw std::invalid_argument("Undefined detector");
-    }
-}
+#include <algorithm>
 
 std::string test_data_path(Detector detector, std::string file_id) {
-    return "../temp-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
+    return "../test-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
 }
 
-Json::Value get_data(std::string path) {
-    Json::Value data;
-    std::ifstream file(path, std::ifstream::binary);
-    file >> data;
-    return data;
-}
-
-// Map nulls to default
-double double_or_default(Json::Value value, double for_null) {
-    if (value.isNull()) {
-        return for_null;
-    } else {
-        return value.asDouble();
-    }
-}
-
-std::vector<double> read_double_array(Json::Value array) {
-    std::vector<double> out_vec;
-    out_vec.reserve(array.size());
-    for (Json::Value element : array) {
-        out_vec.push_back(element.asDouble());
-    }
-    return out_vec;
-}
-
-DetectorSignal::DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate) :
-time_series(read_double_array(data["timeseries"]["times"])),
-start_time(min(time_series)),
-end_time(max(time_series)),
-true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble()),
-background_rate_ms(background_rate)
+TestSignal::TestSignal(Json::Value data, std::string detector_name) : TimeSeries(data["timeseries"]),
+    true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble())
 {}
 
-DetectorSignal::DetectorSignal(Detector detector, std::string file_id) : DetectorSignal(get_data(test_data_path(detector, file_id)), detector_name(detector), background_rates_ms(detector)) {};
+TestSignal::TestSignal(Detector detector, std::string file_id) : TestSignal(read_json_file(test_data_path(detector, file_id)), detector_name(detector)) {};
+
+void TestSignal::filter_times() {
+    std::remove_if(times.begin(), times.end(), [this](scalar time) { return start <= time && time <= stop; });
+}
+
+void TestSignal::reframe(scalar new_start, scalar new_stop) {
+    bool needs_filter = new_start > start || new_stop < stop; 
+    
+    start = new_start;
+    stop = new_stop;
+
+    if (needs_filter) filter_times();
+}
+
+size_t TestSignal::add_background(scalar rate) {
+    size_t n_background = rate * range();
+    times.reserve(times.size() + n_background);
+
+    for (size_t i = 0; i < n_background; i++) {
+        times.push_back(rand_in_range(start, stop));
+    }
+
+    return n_background;
+}
 
 size_t add_background(Histogram& hist, scalar background_rate) {
     size_t n_events = background_rate * hist.range();
@@ -80,15 +49,4 @@ size_t add_background(Histogram& hist, scalar background_rate) {
     }
 
     return n_events;
-}
-
-size_t DetectorSignal::add_background(scalar rate, scalar start, scalar end) {
-    size_t n_background = rate * (end - start);
-    time_series.reserve(time_series.size() + n_background);
-
-    for (size_t i = 0; i < n_background; i++) {
-        time_series.push_back(rand_in_range(start, end));
-    }
-
-    return n_background;
 }

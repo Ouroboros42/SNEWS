@@ -3,42 +3,36 @@
 
 #include "core.hpp"
 #include "histogram.hpp"
+#include "detector_info/detectors.hpp"
+#include "data_io/read_signal.hpp"
 
 #include <json.hpp>
 
 #include <vector>
 #include <string>
 
-enum Detector {
-    IceCube,
-    SuperK,
-    SNOPlus,
-};
-
-std::string detector_name(Detector detector);
-scalar background_rates_ms(Detector detector);
-
 std::string test_data_path(Detector detector, std::string file_id);
 
-Json::Value get_data(std::string path);
+Json::Value read_json_file(std::string path);
 
-struct DetectorSignal {
-    std::vector<scalar> time_series;
-
-    scalar start_time;
-    scalar end_time;
-
+struct TestSignal : public TimeSeries {
     scalar true_time;
 
-    scalar background_rate_ms;
+    TestSignal(Json::Value generated_signal, std::string detector_name);
 
-    DetectorSignal(Json::Value data, std::string detector_name, scalar background_rate);
+    TestSignal(Detector detector, std::string file_id);
+   
+    /* Remove all times outside of range */
+    void filter_times();
 
-    DetectorSignal(Detector detector, std::string file_id);
+    /* Adjust bounds, cutting data outside range */
+    void reframe(scalar new_start, scalar new_stop);
 
-    size_t add_background(scalar rate, scalar start, scalar end);
+    /* Add a random background events in the range start to stop */
+    size_t add_background(scalar rate);
 };
 
-size_t add_background(Histogram& hist, scalar background_rate);
+/* Add random background events to bins at the given rate*/
+size_t add_background(Histogram& hist, scalar rate);
 
 #endif

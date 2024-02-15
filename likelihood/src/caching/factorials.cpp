@@ -3,7 +3,7 @@
 #include <cmath>
 
 FactorialCache::FactorialCache()
-: max_n(1), LogNumberVector { 0 }, LogFactorialVector { 0, 0 } {}
+: max_n(1), log_n { 0 }, log_n_factorial { 0, 0 } {}
 
 FactorialCache::FactorialCache(size_t max_n) : FactorialCache() {
     build_upto(max_n);
@@ -14,12 +14,12 @@ void FactorialCache::build_upto(size_t new_max_n) {
 
     scalar running_sum = log_factorial(max_n);
 
-    LogNumberVector.resize(new_max_n);
-    LogFactorialVector.resize(new_max_n + 1);
+    log_n.resize(new_max_n);
+    log_n_factorial.resize(new_max_n + 1);
 
     for (size_t i = max_n + 1; i <= new_max_n; i++) {
-        running_sum += LogNumberVector[i - 1] = std::log(i);
-        LogFactorialVector[i] = running_sum;
+        running_sum += log_n[i - 1] = std::log(i);
+        log_n_factorial[i] = running_sum;
     }
 }
 

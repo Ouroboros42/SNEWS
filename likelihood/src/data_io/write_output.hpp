@@ -6,6 +6,7 @@
 
 #include <string>
 
+// Store a calculated likelihood distribution and associated information in 
 void save_likelihoods(std::string output_filename, vec time_diffs, vec likelihoods, Histogram dist1, std::vector<Histogram> dist2s);
 
 #endif

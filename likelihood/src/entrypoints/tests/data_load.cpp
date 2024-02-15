@@ -7,12 +7,11 @@
 #include <fstream>
 #include <iostream>
 
-TEST_CASE("Simple read") {
-    DetectorSignal skdata(Detector::SuperK, "121");
+TEST_CASE("Test read") {
+    TestSignal skdata(Detector::SuperK, "121");
 
     CHECK(skdata.true_time == 1635744156.3231735);
-    CHECK(skdata.time_series.size() > 1000);
-    CHECK(skdata.background_rate_ms == 0.0001);
+    CHECK(skdata.times.size() > 1000);
 }
 
 TEST_CASE("Add background") {

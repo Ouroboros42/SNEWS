@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include "detector_params.hpp"
+#include "detector_info/relation.hpp"
 
 auto approx_match(scalar target) {
     return Catch::Matchers::WithinRel(target , 0.001);

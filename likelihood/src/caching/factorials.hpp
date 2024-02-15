@@ -6,8 +6,8 @@
 class FactorialCache {
 private:
     size_t max_n;
-    vec LogNumberVector;
-    vec LogFactorialVector;
+    vec log_n;
+    vec log_n_factorial;
 public:
     FactorialCache();
     FactorialCache(size_t max_n);
@@ -18,10 +18,10 @@ public:
     size_t size() const;
 
     // log(n) for 0 < n <= size
-    inline scalar log(size_t n) const { return LogNumberVector[n-1]; }
+    inline scalar log(size_t n) const { return log_n[n-1]; }
     
     // log(n!) for 0 <= n <= size
-    inline scalar log_factorial(size_t n) const { return LogFactorialVector[n]; }
+    inline scalar log_factorial(size_t n) const { return log_n_factorial[n]; }
 
     // log(x^n / n!)
     scalar log_exp_series_term(scalar log_x, size_t index) const;

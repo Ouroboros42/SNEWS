@@ -1,7 +1,7 @@
 #include "core.hpp"
 #include "test_data/data_load.hpp"
 #include "converging.hpp"
-#include "write_output.hpp"
+#include "data_io/write_output.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -15,10 +15,10 @@ int main(int argc, char* argv[]) {
 
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     std::string det_name_1 = detector_name(detector1), det_name_2 = detector_name(detector2);
-    DetectorSignal data1(detector1, inst), data2(detector2, inst);
+    TestSignal data1(detector1, inst), data2(detector2, inst);
 
-    std::cout << "Data 1 over: " << data1.end_time - data1.start_time << std::endl;
-    std::cout << "Data 2 over: " << data2.end_time - data2.start_time << std::endl;
+    std::cout << "Data 1 over: " << data1.range() << std::endl;
+    std::cout << "Data 2 over: " << data2.range() << std::endl;
 
     scalar background_1 = 1000 * background_rates_ms(detector1);
     scalar background_2 = 1000 * background_rates_ms(detector2);
@@ -26,15 +26,17 @@ int main(int argc, char* argv[]) {
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
 
-    scalar window_start = std::min(data1.start_time, data2.start_time) - .5;
+    scalar window_start = std::min(data1.start, data2.start) - .5;
     scalar window_end = window_start + 20; // std::max(data1.end_time, data2.end_time) + event_margin;
 
     // Widest range over which detector 2 signal will be binned
     scalar window_start_min = window_start + sweep_start;
     scalar window_end_max = window_end + sweep_end;
 
-    // data1.add_background(background_1, window_start, window_end);
-    data2.add_background(background_2, window_start_min, window_end_max);
+    data1.reframe(window_start, window_end);
+    data1.add_background(background_1);
+    data2.reframe(window_start_min, window_end_max);
+    data2.add_background(background_2);
 
     FactorialCache cache;
 
@@ -46,10 +48,9 @@ int main(int argc, char* argv[]) {
 
     vec likelihoods(n), offsets(n);
 
-    Histogram hist1(n_bins, window_start, window_end, data1.time_series);
-    add_background(hist1, background_1);
+    Histogram hist1(n_bins, window_start, window_end, data1.times);
 
-    std::vector<Histogram> hist2s;
+    std::vector<Histogram> hist_2_extrema;
 
     for (size_t i = 0; i < n; i++) {
         std::cout << "i = " << i << std::endl;
@@ -58,12 +59,12 @@ int main(int argc, char* argv[]) {
         offsets[i] = offset;
 
         auto T1 = std::chrono::high_resolution_clock::now();
-        Histogram hist2(n_bins, window_start + offset, window_end + offset, data2.time_series);
+        Histogram hist2(n_bins, window_start + offset, window_end + offset, data2.times);
         //add_background(hist2, background_2);
         auto T2 = std::chrono::high_resolution_clock::now();
 
         if (i == 0 || i == n / 2 || i == n - 1) {
-            hist2s.push_back(hist2);
+            hist_2_extrema.push_back(hist2);
         }
 
         // std::cout << "\n" << hist1.display() << "\n" << hist2.display();
@@ -78,7 +79,7 @@ int main(int argc, char* argv[]) {
 
     std::string outputname = "output/ldist-" + det_name_1 + "-vs-" + det_name_2 + "-src=" + inst + "-steps=" + std::to_string(n) + "-bins=" + std::to_string(n_bins) + ".json";
 
-    save_likelihoods(outputname, offsets, likelihoods, hist1, hist2s);
+    save_likelihoods(outputname, offsets, likelihoods, hist1, hist_2_extrema);
 
     scalar max_likelihood = *std::max_element(likelihoods.begin(), likelihoods.end());
     size_t max_i = std::distance(likelihoods.begin(), std::max_element(likelihoods.begin(), likelihoods.end()));

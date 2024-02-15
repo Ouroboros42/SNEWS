@@ -2,13 +2,13 @@
 
 #include <catch.hpp>
 
-#include "detector_params.hpp"
+#include "detector_info/relation.hpp"
 
 auto approx(scalar value) {
     return Catch::Approx(value).epsilon(0.00001);
 }
 
-void test_row_lead_term(FactorialCache cache, DetectorParams comp, size_t n, size_t m) {
+void test_row_lead_term(FactorialCache cache, DetectorRelation comp, size_t n, size_t m) {
     cache.build_upto(n + m);
     auto big_bin = log_sum_terms(cache, comp, n, m);
     
@@ -30,7 +30,7 @@ void test_row_lead_term(FactorialCache cache, DetectorParams comp, size_t n, siz
     }
 }
 
-void test_lead_term(FactorialCache cache, DetectorParams comp, size_t n, size_t m) {
+void test_lead_term(FactorialCache cache, DetectorRelation comp, size_t n, size_t m) {
     cache.build_upto(n + m);
     auto big_bin = log_sum_terms(cache, comp, n, m);
 
@@ -63,7 +63,7 @@ void test_lead_term(FactorialCache cache, DetectorParams comp, size_t n, size_t 
 TEST_CASE("Bin likelihood row lead term") {
     scalar b1 = 10000, b2 = 10, ratio = 0.01;
 
-    DetectorParams comp(b1, b2, ratio);
+    DetectorRelation comp(b1, b2, ratio);
     FactorialCache cache;
 
     test_row_lead_term(cache, comp, 100000, 10000);
@@ -77,7 +77,7 @@ TEST_CASE("Bin likelihood row lead term") {
 TEST_CASE("Bin likelihood lead term") {
     scalar b1 = 10000, b2 = 10, ratio = 0.01;
 
-    DetectorParams comp(b1, b2, ratio);
+    DetectorRelation comp(b1, b2, ratio);
     FactorialCache cache;
 
     test_lead_term(cache, comp, 100000, 10000);

@@ -7,13 +7,7 @@
 
 #include <functional>
 
-// For a = 1
-scalar quadratic_low_root(scalar b, scalar c);
-
-// Assumes real roots
-scalar quadratic_low_root(scalar a, scalar b, scalar c);
-
-struct DetectorParams {
+struct DetectorRelation {
     public:
         // -log(1 + p/a)
         scalar log_sensitivity_1;
@@ -30,11 +24,11 @@ struct DetectorParams {
 
         scalar rate_const_ratio_2_to_1;
     
-        DetectorParams(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_ratio_2_to_1);
+        DetectorRelation(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_ratio_2_to_1);
 
-        DetectorParams(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_1, scalar sensitivity_2);
+        DetectorRelation(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_1, scalar sensitivity_2);
 
-        DetectorParams(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2);
+        DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2);
 
         scalar log_likelihood_prefactor(size_t total_events_1, size_t total_events_2);
 
@@ -43,6 +37,12 @@ struct DetectorParams {
         size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1) const;
 };
 
-std::function<scalar(size_t i, size_t j)> log_sum_terms(FactorialCache cache, DetectorParams comp, size_t count_1, size_t count_2);
+// For a = 1
+scalar quadratic_low_root(scalar b, scalar c);
+
+// Assumes real roots
+scalar quadratic_low_root(scalar a, scalar b, scalar c);
+
+std::function<scalar(size_t i, size_t j)> log_sum_terms(FactorialCache cache, DetectorRelation comp, size_t count_1, size_t count_2);
 
 #endif
