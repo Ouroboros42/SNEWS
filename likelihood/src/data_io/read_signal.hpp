@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "histogram.hpp"
 
 #include <json.hpp>
 
@@ -28,4 +29,8 @@ struct TimeSeries {
     TimeSeries(vec times);
 
     inline scalar range() { return stop - start; };
+    
+    Histogram to_hist(size_t n_bins, scalar from, scalar to);
+    
+    Histogram to_hist(size_t n_bins);
 };

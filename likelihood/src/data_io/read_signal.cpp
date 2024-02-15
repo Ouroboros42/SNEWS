@@ -20,3 +20,11 @@ TimeSeries::TimeSeries(vec times) :
     start(min(times)),
     stop(max(times))
 {}
+
+Histogram TimeSeries::to_hist(size_t n_bins, scalar from, scalar to) {
+    return Histogram(n_bins, from, to, times);
+}
+
+Histogram TimeSeries::to_hist(size_t n_bins) {
+    return to_hist(n_bins, start, stop);
+}

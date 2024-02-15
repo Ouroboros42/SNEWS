@@ -10,6 +10,11 @@
 #include <random>
 #include <chrono>
 
+template <typename T>
+bool contains(std::vector<T> collection, T element) {
+    return std::find(collection.begin(), collection.end(), element) != collection.end();
+}
+
 int main(int argc, char* argv[]) {
     std::string inst = "121";
 
@@ -48,9 +53,11 @@ int main(int argc, char* argv[]) {
 
     vec likelihoods(n), offsets(n);
 
-    Histogram hist1(n_bins, window_start, window_end, data1.times);
+    Histogram hist1 = data1.to_hist(n_bins);
 
-    std::vector<Histogram> hist_2_extrema;
+    std::vector<size_t> hist_2_sample_indices = { 0, n/2, n-1 };
+    std::vector<Histogram> hist_2_samples;
+    hist_2_samples.reserve(hist_2_sample_indices.size());
 
     for (size_t i = 0; i < n; i++) {
         std::cout << "i = " << i << std::endl;
@@ -59,15 +66,12 @@ int main(int argc, char* argv[]) {
         offsets[i] = offset;
 
         auto T1 = std::chrono::high_resolution_clock::now();
-        Histogram hist2(n_bins, window_start + offset, window_end + offset, data2.times);
-        //add_background(hist2, background_2);
+        Histogram hist2 = data2.to_hist(n_bins, window_start + offset, window_end + offset);
         auto T2 = std::chrono::high_resolution_clock::now();
 
-        if (i == 0 || i == n / 2 || i == n - 1) {
-            hist_2_extrema.push_back(hist2);
+        if (contains(hist_2_sample_indices, i)) {
+            hist_2_samples.push_back(hist2);
         }
-
-        // std::cout << "\n" << hist1.display() << "\n" << hist2.display();
 
         scalar likelihood = log_likelihood(cache, background_1, background_2, hist1, hist2, n_bins, log_accuracy);
         likelihoods[i] = likelihood;
@@ -79,7 +83,7 @@ int main(int argc, char* argv[]) {
 
     std::string outputname = "output/ldist-" + det_name_1 + "-vs-" + det_name_2 + "-src=" + inst + "-steps=" + std::to_string(n) + "-bins=" + std::to_string(n_bins) + ".json";
 
-    save_likelihoods(outputname, offsets, likelihoods, hist1, hist_2_extrema);
+    save_likelihoods(outputname, offsets, likelihoods, hist1, hist_2_samples);
 
     scalar max_likelihood = *std::max_element(likelihoods.begin(), likelihoods.end());
     size_t max_i = std::distance(likelihoods.begin(), std::max_element(likelihoods.begin(), likelihoods.end()));

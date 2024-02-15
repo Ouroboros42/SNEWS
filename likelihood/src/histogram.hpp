@@ -38,6 +38,8 @@ class Histogram : public std::vector<size_t> {
         size_t add_data(std::vector<scalar> data);
 
         std::string display();
+
+        Histogram subset(size_t first_bin, size_t n_bins);
 };
 
 #endif
