@@ -24,12 +24,12 @@ public:
 
 TEST_CASE("Row access test") {
     PowerGrid grid(10, 20);
-    LazySubArray row2(grid, 2, 7, 3);
+    LazySubArray row2(grid, 2, 7, false);
 
     CHECK(row2.get(0) == std::pow(2, 7));
     CHECK(row2.get(1) == std::pow(2, 6));
     CHECK(row2.get(2) == std::pow(2, 5));
     CHECK(row2.get(3) == std::pow(2, 4));
     CHECK(row2.get(4) == std::pow(2, 3));
-    CHECK(row2.size() == 5);
+    CHECK(row2.size() == 8);
 }

@@ -25,19 +25,22 @@ public:
 class LazySubArray : public LazyArray {
 private:
     const Lazy2DArray& source;
+
     size_t row;
+
+    size_t start_index;
+
     // true: increasing indices, false: decreasing indices
     bool direction;
-    size_t start_index;
-    size_t _size;
 
 public:
-    /* Array accessing elements in row of source, from start_index (inclusive) to end (inclusive)
+    /* Array accessing elements in row of source, from start_index (inclusive) to the edge of the array
     If start_index out of bounds, has size 0
-    If end_index < start_index, counts down
     */
-    LazySubArray(const Lazy2DArray& source, size_t row, size_t start_index, size_t end_index);
+    LazySubArray(const Lazy2DArray& source, size_t row, size_t start_index, bool direction);
 
+    bool is_empty() const;
+    
     size_t size() const;
 
     scalar get(size_t i) const;

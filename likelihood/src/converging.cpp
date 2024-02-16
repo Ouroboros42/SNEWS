@@ -30,8 +30,8 @@ scalar converging_sum_exp(LazyArray const& log_terms, scalar total, scalar log_r
 /* Gives lazy arrays of the elements in row_i to the left and right of index split_j */
 std::pair<LazySubArray, LazySubArray> split_row(Lazy2DArray& arr2D, size_t row_i, size_t split_j) {
     return std::make_pair(
-        LazySubArray(arr2D, row_i, split_j - 1, 0),
-        LazySubArray(arr2D, row_i, split_j + 1, arr2D.size_y() - 1)
+        LazySubArray(arr2D, row_i, split_j - 1, false),
+        LazySubArray(arr2D, row_i, split_j + 1, true)
     );
 }
 
