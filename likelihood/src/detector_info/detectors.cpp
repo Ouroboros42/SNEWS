@@ -15,7 +15,7 @@ std::string detector_name(Detector detector) {
     }
 }
 
-scalar background_rates_ms(Detector detector) {
+scalar background_rate_ms(Detector detector) {
     switch (detector) { 
         case Detector::IceCube:
             return 1500;
@@ -26,4 +26,8 @@ scalar background_rates_ms(Detector detector) {
         default:
             throw std::invalid_argument("Undefined detector");
     }
+}
+
+scalar background_rate_s(Detector detector) {
+    return background_rate_ms(detector) * 1000;
 }

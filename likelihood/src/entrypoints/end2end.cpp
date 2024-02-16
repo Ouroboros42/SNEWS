@@ -2,6 +2,9 @@
 #include "test_data/data_load.hpp"
 #include "converging.hpp"
 #include "data_io/write_output.hpp"
+#include "caching/factorials.hpp"
+#include "detector_info/relation.hpp"
+#include "sum_terms.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -16,80 +19,117 @@ bool contains(std::vector<T> collection, T element) {
 }
 
 int main(int argc, char* argv[]) {
-    std::string inst = "121";
+    std::string inst = "121"; // Numerical identifier of test data (appears in file name)
 
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+
     std::string det_name_1 = detector_name(detector1), det_name_2 = detector_name(detector2);
-    TestSignal data1(detector1, inst), data2(detector2, inst);
 
-    std::cout << "Data 1 over: " << data1.range() << std::endl;
-    std::cout << "Data 2 over: " << data2.range() << std::endl;
+    TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
 
-    scalar background_1 = 1000 * background_rates_ms(detector1);
-    scalar background_2 = 1000 * background_rates_ms(detector2);
+    scalar background_1 = background_rate_s(detector1);
+    scalar background_2 = background_rate_s(detector2);
 
+    // Min and max time differences to test
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
+    
+    // Extra space to include around true event
+    scalar front_buffer = 2;
+    scalar back_buffer = 2;
 
-    scalar window_start = std::min(data1.start, data2.start) - .5;
-    scalar window_end = window_start + 20; // std::max(data1.end_time, data2.end_time) + event_margin;
+    // Range over which detector 1 is sampled for all cases
+    // Detector 2 is sampled over this window, with offsets varying between sweep start and sweep end
+    scalar window_start = std::min(signal_1.start, signal_2.start) + sweep_start - front_buffer;
+    scalar window_end = std::max(signal_1.stop, signal_2.stop) + sweep_end + back_buffer;
+
+    scalar window_width = window_end - window_start;
 
     // Widest range over which detector 2 signal will be binned
     scalar window_start_min = window_start + sweep_start;
     scalar window_end_max = window_end + sweep_end;
 
-    data1.reframe(window_start, window_end);
-    data1.add_background(background_1);
-    data2.reframe(window_start_min, window_end_max);
-    data2.add_background(background_2);
-
+    // Simulate uniform background rate across both datasets
+    signal_1.reframe(window_start, window_end);
+    signal_1.add_background(background_1);
+    signal_2.reframe(window_start_min, window_end_max);
+    signal_2.add_background(background_2);
+    
+    // Reuse log-factorial calculations in all cases
     FactorialCache cache;
 
-    scalar log_accuracy = -32;
+    // Maximum acceptable (proportional) error in calculated likelihood
+    scalar rel_accuracy = 0.0000001;
 
+    // Number of bins to split data in range into
     size_t n_bins = 10000;
 
-    size_t n = 10;
+    // Number of time differences to calculate likelihoods for
+    size_t n_steps = 981;
 
-    vec likelihoods(n), offsets(n);
+    // !! Calculate sensitivty once
+    DetectorRelation detectors(background_1, background_2, signal_1, signal_2);
 
-    Histogram hist1 = data1.to_hist(n_bins);
+    // Will hold values of all calculated likelihoods
+    vec likelihoods(n_steps), time_differences(n_steps);
 
-    std::vector<size_t> hist_2_sample_indices = { 0, n/2, n-1 };
+    // Signal 1 is binned only once, as only signal 2 is offset each iteration
+    Histogram hist_1 = signal_1.to_hist(n_bins);
+
+    // Examples of the signal 2 binnings, for debugging (possibly remove later)
+    std::vector<size_t> hist_2_sample_indices = { 0, n_steps/2, n_steps-1 };
     std::vector<Histogram> hist_2_samples;
     hist_2_samples.reserve(hist_2_sample_indices.size());
 
-    for (size_t i = 0; i < n; i++) {
-        std::cout << "i = " << i << std::endl;
+    // An index and time information will be printed every nth likelihood
+    size_t print_every_n = 50;
 
-        scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n);
-        offsets[i] = offset;
+    for (size_t i = 0; i < n_steps; i++) {
+        // positive offset corresponds to signal 2 arriving after signal 1
+        scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n_steps);
+
+        time_differences[i] = offset;
 
         auto T1 = std::chrono::high_resolution_clock::now();
-        Histogram hist2 = data2.to_hist(n_bins, window_start + offset, window_end + offset);
+
+        // Rebin signal 2
+        Histogram hist_2 = signal_2.to_hist(n_bins, window_start + offset, window_end + offset);
+        
         auto T2 = std::chrono::high_resolution_clock::now();
 
+        // !! Recalculate sensitivity each time
+        // DetectorRelation detectors(background_1, background_2, hist_1, hist_2);
+
+        // Record sample of signal 2 binning
         if (contains(hist_2_sample_indices, i)) {
-            hist_2_samples.push_back(hist2);
+            hist_2_samples.push_back(hist_2);
         }
 
-        scalar likelihood = log_likelihood(cache, background_1, background_2, hist1, hist2, n_bins, log_accuracy);
-        likelihoods[i] = likelihood;
-        auto T3 = std::chrono::high_resolution_clock::now();
+        scalar likelihood = log_likelihood(cache, detectors, hist_1, hist_2, rel_accuracy);
 
-        std::cout << "Time to build histograms: " << std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count() << " ms\n";
-        std::cout << "Time to compute likelihood: " << std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count() << " ms\n";
+        likelihoods[i] = likelihood;
+
+        auto T3 = std::chrono::high_resolution_clock::now();
+        
+        // Display timing info
+        if (i % print_every_n == 0) {
+            std::printf(
+                "i = %u\nTime to build histograms: %u ms\nTime to compute likelihood: %u ms\n", i,
+                std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count(),
+                std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count()
+            );
+        }
     }
 
-    std::string outputname = "output/ldist-" + det_name_1 + "-vs-" + det_name_2 + "-src=" + inst + "-steps=" + std::to_string(n) + "-bins=" + std::to_string(n_bins) + ".json";
+    std::string outputname = "output/ldist-" + det_name_1 + "-vs-" + det_name_2 + "-src=" + inst + "-steps=" + std::to_string(n_steps) + "-bins=" + std::to_string(n_bins) + ".json";
 
-    save_likelihoods(outputname, offsets, likelihoods, hist1, hist_2_samples);
+    save_likelihoods(outputname, time_differences, likelihoods, hist_1, hist_2_samples, window_width);
 
-    scalar max_likelihood = *std::max_element(likelihoods.begin(), likelihoods.end());
-    size_t max_i = std::distance(likelihoods.begin(), std::max_element(likelihoods.begin(), likelihoods.end()));
-    scalar best = offsets[max_i];
+    // Identify max likelihood as heuristic
+    scalar max_likelihood = max(likelihoods);
+    scalar best = time_differences[index_of_max(likelihoods)];
 
-    scalar true_d = data2.true_time - data1.true_time;
+    scalar true_d = signal_2.true_time - signal_1.true_time;
 
     std::cout << "\n\nMax likelihood = " << max_likelihood;
 

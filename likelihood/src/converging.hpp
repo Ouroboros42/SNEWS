@@ -1,21 +1,19 @@
 #ifndef CONVERGING_H
 #define CONVERGING_H
 
-#include "core.hpp"
-#include "caching/factorials.hpp"
-#include "detector_info/relation.hpp"
+#include "lazy.hpp"
 
 #include <functional>
 
+typedef std::function<size_t(size_t index_1)> index_getter;
+
 /*
-Evaluates the log(sum over 0<=i<n, 0<=j<m: exp(terms(i, j)))
-Assumes terms converge for increasing i, j
-log_rel_accuracy should correspond approximately to proportional error on terms - will be much more reliable for strictly positive terms
-*/
-scalar log_converging_double_sum(size_t n, size_t m, std::function<scalar(size_t i, size_t j)> terms, scalar log_rel_accuracy);
+Add sequence of terms defined by log_terms(i) for 0 <= i < n
+Assumes strictly decreasing terms
+Rejects terms of value (relative to total) below precision
+*/   
+scalar converging_sum_exp(LazyArray const& log_terms, scalar total, scalar log_rescale, scalar term_rel_precision);
 
-scalar log_converging_bin_likelihood(FactorialCache cache, DetectorRelation comp, size_t count_1, size_t count_2, scalar log_accuracy);
-
-scalar log_likelihood(FactorialCache cache, scalar background_rate_1, scalar background_rate_2, Histogram time_dist_1, Histogram time_dist_2, size_t n_bins, scalar log_accuracy);
+scalar log_sum_exp_peaked_2D(Lazy2DArray& terms, size_t lead_i, index_getter get_lead_j, scalar rel_precision);
 
 #endif

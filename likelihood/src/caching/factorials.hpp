@@ -15,7 +15,7 @@ public:
     void build_upto(size_t new_max_n);
 
     // largest n for which log(n!) is stored
-    size_t size() const;
+    size_t max() const;
 
     // log(n) for 0 < n <= size
     inline scalar log(size_t n) const { return log_n[n-1]; }

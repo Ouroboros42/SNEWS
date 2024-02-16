@@ -3,10 +3,17 @@
 
 #include "core.hpp"
 #include "histogram.hpp"
+#include "converging.hpp"
 #include "caching/factorials.hpp"
+#include "lazy.hpp"
+#include "data_io/read_signal.hpp"
 
 #include <functional>
 
+typedef std::function<scalar(size_t i, size_t j)> term_gen;
+
+/* Encodes information about relative rates of both detectors
+Relative sensitivity to supernova event is inferred from number of observed events */
 struct DetectorRelation {
     public:
         // -log(1 + p/a)
@@ -28,6 +35,8 @@ struct DetectorRelation {
 
         DetectorRelation(scalar background_rate_1, scalar background_rate_2, scalar sensitivity_1, scalar sensitivity_2);
 
+        DetectorRelation(scalar background_rate_1, scalar background_rate_2, TimeSeries signal_1, TimeSeries signal_2);
+
         DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2);
 
         scalar log_likelihood_prefactor(size_t total_events_1, size_t total_events_2);
@@ -35,8 +44,6 @@ struct DetectorRelation {
         size_t lead_index_1(size_t count_1, size_t count_2);
 
         size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1) const;
-
-        std::function<size_t(size_t index_1)> lead_index_2_getter(size_t count_1, size_t count_2);
 };
 
 // For a = 1
@@ -44,7 +51,5 @@ scalar quadratic_low_root(scalar b, scalar c);
 
 // Assumes real roots
 scalar quadratic_low_root(scalar a, scalar b, scalar c);
-
-std::function<scalar(size_t i, size_t j)> log_sum_terms(FactorialCache cache, DetectorRelation comp, size_t count_1, size_t count_2);
 
 #endif

@@ -1,3 +1,6 @@
+#ifndef READ_SIGNAL_H
+#define READ_SIGNAL_H
+
 #include "core.hpp"
 #include "histogram.hpp"
 
@@ -28,9 +31,15 @@ struct TimeSeries {
     // Directly build from timeseries, taking start and stop to be extrema of series
     TimeSeries(vec times);
 
-    inline scalar range() { return stop - start; };
+    inline scalar range() { return stop - start; }
+
+    inline size_t n_events() { return times.size(); }
+
+    inline scalar mean_rate() { return n_events() / range(); }
     
     Histogram to_hist(size_t n_bins, scalar from, scalar to);
     
     Histogram to_hist(size_t n_bins);
 };
+
+#endif

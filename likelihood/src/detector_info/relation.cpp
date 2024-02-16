@@ -1,4 +1,5 @@
 #include "relation.hpp"
+#include "converging.hpp"
 
 #include <cmath>
 
@@ -19,6 +20,12 @@ DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_r
     rate_const_ratio_2_to_1(rate_const_2 / rate_const_1)
 {}
 
+DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, TimeSeries signal_1, TimeSeries signal_2)
+: DetectorRelation(
+    background_rate_1, background_rate_2,
+    (signal_2.mean_rate() - background_rate_2) / (signal_1.mean_rate() - background_rate_1)
+) {}
+
 DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2)
 : DetectorRelation(
     background_rate_1, background_rate_2,
@@ -27,18 +34,6 @@ DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_r
 
 scalar DetectorRelation::log_likelihood_prefactor(size_t total_events_1, size_t total_events_2) {
     return log_sensitivity_1 * total_events_1 + log_sensitivity_2 * total_events_2;
-}
-
-std::function<scalar(size_t i, size_t j)> log_sum_terms(FactorialCache cache, DetectorRelation comp, size_t count_1, size_t count_2) {
-    return [cache, comp, count_1, count_2](size_t i, size_t j) {
-        return cache.log_exp_series_term(comp.log_rate_const_1, i) + cache.log_exp_series_term(comp.log_rate_const_2, j) + cache.log_binomial(count_1 - i, count_2 - j);
-    };
-}
-
-size_t normalise_index(size_t max_index, scalar index_low_bound) {
-    size_t index = std::ceil(index_low_bound);
-
-    return std::min(std::max((size_t) 0, index), max_index);
 }
 
 scalar quadratic_low_root(scalar b, scalar c) {
@@ -72,10 +67,4 @@ size_t DetectorRelation::lead_index_2(size_t count_1, size_t count_2, size_t ind
             (rate_const_2 - 1) * count_2 + index_1 - count_1
         )
     );
-}
-
-std::function<size_t(size_t index_1)> DetectorRelation::lead_index_2_getter(size_t count_1, size_t count_2) {
-    return [this, count_1, count_2] (size_t index_1) {
-        return lead_index_2(count_1, count_2, index_1);
-    };
 }

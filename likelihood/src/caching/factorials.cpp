@@ -9,6 +9,10 @@ FactorialCache::FactorialCache(size_t max_n) : FactorialCache() {
     build_upto(max_n);
 }
 
+size_t FactorialCache::max() const {
+    return max_n;
+}
+
 void FactorialCache::build_upto(size_t new_max_n) {
     if (new_max_n <= max_n) return;
 
@@ -21,6 +25,8 @@ void FactorialCache::build_upto(size_t new_max_n) {
         running_sum += log_n[i - 1] = std::log(i);
         log_n_factorial[i] = running_sum;
     }
+
+    max_n = new_max_n;
 }
 
 scalar FactorialCache::log_exp_series_term(scalar log_x, size_t index) const {

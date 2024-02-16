@@ -11,7 +11,7 @@ std::string test_data_path(Detector detector, std::string file_id) {
     return "../test-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
 }
 
-TestSignal::TestSignal(Json::Value data, std::string detector_name) : TimeSeries(data["timeseries"]),
+TestSignal::TestSignal(Json::Value data, std::string detector_name) : TimeSeries(parse_json_array<scalar>(data["timeseries"]["times"])),
     true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble())
 {}
 

@@ -23,13 +23,19 @@ Json::Value json_2D_array(std::vector<T1> arr2D) {
     return arr2D_out;
 }
 
-void save_likelihoods(std::string output_filename, vec time_diffs, vec likelihoods, Histogram dist1, std::vector<Histogram> dist2s) {
+void save_likelihoods(
+    std::string output_filename,
+    vec time_diffs, vec likelihoods,
+    Histogram dist1, std::vector<Histogram> dist2s,
+    scalar window_width
+) {
     Json::Value outputs;
     
     outputs["Time-Difference"] = json_array(time_diffs);
     outputs["Likelihood"] = json_array(likelihoods);
-    outputs["Histogram1"] = json_array(dist1);
-    outputs["Histograms2"] = json_2D_array(dist2s);
+    outputs["Binned"]["Signal-1"] = json_array(dist1);
+    outputs["Binned"]["Signals-2"] = json_2D_array(dist2s);
+    outputs["Binned"]["Window-Width"] = window_width;
 
     Json::StreamWriterBuilder builder;
     std::string output_str = Json::writeString(builder, outputs);
