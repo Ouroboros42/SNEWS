@@ -1,3 +1,8 @@
+# Specify on call to make command
+# Will be passed to tests as cmdline arguments
+# Allows requesting specific tests etc.
+USER_TEST_ARGS :=
+
 # Location of whole project
 ROOT := .
 
@@ -45,7 +50,7 @@ C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
 RUN_PYTHON := python
 
 # Arguments passed to test exes
-TEST_ARGS := -d yes
+TEST_ARGS := -d yes $(USER_TEST_ARGS)
 
 # File to track last test
 LAST_TEST := $(BUILD_ROOT)/last_test

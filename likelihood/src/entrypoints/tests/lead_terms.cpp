@@ -58,32 +58,48 @@ void test_lead_term(FactorialCache cache, DetectorRelation comp, size_t n, size_
     }
 }
 
+vec backgrounds = {10, 10000}; // {0.1, 1, 10, 100, 1000, 10000};
+vec ratios = {1000}; // { 1, 10, 100, 1000 };
+std::vector<size_t> event_counts = {10000}; // { 1, 10, 100, 1000, 10000 };
 
 TEST_CASE("Bin likelihood row lead term") {
-    scalar b1 = 10000, b2 = 10, ratio = 0.01;
-
-    DetectorRelation comp(b1, b2, ratio);
     FactorialCache cache;
 
-    test_row_lead_term(cache, comp, 100000, 10000);
-    test_row_lead_term(cache, comp, 1000, 2000);
-    test_row_lead_term(cache, comp, 100000, 3000);
-    test_row_lead_term(cache, comp, 200000, 400);
-    test_row_lead_term(cache, comp, 30, 2);
-    test_row_lead_term(cache, comp, 0, 0);
+    for (scalar ratio : ratios) {
+        for (scalar background_1 : backgrounds) {
+            for (scalar background_2 : backgrounds) {
+                DetectorRelation detector(background_1, background_2, ratio);
+
+                for (size_t count_1: event_counts) {
+                    for (size_t count_2: event_counts) {
+                        INFO("Bg 1: " << background_1 << ", 2: " << background_2);
+                        INFO("Ratio: " << ratio);
+
+                        test_row_lead_term(cache, detector, count_1, count_2);
+                    }
+                }
+            }
+        }
+    }
 }
 
 TEST_CASE("Bin likelihood lead term") {
-    scalar b1 = 10000, b2 = 10, ratio = 0.01;
-
-    DetectorRelation comp(b1, b2, ratio);
     FactorialCache cache;
 
-    test_lead_term(cache, comp, 100000, 10000);
-    test_lead_term(cache, comp, 100, 200);
-    test_lead_term(cache, comp, 1000, 2000);
-    test_lead_term(cache, comp, 100000, 3000);
-    test_lead_term(cache, comp, 200000, 400);
-    test_lead_term(cache, comp, 30, 2);
-    test_lead_term(cache, comp, 0, 0);
+    for (scalar ratio : ratios) {
+        for (scalar background_1 : backgrounds) {
+            for (scalar background_2 : backgrounds) {
+                DetectorRelation detector(background_1, background_2, ratio);
+
+                for (size_t count_1: event_counts) {
+                    for (size_t count_2: event_counts) {
+                        INFO("Bg 1: " << background_1 << ", 2: " << background_2);
+                        INFO("Ratio: " << ratio);
+
+                        test_lead_term(cache, detector, count_1, count_2);
+                    }
+                }
+            }
+        }
+    }
 }

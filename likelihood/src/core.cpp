@@ -19,9 +19,3 @@ size_t index_of_max(vec sequence) {
 size_t bound_index(size_t index, size_t collection_size) {
     return std::min(collection_size - 1, std::max(index, (size_t) 0));
 }
-
-size_t normalise_index(size_t max_index, scalar index_low_bound) {
-    size_t index = std::ceil(index_low_bound);
-
-    return bound_index(index, max_index + 1);
-}

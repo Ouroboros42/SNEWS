@@ -6,7 +6,13 @@
 
 // Chokepoint of entire operation
 inline scalar exp_scaled(scalar log_x, scalar log_rescale) {
-    return std::exp(log_x - log_rescale);
+    scalar result = std::exp(log_x - log_rescale);
+
+    if (std::isinf(result)) {
+        throw std::runtime_error("Rescaling did not suppress large term");
+    }
+    
+    return result;
 }
 
 inline bool cutoff_criterion(scalar next_term, scalar total, scalar rel_precision) {

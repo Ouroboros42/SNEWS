@@ -13,6 +13,10 @@ size_t BinSumTerms::size_x() const { return count_1 + 1; }
 size_t BinSumTerms::size_y() const { return count_2 + 1; }
 
 scalar BinSumTerms::get(size_t i, size_t j) const {
+    if (i > count_1 || j > count_2) {
+        throw std::invalid_argument("Index out of bounds");
+    }
+
     return fcache.log_exp_series_term(detectors.log_rate_const_1, i) +
         fcache.log_exp_series_term(detectors.log_rate_const_2, j) +
         fcache.log_binomial(count_1 - i, count_2 - j);
