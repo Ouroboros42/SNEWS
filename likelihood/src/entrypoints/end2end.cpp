@@ -30,13 +30,19 @@ int main(int argc, char* argv[]) {
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
 
+    scalar zero_time = std::min(signal_1.start, signal_2.start);
+
+    // Shift times so zero is at first event (not really necessary)
+    signal_1.rezero_times(zero_time);
+    signal_2.rezero_times(zero_time);
+
     // Min and max time differences to test
     scalar sweep_start = -0.2;
     scalar sweep_end = 0.2;
     
-    // Extra space to include around true event
-    scalar front_buffer = 2;
-    scalar back_buffer = 2;
+    // Extra space to include around true event (more realistic to application where edges are not known)
+    scalar front_buffer = 1;
+    scalar back_buffer = 1;
 
     // Range over which detector 1 is sampled for all cases
     // Detector 2 is sampled over this window, with offsets varying between sweep start and sweep end
@@ -62,10 +68,10 @@ int main(int argc, char* argv[]) {
     scalar rel_accuracy = 0.0000001;
 
     // Number of bins to split data in range into
-    size_t n_bins = 10000;
+    size_t n_bins = 100;
 
     // Number of time differences to calculate likelihoods for
-    size_t n_steps = 981;
+    size_t n_steps = 1000;
 
     // !! Calculate sensitivty once
     DetectorRelation detectors(background_1, background_2, signal_1, signal_2);

@@ -28,3 +28,13 @@ Histogram TimeSeries::to_hist(size_t n_bins, scalar from, scalar to) {
 Histogram TimeSeries::to_hist(size_t n_bins) {
     return to_hist(n_bins, start, stop);
 }
+
+
+void TimeSeries::rezero_times(scalar zero_time) {
+    for (size_t i = 0; i < times.size(); i++) {
+        times[i] -= zero_time;
+    }
+
+    start -= zero_time;
+    stop -= zero_time;
+}
