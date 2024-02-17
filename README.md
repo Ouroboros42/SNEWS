@@ -25,3 +25,5 @@ All compiled outputs go in [build](likelihood/build/).
 * `make tmods` - Re-compile and run all tests whose dependencies have been modified
 * `make bmods` - Re-compile and run all benchmarks whose dependencies have been modified
 * `make mods` - Re-compile and run all tests & benchmarks whose dependencies have been modified
+* `make new_analysis` - Run python data analysis on most recent program output 
+* `make end2end` - Run a full likelihood sweep according to [end2end.cpp](likelihood/src/entrypoints/end2end.cpp) and do analysis

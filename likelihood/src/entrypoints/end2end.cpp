@@ -68,16 +68,13 @@ int main(int argc, char* argv[]) {
     FactorialCache cache;
 
     // Maximum acceptable (proportional) error in calculated likelihood
-    scalar rel_accuracy = 0.0000001;
+    scalar rel_accuracy = 1E-5;
 
     // Number of bins to split data in range into
-    size_t n_bins = 100;
+    size_t n_bins = 10000;
 
     // Number of time differences to calculate likelihoods for
-    size_t n_steps = 1000;
-
-    // !! Calculate sensitivty once
-    DetectorRelation detectors(background_1, background_2, signal_1, signal_2);
+    size_t n_steps = 100;
 
     // Will hold values of all calculated likelihoods
     vec likelihoods(n_steps), time_differences(n_steps);
@@ -91,7 +88,7 @@ int main(int argc, char* argv[]) {
     hist_2_samples.reserve(hist_2_sample_indices.size());
 
     // An index and time information will be printed every nth likelihood
-    size_t print_every_n = 50;
+    size_t print_every_n = 10;
 
     for (size_t i = 0; i < n_steps; i++) {
         // positive offset corresponds to signal 2 arriving after signal 1
@@ -106,8 +103,7 @@ int main(int argc, char* argv[]) {
         
         auto T2 = std::chrono::high_resolution_clock::now();
 
-        // !! Recalculate sensitivity each time
-        // DetectorRelation detectors(background_1, background_2, hist_1, hist_2);
+        DetectorRelation detectors(background_1, background_2, hist_1, hist_2);
 
         // Record sample of signal 2 binning
         if (contains(hist_2_sample_indices, i)) {
@@ -128,11 +124,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::string outputname = "output/ldist_" +
-        det_name_1 + "-vs-" + det_name_2 +
-        "_src=" + inst +
-        "_t=" + get_timestamp()
-    + ".json";
+    std::string outputname = "output/ldist_" + det_name_1 + "-vs-" + det_name_2 + "_src=" + inst + "_t=" + get_timestamp() + ".json";
 
     save_likelihoods(outputname, time_differences, likelihoods, hist_1, hist_2_samples, window_width);
 

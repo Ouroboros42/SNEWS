@@ -6,7 +6,7 @@
 
 #include <string>
 
-// Store a calculated likelihood distribution and associated information in 
+// Store a calculated likelihood distribution and associated information in specified filename
 void save_likelihoods(
     std::string output_filename,
     vec time_diffs, vec likelihoods,

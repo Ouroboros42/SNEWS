@@ -31,6 +31,7 @@ void save_likelihoods(
 ) {
     Json::Value outputs;
     
+    // Add additional information by assigning to unused keys, no extra setup needed
     outputs["Time-Difference"] = json_array(time_diffs);
     outputs["Likelihood"] = json_array(likelihoods);
     outputs["Binned"]["Signal-1"] = json_array(dist1);
