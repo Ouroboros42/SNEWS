@@ -141,16 +141,19 @@ $(LAST_BENCH): $(BENCH_EXES)
 	$(call run_tests,$?)
 
 # Shorthand commands
-.PHONY : clean wipe objects executables tests benches tmods bmods mods end2end end2endExp new_analysis
+.PHONY : clean wipe clear_out objects executables tests benches tmods bmods mods end2end end2endExp new_analysis
 
 # Completely empty /build/ except for the .gitignore
 wipe:
 	$(call empty_excluding,$(BUILD_ROOT),*.gitignore)
 
-
 # Remove unused files from /build/
 clean:
 	$(call empty_excluding,$(BUILD_ROOT),*.gitignore $(DEPS) $(OBJS) $(EXES) $(COMMAND_TRACKERS))
+
+# Delete all output files
+clear_out:
+	$(call empty_excluding,$(OUTPUT_ROOT),*.gitignore) 
 
 # Compile all object files
 objects: $(OBJS)

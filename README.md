@@ -17,6 +17,7 @@ All compiled outputs go in [build](likelihood/build/).
 ### Make commands:
 * `make wipe` - Empty [build](likelihood/build/)
 * `make clean` - Remove all orphaned files from [build](likelihood/build/) (files whose source has been deleted)
+* `make clear_out` - Delete all output files (in [output](likelihood/output/))
 * `make objects` - Compile all `.cpp` to `.o`
 * `make tests` - Re-compile and run all files in [tests](likelihood/src/entrypoints/tests/)
 * `make benches` - Re-compile and run all files in benchmarks [benchmarks](likelihood/src/entrypoints/benchmarks/)

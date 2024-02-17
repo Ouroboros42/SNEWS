@@ -5,6 +5,7 @@
 #include "caching/factorials.hpp"
 #include "detector_info/relation.hpp"
 #include "sum_terms.hpp"
+#include "data_io/timestamp.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -19,6 +20,8 @@ bool contains(std::vector<T> collection, T element) {
 }
 
 int main(int argc, char* argv[]) {
+    auto FULL_START = std::chrono::high_resolution_clock::now();
+
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
 
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
@@ -119,15 +122,17 @@ int main(int argc, char* argv[]) {
         
         // Display timing info
         if (i % print_every_n == 0) {
-            std::printf(
-                "i = %u\nTime to build histograms: %u ms\nTime to compute likelihood: %u ms\n", i,
-                std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count(),
-                std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count()
-            );
+            int hist_time = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
+            int likelihood_time = std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count();
+            std::printf("i = %u\nTime to build histograms: %u ms\nTime to compute likelihood: %u ms\n", i, hist_time, likelihood_time);
         }
     }
 
-    std::string outputname = "output/ldist-" + det_name_1 + "-vs-" + det_name_2 + "-src=" + inst + "-steps=" + std::to_string(n_steps) + "-bins=" + std::to_string(n_bins) + ".json";
+    std::string outputname = "output/ldist_" +
+        det_name_1 + "-vs-" + det_name_2 +
+        "_src=" + inst +
+        "_t=" + get_timestamp()
+    + ".json";
 
     save_likelihoods(outputname, time_differences, likelihoods, hist_1, hist_2_samples, window_width);
 
@@ -137,11 +142,13 @@ int main(int argc, char* argv[]) {
 
     scalar true_d = signal_2.true_time - signal_1.true_time;
 
-    std::cout << "\n\nMax likelihood = " << max_likelihood;
+    auto FULL_END = std::chrono::high_resolution_clock::now();
+    int total_time = std::chrono::duration_cast<std::chrono::seconds>(FULL_END - FULL_START).count();
 
-    std::cout << "\n\nMost probable time difference = " << best;
-
-    std::cout << "\n\nTrue time difference = " << true_d << "\n" << std::endl;
+    std::printf(
+        "\n\nMax likelihood = %.10f\n\nMost probable time difference = %.10f\n\nTrue time difference = %.10f\n\nSweep completed in: %u s\n\n",
+        max_likelihood, best, true_d, total_time
+    );
 
     return 0;
 }
