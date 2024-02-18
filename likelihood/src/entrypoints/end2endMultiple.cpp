@@ -52,7 +52,8 @@ std::vector<std::vector<double>> doLikelihoodCalculation(
     scalar sweep_start,
     scalar sweep_end,
     scalar front_buffer,
-    scalar back_buffer
+    scalar back_buffer,
+    int print_every_x_iterations
         )
 {
     // object to be returned
@@ -93,6 +94,11 @@ std::vector<std::vector<double>> doLikelihoodCalculation(
 
         L[i] = log_likelihood(cache, detectors, hist_1, hist_2, rel_accuracy);
         T[i] = offset;
+
+    if (i % print_every_x_iterations == 0) {
+            std::cout << i << " / " << n_steps << " done" << std::endl;
+        }
+
     }
 
     returnVector[0] = L;
@@ -110,7 +116,7 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     // otherwise we are essentially doing the same analysis
 
-    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
@@ -122,6 +128,7 @@ int main(int argc, char **argv) {
     // size_t n_steps = 1000;
     scalar front_buffer = 1;
     scalar back_buffer = 1;
+    int print_every_x_iterations = 10;
 
     FactorialCache cache;
 
@@ -136,12 +143,12 @@ int main(int argc, char **argv) {
     // Let the output file know
     outputs["UID"]["Name"] = "n_steps";
     outputs["UID"]["Start"] = 100;
-    outputs["UID"]["End"] = 500;
+    outputs["UID"]["End"] = 600;
     outputs["UID"]["Step"] = 100;
     outputs["UID"]["True-Time-Difference"] = signal_2.true_time - signal_1.true_time;
 
 
-    for (size_t n_steps = 100; n_steps < 500; n_steps = n_steps + 100) {
+    for (size_t n_steps = 100; n_steps < 600; n_steps = n_steps + 100) {
 
         printf("n_steps = %zu\n", n_steps);
 
@@ -158,7 +165,9 @@ int main(int argc, char **argv) {
             sweep_start,
             sweep_end,
             front_buffer,
-            back_buffer
+            back_buffer,
+            print_every_x_iterations
+
         );
         auto T2 = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
