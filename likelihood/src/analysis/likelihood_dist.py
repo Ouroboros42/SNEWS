@@ -6,10 +6,10 @@ import argparse
 
 parser = argparse.ArgumentParser("Likelihood_Analysis")
 parser.add_argument("source_file", type=str)
-# args = parser.parse_args()
-# data_file_path = args.source_file
+args = parser.parse_args()
+data_file_path = args.source_file
 
-data_file_path = "abc.json"
+# data_file_path = "def.json"
 with open(data_file_path) as data_file: 
     data = json.load(data_file)
 
@@ -29,9 +29,9 @@ h2s = data["Binned"]["Signals-2"]
 # can select a smaller window to fit the likelihood distribution, currently use all the data
 L_data = Likelihoods
 offsets_data = offsets
+degree = 9
 
-coefficients = np.polyfit(offsets_data, L_data, 9)
-print(coefficients)
+coefficients = np.polyfit(offsets_data, L_data, degree)
 
 # evaluate the fitted polynomial for various offsets
 number_of_points_to_evaluate = 1000
@@ -44,14 +44,14 @@ L_fitted = np.polyval(coefficients, points)
 fig1, ax1 = plt.subplots(2, 1, figsize=(10, 10))
 
 # plotting the data alone, and then the data with the fitted curve
-ax1[0].plot(offsets, L_data, label="Likelihood data points", color="blue")
+ax1[0].plot(offsets, L_data, "o", label="Likelihood data points", color="blue")
 ax1[0].set_xlabel("Time difference (s)")
 ax1[0].set_ylabel("Likelihood")
 ax1[0].legend()
 
 ax1[1].plot(offsets, L_data, label="Likelihood data points", color="blue")
 ax1[1].plot(points, L_fitted, label="Likelihood fit", linestyle="--", color="red")
-ax1[1].axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
+# ax1[1].axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
 ax1[1].set_xlabel("Time difference (s)")
 ax1[1].set_ylabel("Likelihood")
 ax1[1].legend()
@@ -59,6 +59,8 @@ ax1[1].legend()
 
 # ------------------- Find Actual Lag Time -------------------
 
+# Estimate from the original likelihoods
+Lag_from_actual_data = offsets_data[np.argmax(L_data)]
 
 # Easy estimate from the curve
 Lag_estimate_from_curve = points[np.argmax(L_fitted)]
@@ -66,11 +68,11 @@ Lag_estimate_from_curve = points[np.argmax(L_fitted)]
 # Estimate from the derivative
 curve_derivative1 = np.polyder(coefficients)
 roots = np.roots(curve_derivative1)
-real_roots = [root.real for root in roots if np.isreal(root)]
+roots_to_consider = [root.real for root in roots if (np.isreal(root) and offsets_data[0] <= root.real <= offsets_data[-1])]
 # print(f"Roots: {roots}")
 # print(f"Real roots: {real_roots}")
-possible_extrema = [np.polyval(coefficients, root) for root in real_roots]
-Lag_estimate_from_derivative = real_roots[np.argmax(possible_extrema)]
+possible_extrema = [np.polyval(coefficients, root) for root in roots_to_consider]
+Lag_estimate_from_derivative = roots_to_consider[np.argmax(possible_extrema)]
 
 # just visually check he roots are not stupid values
 # fig2, ax2 = plt.subplots(1, 1, figsize=(10, 5))
@@ -80,18 +82,20 @@ Lag_estimate_from_derivative = real_roots[np.argmax(possible_extrema)]
 
 # plot the final results
 fig3, ax3 = plt.subplots(1, 1, figsize=(10, 5))
-ax3.plot(points, L_fitted, label="Likelihood fit", linestyle="--", color="blue")
+ax3.plot(points, L_fitted, label="Likelihood fit", linestyle="--", color="red")
 ax3.axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
-ax3.axvline(x=Lag_estimate_from_curve, color="green", linestyle="--", label="Estimated Maxima from max vale in an "
-                                                                            "evualted array")
-ax3.axvline(x=Lag_estimate_from_derivative, color="red", linestyle="--", label="Estimated Maxima from derivative")
+ax3.axvline(x=Lag_estimate_from_curve, color="green", linestyle="--", label="Estimated Maxima from curve maximum value")
+ax3.axvline(x=Lag_estimate_from_derivative, color="brown", linestyle="--", label="Estimated Maxima from curve derivative")
+ax3.axvline(x=Lag_from_actual_data, color="orange", linestyle="--", label="Estimated Maxima from actual data")
 ax3.set_xlabel("Time difference (s)")
 ax3.set_ylabel("Likelihood")
 ax3.legend()
 
 # print results
+print(f"Results for {data_file_path.split('_')[1]}")
 print(f"True Lag: {True_Lag}")
-print(f"Estimated Lag from curve: {Lag_estimate_from_curve}")
+print(f"Estimated Lag from actual data: {Lag_from_actual_data}")
+print(f"Estimated Lag from curve maximum value: {Lag_estimate_from_curve}")
 print(f"Estimated Lag from derivative: {Lag_estimate_from_derivative}")
 
 plt.show()

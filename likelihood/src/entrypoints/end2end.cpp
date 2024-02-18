@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
 
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
 
     std::string det_name_1 = detector_name(detector1), det_name_2 = detector_name(detector2);
 
