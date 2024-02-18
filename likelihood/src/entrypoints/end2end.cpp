@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
 
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
 
     std::string det_name_1 = detector_name(detector1), det_name_2 = detector_name(detector2);
 
@@ -126,8 +126,6 @@ int main(int argc, char* argv[]) {
 
     std::string outputname = "output/ldist_" + det_name_1 + "-vs-" + det_name_2 + "_src=" + inst + "_t=" + get_timestamp() + ".json";
 
-    save_likelihoods(outputname, time_differences, likelihoods, hist_1, hist_2_samples, window_width);
-
     // Identify max likelihood as heuristic
     scalar max_likelihood = max(likelihoods);
     scalar best = time_differences[index_of_max(likelihoods)];
@@ -136,6 +134,8 @@ int main(int argc, char* argv[]) {
 
     auto FULL_END = std::chrono::high_resolution_clock::now();
     int total_time = std::chrono::duration_cast<std::chrono::seconds>(FULL_END - FULL_START).count();
+
+    save_likelihoods(outputname, time_differences, likelihoods, hist_1, hist_2_samples, window_width, true_d);
 
     std::printf(
         "\n\nMax likelihood = %.10f\n\nMost probable time difference = %.10f\n\nTrue time difference = %.10f\n\nSweep completed in: %u s\n\n",
