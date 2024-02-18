@@ -27,7 +27,7 @@ void save_likelihoods(
     std::string output_filename,
     vec time_diffs, vec likelihoods,
     Histogram dist1, std::vector<Histogram> dist2s,
-    scalar window_width
+    scalar window_width, scalar true_time_difference
 ) {
     Json::Value outputs;
     
@@ -37,6 +37,7 @@ void save_likelihoods(
     outputs["Binned"]["Signal-1"] = json_array(dist1);
     outputs["Binned"]["Signals-2"] = json_2D_array(dist2s);
     outputs["Binned"]["Window-Width"] = window_width;
+    outputs["True-Time-Difference"] = true_time_difference;
 
     Json::StreamWriterBuilder builder;
     std::string output_str = Json::writeString(builder, outputs);
