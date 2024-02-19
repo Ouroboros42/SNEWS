@@ -139,16 +139,20 @@ int main(int argc, char **argv) {
     Json::StreamWriterBuilder builder;
     Json::Value outputs;
 
-    // suppose see the difference in Likelihoods as a function of n_steps
+    // suppose see the difference in Likelihoods as a function of n_steps. set those parameters
+    int n_steps_start = 100;
+    int n_steps_end = 1000;
+    int n_steps_step = 100;
+
     // Let the output file know
     outputs["UID"]["Name"] = "n_steps";
-    outputs["UID"]["Start"] = 100;
-    outputs["UID"]["End"] = 600;
-    outputs["UID"]["Step"] = 100;
+    outputs["UID"]["Start"] = n_steps_start;
+    outputs["UID"]["End"] = n_steps_end;
+    outputs["UID"]["Step"] = n_steps_step;
     outputs["UID"]["True-Time-Difference"] = signal_2.true_time - signal_1.true_time;
 
 
-    for (size_t n_steps = 100; n_steps < 600; n_steps = n_steps + 100) {
+    for (size_t n_steps = n_steps_start; n_steps < n_steps_end; n_steps = n_steps + n_steps_step) {
 
         printf("n_steps = %zu\n", n_steps);
 

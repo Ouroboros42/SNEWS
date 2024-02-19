@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 import json
@@ -91,11 +93,20 @@ ax3.set_xlabel("Time difference (s)")
 ax3.set_ylabel("Likelihood")
 ax3.legend()
 
-# print results
-print(f"Results for {data_file_path.split('_')[1]}")
-print(f"True Lag: {True_Lag}")
-print(f"Estimated Lag from actual data: {Lag_from_actual_data}")
-print(f"Estimated Lag from curve maximum value: {Lag_estimate_from_curve}")
-print(f"Estimated Lag from derivative: {Lag_estimate_from_derivative}")
 
-plt.show()
+# save results
+detector_names = data_file_path.split('_')[1]
+results = {
+    "Analysis of:" : data_file_path,
+    "Detectors": detector_names,
+    "True-Lag": True_Lag,
+    "Estimated-Lag-from-actual-data": Lag_from_actual_data,
+    "Estimated-Lag-from-curve-maximum-value": Lag_estimate_from_curve,
+    "Estimated-Lag-from-derivative": Lag_estimate_from_derivative
+}
+
+
+print(results)
+directory = "src\\analysis\\singleRunResults\\"
+fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
+fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
