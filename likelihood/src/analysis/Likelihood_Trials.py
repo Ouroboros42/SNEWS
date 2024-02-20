@@ -54,7 +54,7 @@ def ExtractDataFromJsonAndEstimateLag(json_file):
 # args = parser.parse_args()
 # data_file_path = args.source_file
 
-data_file_path = "dummy18-02-2024_20-46-39.json"
+data_file_path = "Dummy/dummy18-02-2024_20-46-39.json"
 
 with open(data_file_path) as data_file:
     data = json.load(data_file)

@@ -151,7 +151,6 @@ int main(int argc, char **argv) {
     outputs["UID"]["Step"] = n_steps_step;
     outputs["UID"]["True-Time-Difference"] = signal_2.true_time - signal_1.true_time;
 
-
     for (size_t n_steps = n_steps_start; n_steps < n_steps_end; n_steps = n_steps + n_steps_step) {
 
         printf("n_steps = %zu\n", n_steps);

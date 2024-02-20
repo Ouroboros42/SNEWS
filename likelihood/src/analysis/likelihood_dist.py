@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser("Likelihood_Analysis")
 parser.add_argument("source_file", type=str)
 args = parser.parse_args()
 data_file_path = args.source_file
+detector_names = data_file_path.split('_')[1]
 
 # data_file_path = "def.json"
 with open(data_file_path) as data_file: 
@@ -44,6 +45,7 @@ L_fitted = np.polyval(coefficients, points)
 # ------------------- Plotting -------------------
 
 fig1, ax1 = plt.subplots(2, 1, figsize=(10, 10))
+plt.suptitle(f"Likelihood Datapoints and curve for {detector_names}")
 
 # plotting the data alone, and then the data with the fitted curve
 ax1[0].plot(offsets, L_data, "o", label="Likelihood data points", color="blue")
@@ -84,6 +86,7 @@ Lag_estimate_from_derivative = roots_to_consider[np.argmax(possible_extrema)]
 
 # plot the final results
 fig3, ax3 = plt.subplots(1, 1, figsize=(10, 5))
+plt.title(f"Likelihood Curve and Different Maxima for {detector_names}")
 ax3.plot(points, L_fitted, label="Likelihood fit", linestyle="--", color="red")
 ax3.axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
 ax3.axvline(x=Lag_estimate_from_curve, color="green", linestyle="--", label="Estimated Maxima from curve maximum value")
@@ -95,7 +98,6 @@ ax3.legend()
 
 
 # save results
-detector_names = data_file_path.split('_')[1]
 results = {
     "Analysis of:" : data_file_path,
     "Detectors": detector_names,
@@ -105,8 +107,10 @@ results = {
     "Estimated-Lag-from-derivative": Lag_estimate_from_derivative
 }
 
+# print results in a newline
+for key, value in results.items():
+    print(f"{key}: {value}")
 
-print(results)
 directory = "src\\analysis\\singleRunResults\\"
 fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
 fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
