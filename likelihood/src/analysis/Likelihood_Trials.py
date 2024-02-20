@@ -48,25 +48,29 @@ def ExtractDataFromJsonAndEstimateLag(json_file):
 
 # ------------------- Main -------------------
 
+def main(data_file_path = None):
+    data_file_path = "Dummy/dummy20-02-2024_14-33-24.json"
+
+    with open(data_file_path) as data_file:
+        data = json.load(data_file)
+
+    data_estimates, curve_estimates, ax = ExtractDataFromJsonAndEstimateLag(data)
+
+    print(f"True Lag: {data['UID']['True-Time-Difference']}")
+    print(f"Average Lag from data: {np.mean(data_estimates)}")
+    print(f"Average Lag from fitted curve: {np.mean(curve_estimates)}")
+    print("\n\n")
+    print(f"actual data estimates: {data_estimates}")
+    print(f"fitted curve estimates: {curve_estimates}")
+
+    ax.set_xlim([-0.05, 0.05])
+    plt.show()
 
 # parser = argparse.ArgumentParser("Likelihood_Analysis")
 # parser.add_argument("source_file", type=str)
 # args = parser.parse_args()
 # data_file_path = args.source_file
 
-data_file_path = "Dummy/dummy18-02-2024_20-46-39.json"
 
-with open(data_file_path) as data_file:
-    data = json.load(data_file)
-
-data_estimates, curve_estimates, ax = ExtractDataFromJsonAndEstimateLag(data)
-
-print(f"True Lag: {data['UID']['True-Time-Difference']}")
-print(f"Average Lag from data: {np.mean(data_estimates)}")
-print(f"Average Lag from fitted curve: {np.mean(curve_estimates)}")
-print("\n\n")
-print(f"actual data estimates: {data_estimates}")
-print(f"fitted curve estimates: {curve_estimates}")
-
-ax.set_xlim([-0.05, 0.05])
-plt.show()
+if __name__ == "__main__":
+    main()

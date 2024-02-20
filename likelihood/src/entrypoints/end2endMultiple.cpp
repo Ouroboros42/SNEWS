@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     // otherwise we are essentially doing the same analysis
 
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
     TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
