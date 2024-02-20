@@ -6,13 +6,15 @@ import json
 
 import argparse
 
-parser = argparse.ArgumentParser("Likelihood_Analysis")
-parser.add_argument("source_file", type=str)
-args = parser.parse_args()
-data_file_path = args.source_file
-detector_names = data_file_path.split('_')[1]
+# parser = argparse.ArgumentParser("Likelihood_Analysis")
+# parser.add_argument("source_file", type=str)
+# args = parser.parse_args()
+# data_file_path = args.source_file
+# detector_names = data_file_path.split('_')[1]
 
-# data_file_path = "def.json"
+data_file_path = "Test\\ldist_IC-vs-SK_src=121_t=20-02-2024_15-34-11.json"
+detector_names = "IC-vs-SK"
+
 with open(data_file_path) as data_file: 
     data = json.load(data_file)
 
@@ -30,11 +32,15 @@ h2s = data["Binned"]["Signals-2"]
 # ------------------- Likelihood Fitting -------------------
 
 # can select a smaller window to fit the likelihood distribution, currently use all the data
-L_data = Likelihoods
+L_data = Likelihoods - np.min(Likelihoods)
 offsets_data = offsets
 degree = 9
 
-coefficients = np.polyfit(offsets_data, L_data, degree)
+coefficients, cov = np.polyfit(offsets_data, L_data, degree, cov=True)
+errors = np.sqrt(np.diag(cov))
+
+for i in range(len(coefficients)):
+    print(f"coefficient_{i}: {coefficients[i]} +- {errors[i]}, which is {errors[i]*100/coefficients[i]} % of the value")
 
 # evaluate the fitted polynomial for various offsets
 number_of_points_to_evaluate = 1000
@@ -111,6 +117,8 @@ results = {
 for key, value in results.items():
     print(f"{key}: {value}")
 
-directory = "src\\analysis\\singleRunResults\\"
-fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
-fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
+# directory = "src\\analysis\\singleRunResults\\"
+# fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
+# fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
+
+plt.show()
