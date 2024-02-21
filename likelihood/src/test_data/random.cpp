@@ -14,3 +14,8 @@ scalar rand_in_range(scalar min, scalar max) {
     std::uniform_real_distribution<scalar> range { min, max };
     return range(e1);
 }
+
+size_t poisson_trial(scalar rate) {
+    std::poisson_distribution<size_t> dist(rate);
+    return dist(e1);
+}
