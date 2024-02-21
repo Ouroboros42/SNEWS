@@ -6,14 +6,14 @@ import json
 
 import argparse
 
-# parser = argparse.ArgumentParser("Likelihood_Analysis")
-# parser.add_argument("source_file", type=str)
-# args = parser.parse_args()
-# data_file_path = args.source_file
-# detector_names = data_file_path.split('_')[1]
+parser = argparse.ArgumentParser("Likelihood_Analysis")
+parser.add_argument("source_file", type=str)
+args = parser.parse_args()
+data_file_path = args.source_file
+detector_names = data_file_path.split('_')[1]
 
-data_file_path = "Test\\ldist_IC-vs-SK_src=121_t=20-02-2024_15-34-11.json"
-detector_names = "IC-vs-SK"
+# data_file_path = "Test\\ldist_IC-vs-SK_src=121_t=20-02-2024_15-34-11.json"
+# detector_names = "IC-vs-SK"
 
 with open(data_file_path) as data_file: 
     data = json.load(data_file)
@@ -117,8 +117,6 @@ results = {
 for key, value in results.items():
     print(f"{key}: {value}")
 
-# directory = "src\\analysis\\singleRunResults\\"
-# fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
-# fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
-
-plt.show()
+directory = "src\\analysis\\singleRunResults\\"
+fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{time.time()}.png")
+fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{time.time()}.png")
