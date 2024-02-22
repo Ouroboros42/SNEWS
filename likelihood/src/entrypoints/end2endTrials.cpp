@@ -40,7 +40,7 @@ Json::Value json_2D_array(std::vector<T1> arr2D) {
 }
 
 
-std::vector<std::vector<double>> doLikelihoodCalculation(
+std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
     TestSignal signal_1,
     TestSignal signal_2,
     scalar background_1,
@@ -48,7 +48,6 @@ std::vector<std::vector<double>> doLikelihoodCalculation(
     FactorialCache cache,
     scalar rel_accuracy,
     size_t n_bins,
-    size_t n_steps,
     scalar sweep_start,
     scalar sweep_end,
     scalar front_buffer,
@@ -83,6 +82,8 @@ std::vector<std::vector<double>> doLikelihoodCalculation(
     // Signal 1 is binned only once, as only signal 2 is offset each iteration
     Histogram hist_1 = signal_1.to_hist(n_bins);
 
+    // initial number of steps
+    size_t n_steps = 100;
     vec L(n_steps), T(n_steps);
 
     for (size_t i = 0; i < n_steps; i++) {
@@ -121,11 +122,10 @@ int main(int argc, char **argv) {
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
 
-    scalar sweep_start = -0.2;
-    scalar sweep_end = 0.2;
+    scalar sweep_start = -0.05;
+    scalar sweep_end = 0.05;
     scalar log_accuracy = 1E-6;
     size_t data_into_n_bins = 10000;
-    // size_t n_steps = 1000;
     scalar front_buffer = 1;
     scalar back_buffer = 1;
     int print_every_x_iterations = 10;
@@ -139,22 +139,9 @@ int main(int argc, char **argv) {
     Json::StreamWriterBuilder builder;
     Json::Value outputs;
 
-    // suppose see the difference in Likelihoods as a function of n_steps. set those parameters
-    int n_steps_start = 100;
-    int n_steps_end = 800;
-    int n_steps_step = 100;
+    for (size_t trial_number = 0; trial_number < 1; trial_number++) {
 
-    // Let the output file know
-    outputs["UID"]["Name"] = "n_steps";
-    outputs["UID"]["Start"] = n_steps_start;
-    outputs["UID"]["End"] = n_steps_end;
-    outputs["UID"]["Step"] = n_steps_step;
-    outputs["UID"]["True-Time-Difference"] = signal_2.true_time - signal_1.true_time;
-
-    for (size_t n_steps = n_steps_start; n_steps < n_steps_end; n_steps = n_steps + n_steps_step) {
-
-        printf("n_steps = %zu\n", n_steps);
-
+        printf("Trial number %zu\n", trial_number);
         auto T1 = std::chrono::high_resolution_clock::now();
         std::vector<std::vector<double>> samples = doLikelihoodCalculation(
             signal_1,
@@ -164,7 +151,6 @@ int main(int argc, char **argv) {
             cache,
             log_accuracy,
             data_into_n_bins,
-            n_steps,
             sweep_start,
             sweep_end,
             front_buffer,
@@ -176,9 +162,15 @@ int main(int argc, char **argv) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
         printf("Time taken = %lld ms\n", duration);
 
+        // print results
+        for (size_t i = 0; i < samples[0].size(); i++) {
+            std::cout << "Likelihood: " << samples[0][i] << " Offset: " << samples[1][i] << std::endl;
+        }
+
+
         // write current results to file
-        outputs[std::to_string(n_steps)]["Likelihoods"] = json_array(samples[0]);
-        outputs[std::to_string(n_steps)]["Offsets"] = json_array(samples[1]);
+        outputs[std::to_string(trial_number)]["Likelihoods"] = json_array(samples[0]);
+        outputs[std::to_string(trial_number)]["Offsets"] = json_array(samples[1]);
     }
 
     std::string output_string = Json::writeString(builder, outputs);
