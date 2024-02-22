@@ -10,10 +10,4 @@ typedef double scalar;
 typedef std::vector<scalar> vec;
 typedef std::vector<std::vector<scalar>> mat;
 
-scalar max(vec values);
-scalar min(vec values);
-size_t index_of_max(vec sequence);
-
-size_t bound_index(size_t index, size_t collection_size);
-
 #endif

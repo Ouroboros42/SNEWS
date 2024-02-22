@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include "lazy.hpp"
+#include "fast_sum/lazy.hpp"
 
 #include<iostream>
 

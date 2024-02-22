@@ -16,12 +16,15 @@ class Histogram : public std::vector<size_t> {
         size_t binOf(scalar datum);
 
     public:
-        // Empty histogram
+        /* Create an empty histogram of n_bins over a range from lo to hi */
         Histogram(size_t n_bins, scalar lo, scalar hi);
-        // Fill with data
+        /* Create a histogram and add data to it */
         Histogram(size_t n_bins, scalar lo, scalar hi, std::vector<scalar> data);
-        // From preset bins
+        /* Create a histogram from preset bin counts */
         Histogram(std::vector<size_t> bins, scalar lo, scalar hi);
+
+        /* Create an empty histogram of the same shape as like */
+        static Histogram empty(Histogram like);
 
         inline scalar hi() { return _hi; }
         inline scalar lo() { return _lo; }

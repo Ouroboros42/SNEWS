@@ -2,7 +2,7 @@
 #define READ_SIGNAL_H
 
 #include "core.hpp"
-#include "histogram.hpp"
+#include "data_io/histogram.hpp"
 
 #include <json.hpp>
 
@@ -40,6 +40,8 @@ struct TimeSeries {
     Histogram to_hist(size_t n_bins, scalar from, scalar to);
     
     Histogram to_hist(size_t n_bins);
+
+    Histogram to_hist(scalar bin_width);
 
     void rezero_times(scalar zero_time);
 };

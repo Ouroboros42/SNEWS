@@ -3,7 +3,7 @@
 #include <catch.hpp>
 
 #include "detector_info/relation.hpp"
-#include "sum_terms.hpp"
+#include "fast_sum/sum_terms.hpp"
 
 auto approx(scalar value) {
     return Catch::Approx(value).epsilon(0.00001);

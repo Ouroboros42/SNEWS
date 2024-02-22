@@ -1,7 +1,7 @@
 #ifndef SUM_TERMS_H
 #define SUM_TERMS_H
 
-#include "lazy.hpp"
+#include "fast_sum/lazy.hpp"
 #include "caching/factorials.hpp"
 #include "detector_info/relation.hpp"
 

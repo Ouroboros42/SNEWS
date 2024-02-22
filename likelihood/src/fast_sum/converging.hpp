@@ -1,7 +1,7 @@
 #ifndef CONVERGING_H
 #define CONVERGING_H
 
-#include "lazy.hpp"
+#include "fast_sum/lazy.hpp"
 
 #include <functional>
 

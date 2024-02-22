@@ -1,4 +1,4 @@
-#include "histogram.hpp"
+#include "data_io/histogram.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -7,7 +7,7 @@
 #include <numeric>
 
 Histogram::Histogram(size_t n_bins, scalar lo, scalar hi)
-: vector(n_bins),
+: vector(n_bins, 0),
     _lo(lo), _hi(hi),
     _delta((hi-lo)/n_bins)
 {}
@@ -22,6 +22,10 @@ Histogram::Histogram(std::vector<size_t> bins, scalar lo, scalar hi)
     _lo(lo), _hi(hi),
     _delta((hi-lo)/bins.size())
 {}
+
+Histogram Histogram::empty(Histogram like) {
+    return Histogram(like.size(), like.lo(), like.hi());
+}
 
 size_t Histogram::binOf(scalar datum) {
     if (datum == _hi) return size() - 1; // Make last bin inclusive of boundary

@@ -1,5 +1,5 @@
-#include "converging.hpp"
-#include "lazy.hpp"
+#include "fast_sum/converging.hpp"
+#include "fast_sum/lazy.hpp"
 
 #include <cmath>
 #include <optional>

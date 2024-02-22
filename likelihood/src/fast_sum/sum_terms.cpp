@@ -1,4 +1,4 @@
-#include "sum_terms.hpp"
+#include "fast_sum/sum_terms.hpp"
 
 #include <cassert>
 

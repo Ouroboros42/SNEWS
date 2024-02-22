@@ -1,4 +1,4 @@
-#include "lazy.hpp"
+#include "fast_sum/lazy.hpp"
 
 LazyArray::~LazyArray() {}
 

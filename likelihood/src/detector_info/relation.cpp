@@ -1,14 +1,7 @@
 #include "relation.hpp"
-#include "converging.hpp"
+#include "fast_sum/converging.hpp"
 
 #include <cmath>
-
-DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_ratio_2_to_1)
-: DetectorRelation (
-    bin_background_rate_1, bin_background_rate_2,
-    1 / (1 + sensitivity_ratio_2_to_1),
-    1 / (1 + 1 / sensitivity_ratio_2_to_1)
-) {}
 
 DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_1, scalar sensitivity_2) : 
     log_sensitivity_1(std::log(sensitivity_1)),
@@ -20,10 +13,29 @@ DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_back
     rate_const_ratio_2_to_1(rate_const_2 / rate_const_1)
 {}
 
+DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_ratio_2_to_1)
+: DetectorRelation (
+    bin_background_rate_1, bin_background_rate_2,
+    1 / (1 + sensitivity_ratio_2_to_1),
+    1 / (1 + 1 / sensitivity_ratio_2_to_1)
+) {}
+
 DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2)
 : DetectorRelation(
     background_rate_1 * events_1.delta(), background_rate_2 * events_2.delta(),
     (events_2.mean_rate() - background_rate_2) / (events_1.mean_rate() - background_rate_1)
+) {}
+
+DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, TimeSeries signal_1, TimeSeries signal_2, scalar bin_width)
+: DetectorRelation(
+    background_rate_1 * bin_width, background_rate_2 * bin_width,
+    (signal_2.mean_rate() - background_rate_2) / (signal_1.mean_rate() - background_rate_1)
+) {}
+
+DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram signal_1, TimeSeries signal_2)
+: DetectorRelation(
+    background_rate_1 * signal_1.delta(), background_rate_2 * signal_1.delta(),
+    (signal_2.mean_rate() - background_rate_2) / (signal_1.mean_rate() - background_rate_1)
 ) {}
 
 scalar DetectorRelation::log_likelihood_prefactor(size_t total_events_1, size_t total_events_2) {
