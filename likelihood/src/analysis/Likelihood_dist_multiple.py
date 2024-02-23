@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import json
 import matplotlib.pyplot as plt
+import pull_distribution as pd
 
 
 def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None):
@@ -77,11 +78,10 @@ def makeEstimates(json_file, number_of_trials = 1000):
             Likelihoods = json_file[key]["Likelihoods"]
             TimeDifferences = json_file[key]["Offsets"]
 
-            # display every 100th Trial
             fig = ax = draw = None
-            if i % 100 == 0:
-                draw = True
-                fig, ax = plt.subplots(2, 1, figsize=(10, 10))
+            # if i % 100 == 0:
+            #     fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+            #     draw = True
 
             data_results = findDataMaximaAndErrors(Likelihoods, TimeDifferences, ax= ax[0] if draw else None)
             data_estimates.append(data_results)
@@ -92,6 +92,17 @@ def makeEstimates(json_file, number_of_trials = 1000):
     return curve_estimates, data_estimates
 
 
+def unpackAndTestEstimates(estimates):
+    values = []
+    sigmas = []
+    for estimate in estimates:
+        values.append(estimate[0])
+        assert estimate[1] <= estimate[0] <= estimate[2]
+        sigmas.append((estimate[2] - estimate[1]))
+
+    return values, sigmas
+
+
 # ------------------- Main -------------------
 
 def main():
@@ -99,11 +110,32 @@ def main():
     with open(data_file_path) as data_file:
         data = json.load(data_file)
 
-    curve_estimates, data_estimates = makeEstimates(data)
+    True_Lag = data["True-Time-Diff"]
 
-    print(f"True Lag: {data['True-Time-Diff']}")
-    print(f"Fitted curve estimates: {curve_estimates[0]}")
-    print(f"Data estimates: {data_estimates[0]}")
+    # find peak and error bounds from curve and from actual data
+    # we have more data here than needed for a pull distribution, just in case!
+    curve_estimates, data_estimates = makeEstimates(data)
+    curve_values, curve_sigmas = unpackAndTestEstimates(curve_estimates)
+    data_values, data_sigmas = unpackAndTestEstimates(data_estimates)
+
+    # print results
+    print(f"True Lag: {True_Lag}")
+    print(f"Average Lag from data: {np.mean(data_values)}")
+    print(f"Average Lag from fitted curve: {np.mean(curve_values)}")
+
+    # make pull distributions
+    pd_data_points = [(curve_values[i] - True_Lag) / curve_sigmas[i] for i in range(len(curve_values))]
+    pd.makePullDistribution(pd_data_points, [-0.05, 0.05], 0.002, "Curve Estimates")
+
+    pd_data_points = [(data_values[i] - True_Lag) / data_sigmas[i] for i in range(len(data_values))]
+    pd.makePullDistribution(pd_data_points, [-0.05, 0.05], 0.002, "Data Estimates")
+
+
+
+
+
+
+
 
 
 
