@@ -66,7 +66,7 @@ size_t add_background(Histogram& hist, scalar background_rate) {
 
 std::pair<SignalAnalysis, scalar> complete_test_case(
     Detector detector_1, Detector detector_2, std::string file_id,
-    scalar start_buffer, scalar stop_buffer,
+    scalar start_buffer, scalar window_size,
     scalar min_offset, scalar max_offset,
     bool vary_background,
     scalar bin_width
@@ -79,7 +79,7 @@ std::pair<SignalAnalysis, scalar> complete_test_case(
     scalar background_2 = background_rate_s(detector_2);
 
     scalar base_window_start = std::min(signal_1.start, signal_2.start) - start_buffer;
-    scalar base_window_stop = std::max(signal_1.stop, signal_2.stop) + stop_buffer;
+    scalar base_window_stop = base_window_start + window_size;
 
     signal_1.reframe(base_window_start, base_window_stop);
 

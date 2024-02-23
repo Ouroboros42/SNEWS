@@ -3,6 +3,8 @@
 SignalAnalysis::SignalAnalysis(Histogram signal_1, TimeSeries signal_2, scalar background_rate_1, scalar background_rate_2) :
     signal_1(signal_1),
     signal_2(signal_2),
+    background_rate_1(background_rate_1),
+    background_rate_2(background_rate_2),
     detectors(background_rate_1, background_rate_2, signal_1, signal_2),
     cache()
 {}

@@ -53,14 +53,15 @@ size_t add_background(Histogram& hist, scalar rate);
 /* Setup an analysis of the simulated signal for 27 solar masses
 For detector_1 being the larger detector
 Trial number specified by file_id
-Start and stop buffer specify how much to extend both signals (with background) around the true events (for both, positive means widen the interval)
+Start specifies how much to extend both signals (with background) before the true events (positive means widen the interval)
+Window size specifies how much of both event should be included
 Min and max offset specify bounds of time differences that can be tested (min will likely be negative) 
 If vary_background is true, total number of background events will follow a poisson distribution, otherwise it will be constant
 Signal one will be binned in a histogram of specified bin_width
 */
 std::pair<SignalAnalysis, scalar> complete_test_case(
     Detector detector_1, Detector detector_2, std::string file_id,
-    scalar start_buffer, scalar stop_buffer,
+    scalar start_buffer, scalar window_size,
     scalar min_offset, scalar max_offset,
     bool vary_background,
     scalar bin_width

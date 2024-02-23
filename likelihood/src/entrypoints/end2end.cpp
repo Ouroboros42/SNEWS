@@ -21,24 +21,24 @@ int main(int argc, char* argv[]) {
     // Test data to use
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
-    bool poisson_vary_background = true; // Use variable total background counts, according to poisson
+    bool poisson_vary_background = false; // Use variable total background counts, according to poisson
 
     // Extra space to include around true event (more realistic to application where edges are not known)
     scalar front_buffer = 1;
-    scalar back_buffer = 1;
+    scalar window = 20;
     
     scalar bin_width = 2e-3;
 
     // Time difference sweep params
-    size_t n_sweep_steps = 100;
-    scalar sweep_start = -0.2;
-    scalar sweep_end = 0.2;
+    size_t n_sweep_steps = 1000;
+    scalar sweep_start = -0.05;
+    scalar sweep_end = 0.05;
     
-    scalar rel_accuracy = 1e-5;
+    scalar rel_accuracy = 1e-6;
 
     auto [test_case, true_d] = complete_test_case(
         detector1, detector2, inst,
-        front_buffer, back_buffer,
+        front_buffer, window,
         sweep_start, sweep_end,
         poisson_vary_background,
         bin_width
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
         
         auto T2 = std::chrono::high_resolution_clock::now();
 
-        scalar likelihood = test_case.lag_log_likelihood(offset, rel_accuracy);
+        scalar likelihood = test_case.lag_log_likelihood(offset, rel_accuracy, false);
 
         auto T3 = std::chrono::high_resolution_clock::now();
         
