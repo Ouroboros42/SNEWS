@@ -81,8 +81,6 @@ std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
 
     // Signal 1 is binned only once, as only signal 2 is offset each iteration
     Histogram hist_1 = signal_1.to_hist(n_bins);
-
-    // initial number of steps
     size_t n_steps = 100;
     vec L(n_steps), T(n_steps);
 
@@ -117,7 +115,7 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     // otherwise we are essentially doing the same analysis
 
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
     TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
@@ -133,17 +131,25 @@ int main(int argc, char **argv) {
     FactorialCache cache;
 
     // store results
-    std::string output_filename = "output/dummy" + get_timestamp() + ".json";
+    std::string for_which_detectors = detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
+    std::string output_filename = "src\\analysis\\Trials/1000_runs_" + for_which_detectors + get_timestamp() + ".json";
+
+    // prepare output file
     std::ofstream outfile;
     outfile.open(output_filename);
     Json::StreamWriterBuilder builder;
     Json::Value outputs;
 
-    for (size_t trial_number = 0; trial_number < 1; trial_number++) {
+    // write actual answer and parameters to file
+    outputs["detector1"] = detector_name(detector1);
+    outputs["detector2"] = detector_name(detector2);
+    outputs["True-Time-Diff"] = signal_2.true_time - signal_1.true_time;
+
+    for (size_t trial_number = 0; trial_number < 500; trial_number++) {
 
         printf("Trial number %zu\n", trial_number);
         auto T1 = std::chrono::high_resolution_clock::now();
-        std::vector<std::vector<double>> samples = doLikelihoodCalculation(
+        std::vector<std::vector<double>> samples = doLikelihoodsWithOptimisedMesh(
             signal_1,
             signal_2,
             background_1,
@@ -162,12 +168,6 @@ int main(int argc, char **argv) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
         printf("Time taken = %lld ms\n", duration);
 
-        // print results
-        for (size_t i = 0; i < samples[0].size(); i++) {
-            std::cout << "Likelihood: " << samples[0][i] << " Offset: " << samples[1][i] << std::endl;
-        }
-
-
         // write current results to file
         outputs[std::to_string(trial_number)]["Likelihoods"] = json_array(samples[0]);
         outputs[std::to_string(trial_number)]["Offsets"] = json_array(samples[1]);
@@ -176,6 +176,7 @@ int main(int argc, char **argv) {
     std::string output_string = Json::writeString(builder, outputs);
     outfile << output_string;
     outfile.close();
+    std::cout << "Output written to " << output_filename << std::endl;
 }
 
 

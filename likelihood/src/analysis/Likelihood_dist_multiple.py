@@ -1,76 +1,113 @@
+import copy
 import numpy as np
 import json
 import matplotlib.pyplot as plt
-import argparse
 
 
-def doLikelihoodFittingAndReturnCurveMaxima(L_data, T_data, number_of_points_to_evaluate=1000, degree=9):
-    coefficients = np.polyfit(T_data, L_data, degree)
-    points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
+def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None):
+    max_L_position = np.argmax(L_data)
+    max_L_value = L_data[max_L_position]
+    best_Lag = T_data[max_L_position]
+
+    pos_left = max_L_position - 1
+    while L_data[pos_left] > max_L_value - error_bound and pos_left > 0:
+        pos_left -= 1
+
+    pos_right = max_L_position + 1
+    while L_data[pos_right] > max_L_value - error_bound and pos_right < len(L_data):
+        pos_right += 1
+
+    if ax:
+        ax.plot(T_data, L_data, "o", label="Likelihood data points")
+        ax.axvline(x=best_Lag, linestyle="--", label="Best Lag")
+        ax.axvline(x=T_data[pos_left], linestyle="--", label="Error Bound")
+        ax.axvline(x=T_data[pos_right], linestyle="--")
+        ax.set_xlabel("Time difference (s)")
+        ax.set_ylabel("Likelihood")
+        ax.legend()
+
+    return best_Lag, T_data[pos_left], T_data[pos_right]
+
+
+def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse):
     L_fitted = np.polyval(coefficients, points)
-    maxima = points[np.argmax(L_fitted)]
-    return maxima, L_fitted, points
+    max_L_position = np.argmax(L_fitted)
+    max_L_value = L_fitted[max_L_position]
+    best_Lag = points[max_L_position]
+
+    points_within_error_bound = [p for i, p in enumerate(points) if (max_L_value - L_fitted[i]) <= error_bound]
+
+    if max_recurse == 0:
+        return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
+
+    if len(points_within_error_bound) < 2:
+        points = np.linspace(points[max_L_position - 1], points[max_L_position + 1], 20)
+        return findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse - 1)
+    else:
+        return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def ExtractDataFromJsonAndEstimateLag(json_file):
-    name = json_file["UID"]["Name"]
-    start = json_file["UID"]["Start"]
-    end = json_file["UID"]["End"]
-    step = json_file["UID"]["Step"]
-    True_Lag = json_file["UID"]["True-Time-Difference"]
+def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, degree=9, error_bound = 0.5, ax=None):
+    coefficients = np.polyfit(T_data, L_data, degree)
+    offset_points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
+    L_fitted = np.polyval(coefficients, offset_points)
 
-    actual_data_estimates = []
-    fitted_curve_estimates = []
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    best_Lag, error_left, error_right = findErrorOnCurveRecursively(coefficients, copy.deepcopy(offset_points), error_bound, 5)
 
-    for i in range(start, end, step):
+    if  ax:
+        ax.plot(offset_points, L_fitted, label="Fitted Curve")
+        ax.axvline(x=best_Lag, linestyle="--", label="Best Lag")
+        ax.axvline(x=error_left, linestyle="--", label="Error Bound")
+        ax.axvline(x=error_right, linestyle="--")
+        ax.set_xlabel("Time difference (s)")
+        ax.set_ylabel("Likelihood")
+        ax.legend()
+
+    return best_Lag, error_left, error_right
+
+
+def makeEstimates(json_file, number_of_trials = 1000):
+
+    curve_estimates = []
+    data_estimates = []
+
+    for i in range(number_of_trials):
         key = str(i)
         if key in json_file:
             Likelihoods = json_file[key]["Likelihoods"]
             TimeDifferences = json_file[key]["Offsets"]
 
-            estimate, L_fitted, points = doLikelihoodFittingAndReturnCurveMaxima(Likelihoods, TimeDifferences)
+            # display every 100th Trial
+            fig = ax = draw = None
+            if i % 100 == 0:
+                draw = True
+                fig, ax = plt.subplots(2, 1, figsize=(10, 10))
 
-            actual_data_estimates.append(TimeDifferences[np.argmax(Likelihoods)])
-            fitted_curve_estimates.append(estimate)
+            data_results = findDataMaximaAndErrors(Likelihoods, TimeDifferences, ax= ax[0] if draw else None)
+            data_estimates.append(data_results)
 
-            ax.plot(points, L_fitted, label=f"Fit when {name} = {key}")
-            ax.axvline(x=estimate, linestyle="--")
+            curve_results = LikelihoodFitPolynomial(Likelihoods, TimeDifferences, ax=ax[1] if draw else None)
+            curve_estimates.append(curve_results)
 
-    # plot the expected line
-    ax.set_xlabel("Time difference (s)")
-    ax.set_ylabel("Likelihood")
-    ax.axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
-    ax.legend()
-
-    return actual_data_estimates, fitted_curve_estimates, ax
+    return curve_estimates, data_estimates
 
 
 # ------------------- Main -------------------
 
-def main(data_file_path = None):
-    data_file_path = "Dummy/dummy20-02-2024_14-33-24.json"
-
+def main():
+    data_file_path = "Trials/500_runs_SNOPvsSK_23-02-2024_01-11-31.json"
     with open(data_file_path) as data_file:
         data = json.load(data_file)
 
-    data_estimates, curve_estimates, ax = ExtractDataFromJsonAndEstimateLag(data)
+    curve_estimates, data_estimates = makeEstimates(data)
 
-    print(f"True Lag: {data['UID']['True-Time-Difference']}")
-    print(f"Average Lag from data: {np.mean(data_estimates)}")
-    print(f"Average Lag from fitted curve: {np.mean(curve_estimates)}")
-    print("\n\n")
-    print(f"actual data estimates: {data_estimates}")
-    print(f"fitted curve estimates: {curve_estimates}")
+    print(f"True Lag: {data['True-Time-Diff']}")
+    print(f"Fitted curve estimates: {curve_estimates[0]}")
+    print(f"Data estimates: {data_estimates[0]}")
 
-    ax.set_xlim([-0.05, 0.05])
-    plt.show()
 
-# parser = argparse.ArgumentParser("Likelihood_Analysis")
-# parser.add_argument("source_file", type=str)
-# args = parser.parse_args()
-# data_file_path = args.source_file
 
 
 if __name__ == "__main__":
     main()
+    plt.show()
