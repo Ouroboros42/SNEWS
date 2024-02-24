@@ -52,25 +52,24 @@ def main(jsonfile, num_plots):
         data = json.load(data_file)
 
     for i in range(num_plots):
+        key = str(i)
+        if key in data:
+            Likelihoods = data[key]["Likelihoods"]
+            TimeDifferences = data[key]["Offsets"]
 
-        Likelihoods = data["Likelihood"]
-        TimeDifferences = data["Time-Difference"]
+            plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
+            plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Diff"], 0.01)
 
-        plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
-        plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Difference"], 0.01)
 
-        # key = str(i)
-        # if key in data:
-        #     Likelihoods = data[key]["Likelihoods"]
-        #     TimeDifferences = data[key]["Offsets"]
-        #
-        #     plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
-        #     plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Diff"], 0.01)
+        # Likelihoods = data["Likelihood"]
+        # TimeDifferences = data["Time-Difference"]
+        # plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
+        # plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Difference"], 0.01)
 
     plt.show()
     return
 
 
 if __name__ == "__main__":
-    data_file_path = "ldist_SNOP-vs-SK_src=121_t=24-02-2024_14-36-34.json"
+    data_file_path = ""
     main(data_file_path, 1)

@@ -26,7 +26,12 @@ Json::Value json_array(std::vector<T> arr) {
 }
 
 
-std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(std::map<scalar, scalar> Likelihoods, scalar start, scalar end) {
+std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(
+        std::map<scalar,
+        scalar> Likelihoods,
+        scalar start,
+        scalar end)
+{
     // set max and min to the closest key to start value
     scalar max = Likelihoods[start];
     scalar min = Likelihoods[start];
@@ -72,8 +77,7 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
     SignalAnalysis test_case,
     scalar rel_accuracy,
     scalar sweep_start,
-    scalar sweep_end,
-    int print_every_x_iterations
+    scalar sweep_end
         )
 {
     // object to be returned
@@ -94,7 +98,7 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
         }
 
         // print current size
-        std::cout << "Size after calculation: " << Likelihoods.size() << std::endl;
+        std::cout << "Number of Likelihoods calculated so far: " << Likelihoods.size() << std::endl;
 
         // find max and min Likelihoods
         auto [max, max_offset, min, min_offset] =
@@ -107,22 +111,21 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
         std::cout << "New mesh to search: " << a << " " << b << std::endl;
 
         // if certain conditions are is achieved, break
-        bool accuracyAchieved = (max - min < 0.5) or (std::abs(sweep_start - a) < 0.001) or (std::abs(sweep_end - b) < 0.001);
+        bool accuracyAchieved = (max - min < 0.5) or (std::abs(sweep_start - a) < 0.001)
+                or (std::abs(sweep_end - b) < 0.001);
         if(accuracyAchieved) {
             std::cout << "Accuracy achieved!" << std::endl;
-            accuracyAchieved = true;
             break;
         }
 
-
+        // update sweeping parameters
         sweep_start = a;
         sweep_end = b;
         n_steps = 50;
     }
 
-    std::cout << "Size: " << Likelihoods.size() << std::endl;
+    std::cout << "Total number of Likelihoods in this Trial: " << Likelihoods.size() << std::endl;
     return Likelihoods;
-
 }
 
 
@@ -131,8 +134,6 @@ int main(int argc, char **argv) {
     std::string inst = "222";
 
     // Create the variables needed. Let the background be generated in the Likelihood calculation
-    // otherwise we are essentially doing the same analysis
-
     Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
 
     scalar sweep_start = -0.05;
@@ -143,13 +144,16 @@ int main(int argc, char **argv) {
 
     scalar front_buffer = 1;
     scalar window = 20;
-    int print_every_x_iterations = 10;
+    int NumOfTrials = 1;
 
-    // store results
-    std::string for_which_detectors = detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
+    // generate filename to store results
+    std::string detector_names = "_" + detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
     std::string sweep_range = std::to_string(sweep_start - sweep_end);
-    std::string output_filename = "src\\analysis\\Trials/1000_runs_Sweep_Range_" + sweep_range
-             + for_which_detectors + get_timestamp() + "_ID_" + inst + ".json";
+    std::string numT = std::to_string(NumOfTrials);
+    std::string directory = "src\\analysis\\TrialsData/";
+
+    std::string output_filename = directory + numT + "_runs_Sweep_Range_" + sweep_range + "_UID_" + inst +
+            detector_names + "___" + get_timestamp() + ".json";
 
     // prepare output file
     std::ofstream outfile;
@@ -163,7 +167,7 @@ int main(int argc, char **argv) {
     scalar TrueTimeDiff = 0;
 
 
-    for (size_t trial_number = 0; trial_number < 2; trial_number++) {
+    for (size_t trial_number = 0; trial_number < NumOfTrials; trial_number++) {
         printf("Trial number %zu\n", trial_number);
 
         auto [test_case, true_d] = complete_test_case(
@@ -181,8 +185,7 @@ int main(int argc, char **argv) {
             test_case,
             rel_accuracy,
             sweep_start,
-            sweep_end,
-            print_every_x_iterations
+            sweep_end
         );
 
         auto T2 = std::chrono::high_resolution_clock::now();
@@ -208,6 +211,4 @@ int main(int argc, char **argv) {
     outfile.close();
     std::cout << "Output written to " << output_filename << std::endl;
 }
-
-
 

@@ -111,7 +111,7 @@ def makeEstimates(json_file, number_of_trials = 1000):
 
             fig = ax = draw = None
             # can choose to display every 100th sample or so
-            if i % 1 == 0:
+            if i % 100 == 0:
                 fig, ax = plt.subplots(1, 2, figsize=(20, 10))
                 draw = True
 
@@ -146,12 +146,23 @@ def printResults(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
     print("\n\n")
     return
 
+def printResultsAll(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas):
+    # format upto 3 decimal places and display the actual numbers
+    xx1 = [f"{x:.5f}" for x in data_values]
+    xx2 = [f"{x:.5f}" for x in data_sigmas]
+    print(f"data estimates: {xx1}")
+    print(f"data sigmas: {xx2}")
+    xx1 = [f"{x:.5f}" for x in curve_values]
+    xx2 = [f"{x:.5f}" for x in curve_sigmas]
+    print(f"curve estimates: {xx1}")
+    print(f"curve sigmas: {xx2}")
+
 # ------------------- Main -------------------
 
 
 def main():
     # read in data
-    data_file_path = "Trials/1000_runs_Sweep_Range_-0.100000ICvsSK_24-02-2024_16-09-50_ID_222.json"
+    data_file_path = "TrialsData/1000_runs_Sweep_Range_-0.100000ICvsSK_24-02-2024_16-09-50_ID_222.json"
     with open(data_file_path) as data_file:
         data = json.load(data_file)
 
@@ -165,24 +176,17 @@ def main():
 
     # print results
     printResults(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
+    # print actual values upto 3 decimal places
+    printResultsAll(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
 
 
-    # format upto 3 decimal places
-    xx1 = [f"{x:.5f}" for x in data_values]
-    xx2 = [f"{x:.5f}" for x in data_sigmas]
-    print(f"data estimates: {xx1}")
-    print(f"data sigmas: {xx2}")
-    xx1 = [f"{x:.5f}" for x in curve_values]
-    xx2 = [f"{x:.5f}" for x in curve_sigmas]
-    print(f"data estimates: {xx1}")
-    print(f"data sigmas: {xx2}")
 
 
     # make pull distribution (I need suggestions for bin width and range)
-    # hist_range = (-1.5, 1.5)
-    # bin_width = 0.1
-    # mean1, std1 = pd.createDistribution(curve_values, curve_sigmas, True_Lag, hist_range, bin_width, name="Curve Estimates")
-    # mean2, std2 = pd.createDistribution(data_values, data_sigmas, True_Lag, hist_range, bin_width, name="Data Estimates")
+    hist_range = (-2, 2)
+    bin_width = 0.1
+    mean1, std1 = pd.createDistribution(curve_values, curve_sigmas, True_Lag, hist_range, bin_width, name="Curve Estimates")
+    mean2, std2 = pd.createDistribution(data_values, data_sigmas, True_Lag, hist_range, bin_width, name="Data Estimates")
 
 
 
