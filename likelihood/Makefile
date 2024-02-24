@@ -174,7 +174,7 @@ tmods: $(LAST_TEST)
 bmods: $(LAST_BENCH)
 mods: tmods bmods
 
-ANALYSER := $(SOURCE_ROOT)/analysis/likelihood_dist.py
+ANALYSER := $(SOURCE_ROOT)/analysis/AnalyseSingleRun.py
 
 FIND_DAT_FILE = unset -v latest; for file in $(OUTPUT_DIR)/*; do [[ $$file -nt $$latest ]] && latest=$$file; done
 

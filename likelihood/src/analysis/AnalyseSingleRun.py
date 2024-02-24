@@ -1,9 +1,7 @@
 import time
-
 import numpy as np
 import matplotlib.pyplot as plt
 import json
-
 import argparse
 
 parser = argparse.ArgumentParser("Likelihood_Analysis")
@@ -39,8 +37,9 @@ degree = 9
 coefficients, cov = np.polyfit(offsets_data, L_data, degree, cov=True)
 errors = np.sqrt(np.diag(cov))
 
-for i in range(len(coefficients)):
-    print(f"coefficient_{i}: {coefficients[i]} +- {errors[i]}, which is {errors[i]*100/coefficients[i]} % of the value")
+# print the coefficients upto 5 decimal places
+# for i in range(len(coefficients)):
+#     print(f"coefficient_{i}: {coefficients[i]:.5f} with error: {errors[i]*100/coefficients[i]:.5f} %")
 
 # evaluate the fitted polynomial for various offsets
 number_of_points_to_evaluate = 1000

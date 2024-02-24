@@ -161,9 +161,7 @@ int main(int argc, char **argv) {
     Json::StreamWriterBuilder builder;
     Json::Value outputs;
 
-    // write actual answer and parameters to file
-    outputs["detector1"] = detector_name(detector1);
-    outputs["detector2"] = detector_name(detector2);
+    // dummy variable
     scalar TrueTimeDiff = 0;
 
 
@@ -203,8 +201,12 @@ int main(int argc, char **argv) {
         outputs[std::to_string(trial_number)]["Offsets"] = json_array(T);
     }
 
+    outputs["detector1"] = detector_name(detector1);
+    outputs["detector2"] = detector_name(detector2);
     outputs["True-Time-Diff"] = TrueTimeDiff;
     outputs["inst"] = inst;
+    outputs["sweep-range"] = sweep_range;
+    outputs["num-Trials"] = NumOfTrials;
 
     std::string output_string = Json::writeString(builder, outputs);
     outfile << output_string;
