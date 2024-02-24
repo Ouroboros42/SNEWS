@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     auto FULL_START = std::chrono::high_resolution_clock::now();
 
     // Test data to use
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
     bool poisson_vary_background = false; // Use variable total background counts, according to poisson
 
@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
     scalar bin_width = 2e-3;
 
     // Time difference sweep params
-    size_t n_sweep_steps = 1000;
-    scalar sweep_start = -0.05;
-    scalar sweep_end = 0.05;
+    size_t n_sweep_steps = 100;
+    scalar sweep_start = -0.2;
+    scalar sweep_end = 0.2;
     
     scalar rel_accuracy = 1e-6;
 
@@ -56,19 +56,15 @@ int main(int argc, char* argv[]) {
 
         auto T1 = std::chrono::high_resolution_clock::now();
 
-        Histogram hist_2 = test_case.bin_signal_2(offset);
-        
+
+        scalar likelihood = test_case.lag_log_likelihood(offset, rel_accuracy, true);
+
         auto T2 = std::chrono::high_resolution_clock::now();
-
-        scalar likelihood = test_case.lag_log_likelihood(offset, rel_accuracy, false);
-
-        auto T3 = std::chrono::high_resolution_clock::now();
         
         // Display timing info
         if (i % print_every_n == 0) {
-            int hist_time = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
-            int likelihood_time = std::chrono::duration_cast<std::chrono::milliseconds>(T3 - T2).count();
-            std::printf("i = %u\nTime to build histograms: %u ms\nTime to compute likelihood: %u ms\n", i, hist_time, likelihood_time);
+            int likelihood_time = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
+            std::printf("i = %zu \nTime to compute likelihood: %u ms\n", i, likelihood_time);
         }
 
         time_differences[i] = offset;
@@ -84,7 +80,8 @@ int main(int argc, char* argv[]) {
 
     std::string outputname = "output/ldist_" + detector_name(detector1) + "-vs-" + detector_name(detector2) + "_src=" + inst + "_t=" + get_timestamp() + ".json";
 
-    save_likelihoods(outputname, time_differences, likelihoods, test_case.signal_1, hist_2_samples, test_case.signal_1.range());
+    save_likelihoods(outputname, time_differences, likelihoods,
+                     test_case.signal_1, hist_2_samples, test_case.signal_1.range(), true_d);
 
     // Identify max likelihood as heuristic
     scalar max_likelihood = max(likelihoods);

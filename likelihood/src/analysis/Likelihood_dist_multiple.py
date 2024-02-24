@@ -81,7 +81,7 @@ def makeEstimates(json_file, number_of_trials = 1000):
             # can choose to display every 100th sample or so
             if i % 100 == 0:
                 fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-                draw = True
+                draw = False
 
             data_results = findDataMaximaAndErrors(Likelihoods, TimeDifferences, ax= ax[0] if draw else None)
             data_estimates.append(data_results)
