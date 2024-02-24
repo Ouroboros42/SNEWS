@@ -81,7 +81,7 @@ std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
 
     // Signal 1 is binned only once, as only signal 2 is offset each iteration
     Histogram hist_1 = signal_1.to_hist(n_bins);
-    size_t n_steps = 100;
+    size_t n_steps = 500;
     vec L(n_steps), T(n_steps);
 
     for (size_t i = 0; i < n_steps; i++) {
@@ -115,13 +115,13 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     // otherwise we are essentially doing the same analysis
 
-    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
 
-    scalar sweep_start = -0.05;
-    scalar sweep_end = 0.05;
+    scalar sweep_start = -0.1;
+    scalar sweep_end = 0.1;
     scalar log_accuracy = 1E-6;
     size_t data_into_n_bins = 10000;
     scalar front_buffer = 1;
@@ -132,7 +132,9 @@ int main(int argc, char **argv) {
 
     // store results
     std::string for_which_detectors = detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
-    std::string output_filename = "src\\analysis\\Trials/1000_runs_" + for_which_detectors + get_timestamp() + ".json";
+    std::string sweep_range = std::to_string(sweep_start - sweep_end);
+    std::string output_filename = "src\\analysis\\Trials/1000_runs_Sweep_Range_" + sweep_range
+             + for_which_detectors + get_timestamp() + "_ID_" + inst + ".json";
 
     // prepare output file
     std::ofstream outfile;
@@ -145,7 +147,7 @@ int main(int argc, char **argv) {
     outputs["detector2"] = detector_name(detector2);
     outputs["True-Time-Diff"] = signal_2.true_time - signal_1.true_time;
 
-    for (size_t trial_number = 0; trial_number < 500; trial_number++) {
+    for (size_t trial_number = 0; trial_number < 5; trial_number++) {
 
         printf("Trial number %zu\n", trial_number);
         auto T1 = std::chrono::high_resolution_clock::now();

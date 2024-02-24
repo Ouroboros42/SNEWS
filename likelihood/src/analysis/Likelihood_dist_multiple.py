@@ -119,7 +119,7 @@ def printResults(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
 
 def main():
     # read in data
-    data_file_path = "Trials/500_runs_SNOPvsSK_23-02-2024_01-11-31.json"
+    data_file_path = "Trials/1000_runs_SNOPvsSK_23-02-2024_04-00-59.json"
     with open(data_file_path) as data_file:
         data = json.load(data_file)
 
@@ -133,6 +133,15 @@ def main():
 
     # print results
     printResults(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
+
+
+    # format upto 3 decimal places
+    xx1 = [f"{x:.5f}" for x in data_values]
+    xx2 = [f"{x:.5f}" for x in data_sigmas]
+    print(f"data estimates: {xx1}")
+    print(f"data sigmas: {xx2}")
+
+
 
     # make pull distribution (I need suggestions for bin width and range)
     hist_range = (-1.5, 1.5)

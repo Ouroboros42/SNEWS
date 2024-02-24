@@ -19,6 +19,33 @@ def plotDataAndEvaluateAndPlotCurve(L_data, T_data, number_of_points_to_evaluate
     return ax
 
 
+def plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(L_data, T_data, True_T, bound):
+    zoomed_in = []
+    zoomed_in_L = []
+    for i, T in enumerate(T_data):
+        if bound > abs(T - True_T):
+            zoomed_in.append(T)
+            zoomed_in_L.append(L_data[i])
+
+    assert len(zoomed_in) == len(zoomed_in_L)
+
+    plt.figure()
+    plt.plot(zoomed_in, zoomed_in_L, "o", label="Zoomed in")
+    plt.axvline(x=True_T, linestyle="--", label="True T", color="black")
+
+    max1 = T_data[np.argmax(L_data)]
+    print(f"Max 1: {max1}")
+    L_copy = [L_data[i] for i in range(len(L_data)) if i != np.argmax(L_data)]
+    assert len(L_copy) == len(L_data) - 1
+    max2 = T_data[np.argmax(L_copy)]
+    print(f"Max 2: {max2}")
+
+    plt.axvline(x=max1, linestyle="--", label="Max 1", color="red")
+    plt.axvline(x=max2, linestyle="--", label="Max 2", color="green")
+    plt.legend()
+
+
+
 
 def main(jsonfile, num_plots):
     with open(jsonfile) as data_file:
@@ -29,12 +56,14 @@ def main(jsonfile, num_plots):
         if key in data:
             Likelihoods = data[key]["Likelihoods"]
             TimeDifferences = data[key]["Offsets"]
-            plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
+
+            # plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
+            plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Diff"], 0.01)
 
     plt.show()
     return
 
 
 if __name__ == "__main__":
-    data_file_path = "Trials/500_runs_SNOPvsSK_23-02-2024_01-11-31.json"
-    main(data_file_path, 5)
+    data_file_path = "Trials/1000_runs_SNOPvsSK_23-02-2024_04-00-59.json"
+    main(data_file_path, 1)
