@@ -14,9 +14,7 @@ def normalDistributionFit(y_values, x_values, ax):
     return mean, std
 
 
-def createDistribution(estimates, errors, True_value, hist_range, bin_width, name = "Estimates"):
-
-    data_points = [(estimate - True_value) / error for estimate, error in zip(estimates, errors)]
+def createDistribution(data_points, True_value, hist_range, bin_width, name = "", output_folder = None):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 
     y_values, bins, _ = ax.hist(data_points, bins=np.arange(hist_range[0], hist_range[1], bin_width), label=f"{name} Pull Distribution")
@@ -33,8 +31,11 @@ def createDistribution(estimates, errors, True_value, hist_range, bin_width, nam
     print(f"number of bins: {len(bins)} with bin width: {bin_width} and range: {hist_range}")
     print(f"Total number of events binned in the histogram: {np.sum(y_values)} out of {len(data_points)}")
 
-    # return normalDistributionFit(y_values, x_values, ax)
-    return None, None
+    # mean, std = normalDistributionFit(y_values, x_values, ax)
+
+    if output_folder:
+        plt.savefig(output_folder + f"{name}_Pull_Distribution.png")
+
 
 
 

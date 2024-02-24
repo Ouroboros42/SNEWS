@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
     std::string inst = "222";
 
     // Create the variables needed. Let the background be generated in the Likelihood calculation
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
 
     scalar sweep_start = -0.05;
     scalar sweep_end = 0.05;
@@ -144,11 +144,11 @@ int main(int argc, char **argv) {
 
     scalar front_buffer = 1;
     scalar window = 20;
-    int NumOfTrials = 1;
+    int NumOfTrials = 20;
 
     // generate filename to store results
     std::string detector_names = "_" + detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
-    std::string sweep_range = std::to_string(sweep_start - sweep_end);
+    std::string sweep_range = std::to_string(sweep_end - sweep_start);
     std::string numT = std::to_string(NumOfTrials);
     std::string directory = "src\\analysis\\TrialsData/";
 

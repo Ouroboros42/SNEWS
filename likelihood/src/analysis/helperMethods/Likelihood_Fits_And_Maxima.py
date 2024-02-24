@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import json
 import copy
 
-def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None):
+def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None, True_T = None):
     max_L_position = np.argmax(L_data)
     max_L_value = L_data[max_L_position]
     best_Lag = T_data[max_L_position]
@@ -21,6 +21,8 @@ def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None):
         ax.axvline(x=best_Lag, linestyle="--", label="Best Lag")
         ax.axvline(x=T_data[pos_left], linestyle="--", label="Error Bound")
         ax.axvline(x=T_data[pos_right], linestyle="--")
+        if True_T:
+            ax.axvline(x=True_T, linestyle="--", label="True T", color="black")
         ax.set_xlabel("Time difference (s)")
         ax.set_ylabel("Likelihood")
         ax.legend()
@@ -46,7 +48,7 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse):
         return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, degree=9, error_bound = 0.5, ax=None):
+def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, degree=9, error_bound = 0.5, ax=None, True_T = None):
     coefficients = np.polyfit(T_data, L_data, degree)
     offset_points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
     L_fitted = np.polyval(coefficients, offset_points)
@@ -58,6 +60,8 @@ def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, d
         ax.axvline(x=best_Lag, linestyle="--", label="Best Lag")
         ax.axvline(x=error_left, linestyle="--", label="Error Bound")
         ax.axvline(x=error_right, linestyle="--")
+        if True_T:
+            ax.axvline(x=True_T, linestyle="--", label="True T", color="black")
         ax.set_xlabel("Time difference (s)")
         ax.set_ylabel("Likelihood")
         ax.legend()
