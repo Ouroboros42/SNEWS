@@ -57,7 +57,7 @@ def main(jsonfile, num_plots):
             Likelihoods = data[key]["Likelihoods"]
             TimeDifferences = data[key]["Offsets"]
 
-            # plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
+            plotDataAndEvaluateAndPlotCurve(Likelihoods, TimeDifferences)
             plotLandTaroundTrueTAndSeeWhereActualDataMaximaOccur(Likelihoods, TimeDifferences, data["True-Time-Diff"], 0.01)
 
     plt.show()
@@ -65,5 +65,5 @@ def main(jsonfile, num_plots):
 
 
 if __name__ == "__main__":
-    data_file_path = "Trials/1000_runs_SNOPvsSK_23-02-2024_04-00-59.json"
+    data_file_path = "Trials/1000_runs_Sweep_Range_-0.200000SNOPvsSK_24-02-2024_13-12-35_ID_121.json"
     main(data_file_path, 1)

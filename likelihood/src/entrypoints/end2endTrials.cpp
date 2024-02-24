@@ -16,6 +16,8 @@
 #include <fstream>
 
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
 template <typename T>
 bool contains(std::vector<T> collection, T element) {
     return std::find(collection.begin(), collection.end(), element) != collection.end();
@@ -40,7 +42,49 @@ Json::Value json_2D_array(std::vector<T1> arr2D) {
 }
 
 
-std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
+std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(std::map<scalar, scalar> Likelihoods, scalar start, scalar end) {
+    // set max and min to the closest key to start value
+    scalar max = Likelihoods[start];
+    scalar min = Likelihoods[start];
+    scalar max_offset = start;
+    scalar min_offset = start;
+
+    for (auto const& [key, val] : Likelihoods) {
+        if(key > start and key < end) {
+            if (val > max) {
+                max = val;
+                max_offset = key;
+            }
+            if (val < min) {
+                min = val;
+                min_offset = key;
+            }
+        }
+    }
+    return std::make_tuple(max, max_offset, min, min_offset);
+}
+
+
+std::tuple<scalar, scalar> findNewMeshToSearch(std::map<scalar, scalar> Likelihoods, scalar threshold) {
+    scalar max_offset_left = 0;
+    scalar max_offset_right = 0;
+    for (auto const& [key, val] : Likelihoods) {
+        if (val > threshold) {
+            max_offset_left = key;
+            break;
+        }
+    }
+    for (auto it = Likelihoods.rbegin(); it != Likelihoods.rend(); ++it) {
+        if (it->second > threshold) {
+            max_offset_right = it->first;
+            break;
+        }
+    }
+    return std::make_tuple(max_offset_left, max_offset_right);
+}
+
+
+std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
     TestSignal signal_1,
     TestSignal signal_2,
     scalar background_1,
@@ -56,7 +100,7 @@ std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
         )
 {
     // object to be returned
-    std::vector<std::vector<double>> returnVector(2);
+    std::map<scalar, scalar> Likelihoods;
 
     // rezero times
     scalar zero_time = std::min(signal_1.start, signal_2.start);
@@ -81,29 +125,56 @@ std::vector<std::vector<double>> doLikelihoodsWithOptimisedMesh(
 
     // Signal 1 is binned only once, as only signal 2 is offset each iteration
     Histogram hist_1 = signal_1.to_hist(n_bins);
-    size_t n_steps = 500;
-    vec L(n_steps), T(n_steps);
 
-    for (size_t i = 0; i < n_steps; i++) {
+    // ------------------- Begin Mesh -------------------
 
-        scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n_steps);
-        Histogram hist_2 = signal_2.to_hist(n_bins, window_start + offset, window_end + offset);
+    size_t n_steps = 100;
+    bool accuracyAchieved = false;
 
-        DetectorRelation detectors(background_1, background_2, hist_1, hist_2);
+    while(Likelihoods.size() < 300) {
+        scalar increment = (sweep_end - sweep_start) / n_steps;
 
-        L[i] = log_likelihood(cache, detectors, hist_1, hist_2, rel_accuracy);
-        T[i] = offset;
+        // calculate Likelihoods
+        for(scalar o = sweep_start; o < sweep_end; o += increment) {
+            if (Likelihoods.count(o) == 0) {
+                // rebin
+                Histogram hist_2 = signal_2.to_hist(n_bins, window_start + o, window_end + o);
 
-    if (i % print_every_x_iterations == 0) {
-            std::cout << i << " / " << n_steps << " done" << std::endl;
+                // calculate Likelihood
+                DetectorRelation detectors(background_1, background_2, hist_1, hist_2);
+                Likelihoods[o] = log_likelihood(cache, detectors, hist_1, hist_2, rel_accuracy);
+            }
         }
 
+        // print current size
+        std::cout << "Size after calculation: " << Likelihoods.size() << std::endl;
+
+        // find max and min Likelihoods
+        auto [max, max_offset, min, min_offset] =
+                findMaxAndMinLikelihood(Likelihoods, sweep_start, sweep_end);
+
+        // find new mesh to search
+        scalar threshold = (max + min) / 2;
+        auto [a, b] = findNewMeshToSearch(Likelihoods, threshold);
+
+        std::cout << "New mesh to search: " << a << " " << b << std::endl;
+
+        // if certain conditions are is achieved, break
+        bool accuracyAchieved = (max - min < 0.5) or (std::abs(sweep_start - a) < 0.001) or (std::abs(sweep_end - b) < 0.001);
+        if(accuracyAchieved) {
+            std::cout << "Accuracy achieved!" << std::endl;
+            accuracyAchieved = true;
+            break;
+        }
+
+
+        sweep_start = a;
+        sweep_end = b;
+        n_steps = 50;
     }
 
-    returnVector[0] = L;
-    returnVector[1] = T;
-
-    return returnVector;
+    std::cout << "Size: " << Likelihoods.size() << std::endl;
+    return Likelihoods;
 
 }
 
@@ -115,7 +186,7 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     // otherwise we are essentially doing the same analysis
 
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
     TestSignal signal_1(detector1, inst), signal_2(detector2, inst);
     scalar background_1 = background_rate_s(detector1);
     scalar background_2 = background_rate_s(detector2);
@@ -147,11 +218,11 @@ int main(int argc, char **argv) {
     outputs["detector2"] = detector_name(detector2);
     outputs["True-Time-Diff"] = signal_2.true_time - signal_1.true_time;
 
-    for (size_t trial_number = 0; trial_number < 5; trial_number++) {
+    for (size_t trial_number = 0; trial_number < 1; trial_number++) {
 
         printf("Trial number %zu\n", trial_number);
         auto T1 = std::chrono::high_resolution_clock::now();
-        std::vector<std::vector<double>> samples = doLikelihoodsWithOptimisedMesh(
+        std::map<scalar, scalar> samples = doLikelihoodsWithOptimisedMesh(
             signal_1,
             signal_2,
             background_1,
@@ -170,9 +241,15 @@ int main(int argc, char **argv) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
         printf("Time taken = %lld ms\n", duration);
 
-        // write current results to file
-        outputs[std::to_string(trial_number)]["Likelihoods"] = json_array(samples[0]);
-        outputs[std::to_string(trial_number)]["Offsets"] = json_array(samples[1]);
+        // unpack results to vectors
+        std::vector<scalar> L, T;
+        for (auto const& [key, val] : samples) {
+            T.push_back(key);
+            L.push_back(val);
+        }
+
+        outputs[std::to_string(trial_number)]["Likelihoods"] = json_array(L);
+        outputs[std::to_string(trial_number)]["Offsets"] = json_array(T);
     }
 
     std::string output_string = Json::writeString(builder, outputs);
@@ -184,3 +261,5 @@ int main(int argc, char **argv) {
 
 
 
+
+#pragma clang diagnostic pop
