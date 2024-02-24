@@ -4,6 +4,36 @@ import json
 import matplotlib.pyplot as plt
 import pull_distribution as pd
 
+def returnCleanData(L_data, T_data):
+    plt.figure(figsize=(10, 5))
+
+    N = len(L_data)
+
+    L_data = np.array(L_data)
+    L_min = np.min(L_data)
+    L_data = L_data - L_min
+    T_data = np.array(T_data)
+
+    L_fft = np.abs(np.fft.fft(L_data))
+    freqs = np.fft.fftfreq(N, T_data[1] - T_data[0])
+
+    highest_freq = 1000
+
+    L_fft_clean = [L_fft[i] if (-highest_freq < freqs[i] < highest_freq) else 0 for i in range(N)]
+
+    plt.plot(freqs, L_fft, label="Fourier Transform")
+    plt.plot(freqs, L_fft_clean, label="Cleaned Fourier Transform", color="red")
+    plt.show()
+
+    # recontruct the cleaned signal
+    L_data_clean = np.fft.ifft(L_fft_clean)
+
+    plt.plot(T_data, L_data, label="Original Likelihood")
+    plt.plot(T_data, L_data_clean, label="Cleaned Likelihood", color="red")
+    plt.show()
+
+    return L_data_clean, T_data
+
 
 def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None):
     max_L_position = np.argmax(L_data)
@@ -77,11 +107,13 @@ def makeEstimates(json_file, number_of_trials = 1000):
             Likelihoods = json_file[key]["Likelihoods"]
             TimeDifferences = json_file[key]["Offsets"]
 
+            #Likelihoods, TimeDifferences = returnCleanData(json_file[key]["Likelihoods"], json_file[key]["Offsets"])
+
             fig = ax = draw = None
             # can choose to display every 100th sample or so
-            if i % 100 == 0:
+            if i % 1 == 0:
                 fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-                draw = False
+                draw = True
 
             data_results = findDataMaximaAndErrors(Likelihoods, TimeDifferences, ax= ax[0] if draw else None)
             data_estimates.append(data_results)
@@ -119,7 +151,7 @@ def printResults(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
 
 def main():
     # read in data
-    data_file_path = "Trials/1000_runs_SNOPvsSK_23-02-2024_04-00-59.json"
+    data_file_path = "Trials/1000_runs_Sweep_Range_-0.100000ICvsSK_24-02-2024_16-09-50_ID_222.json"
     with open(data_file_path) as data_file:
         data = json.load(data_file)
 
@@ -140,14 +172,17 @@ def main():
     xx2 = [f"{x:.5f}" for x in data_sigmas]
     print(f"data estimates: {xx1}")
     print(f"data sigmas: {xx2}")
-
+    xx1 = [f"{x:.5f}" for x in curve_values]
+    xx2 = [f"{x:.5f}" for x in curve_sigmas]
+    print(f"data estimates: {xx1}")
+    print(f"data sigmas: {xx2}")
 
 
     # make pull distribution (I need suggestions for bin width and range)
-    hist_range = (-1.5, 1.5)
-    bin_width = 0.1
-    mean1, std1 = pd.createDistribution(curve_values, curve_sigmas, True_Lag, hist_range, bin_width, name="Curve Estimates")
-    mean2, std2 = pd.createDistribution(data_values, data_sigmas, True_Lag, hist_range, bin_width, name="Data Estimates")
+    # hist_range = (-1.5, 1.5)
+    # bin_width = 0.1
+    # mean1, std1 = pd.createDistribution(curve_values, curve_sigmas, True_Lag, hist_range, bin_width, name="Curve Estimates")
+    # mean2, std2 = pd.createDistribution(data_values, data_sigmas, True_Lag, hist_range, bin_width, name="Data Estimates")
 
 
 

@@ -1,12 +1,13 @@
 #include "fast_sum/converging.hpp"
 #include "fast_sum/lazy.hpp"
 
+#include <fastexp.hpp>
 #include <cmath>
 #include <optional>
 
 // Chokepoint of entire operation
 inline scalar exp_scaled(scalar log_x, scalar log_rescale) {
-    scalar result = std::exp(log_x - log_rescale);
+    scalar result = fastExp(log_x - log_rescale);
 
     if (std::isinf(result)) {
         throw std::runtime_error("Rescaling did not suppress large term");
