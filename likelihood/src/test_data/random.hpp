@@ -4,10 +4,13 @@
 #include "core.hpp"
 #include <random>
 
-// Random real number in range min to max
+/* Return a random real number in range [min, max] */
 scalar rand_in_range(scalar min, scalar max);
 
-// Random integer in range [0,ceil)
+/* Return a random integer in range [0, ceil) */
 size_t rand_int(size_t ceil);
+
+/* Return an observed count, distributed according to a Poissond distribution with the specified rate */
+size_t poisson_trial(scalar rate);
 
 #endif

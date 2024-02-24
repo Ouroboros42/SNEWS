@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include "histogram.hpp"
+#include "data_io/histogram.hpp"
 
 TEST_CASE("Histogram construction") {
     Histogram hist(10, 0, 10);

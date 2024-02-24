@@ -2,7 +2,7 @@
 #define WRITE_OUT_H
 
 #include "core.hpp"
-#include "histogram.hpp"
+#include "data_io/histogram.hpp"
 
 #include <string>
 

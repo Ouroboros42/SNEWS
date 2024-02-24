@@ -3,7 +3,7 @@
 
 #include "caching/factorials.hpp"
 
-#include "converging.hpp"
+#include "fast_sum/converging.hpp"
 
 #include <cmath>
 

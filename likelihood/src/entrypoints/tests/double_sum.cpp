@@ -2,8 +2,8 @@
 
 #include <catch.hpp>
 
-#include "converging.hpp"
-#include "sum_terms.hpp"
+#include "fast_sum/converging.hpp"
+#include "fast_sum/sum_terms.hpp"
 
 scalar add_all_log_terms(Lazy2DArray& log_terms) {
     scalar log_total = log_terms.get(0, 0);

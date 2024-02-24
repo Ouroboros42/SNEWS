@@ -1,6 +1,8 @@
 #include "read_signal.hpp"
+#include "util/array_util.hpp"
 
 #include <fstream>
+#include <cmath>
 
 Json::Value read_json_file(std::string path) {
     Json::Value data;
@@ -29,6 +31,9 @@ Histogram TimeSeries::to_hist(size_t n_bins) {
     return to_hist(n_bins, start, stop);
 }
 
+Histogram TimeSeries::to_hist(scalar bin_width) {
+    return to_hist((size_t) std::abs(std::ceil(range() / bin_width)));
+}
 
 void TimeSeries::rezero_times(scalar zero_time) {
     for (size_t i = 0; i < times.size(); i++) {
