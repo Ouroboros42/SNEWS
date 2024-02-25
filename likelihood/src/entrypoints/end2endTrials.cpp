@@ -16,16 +16,6 @@
 #include <chrono>
 #include <fstream>
 
-template <typename T>
-Json::Value json_array(std::vector<T> arr) {
-    Json::Value arr_out(Json::arrayValue);
-    for (T elem : arr) {
-        arr_out.append(elem);
-    }
-    return arr_out;
-}
-
-
 std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(
         std::map<scalar,
         scalar> Likelihoods,
@@ -39,7 +29,7 @@ std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(
     scalar min_offset = start;
 
     for (auto const& [key, val] : Likelihoods) {
-        if(key > start and key < end) {
+        if(key > start && key < end) {
             if (val > max) {
                 max = val;
                 max_offset = key;
@@ -111,8 +101,8 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
         std::cout << "New mesh to search: " << a << " " << b << std::endl;
 
         // if certain conditions are is achieved, break
-        bool accuracyAchieved = (max - min < 0.5) or (std::abs(sweep_start - a) < 0.001)
-                or (std::abs(sweep_end - b) < 0.001);
+        bool accuracyAchieved = (max - min < 0.5) || (std::abs(sweep_start - a) < 0.001)
+                || (std::abs(sweep_end - b) < 0.001);
         if(accuracyAchieved) {
             std::cout << "Accuracy achieved!" << std::endl;
             break;
