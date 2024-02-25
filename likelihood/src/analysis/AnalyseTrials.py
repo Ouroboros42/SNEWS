@@ -2,16 +2,19 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import os
+import argparse
+import pathlib
 
 from helperMethods import Likelihood_Fits_And_Maxima as LFM
 from helperMethods import Raw_Data_Visualise as RDV
 from helperMethods import Pull_Distribution as PD
 
+parser = argparse.ArgumentParser("Likelihood_Analysis")
+parser.add_argument("source_file", type=str)
+args = parser.parse_args()
 
-# just change the path to the file you want to analyse and runthis script
-directory = "TrialsData/"
-file_name = "20_runs_Sweep_Range_-0.100000_UID_222_SNOPvsSK____24-02-2024_22-14-17.json"
-data_file_path = directory + file_name
+data_file_path = args.source_file 
+print(data_file_path)
 
 def makeEstimates(json_file, number_of_trials, draw_every = 1000, out_folder = None):
     curve_estimates = []
@@ -38,7 +41,7 @@ def makeEstimates(json_file, number_of_trials, draw_every = 1000, out_folder = N
             curve_estimates.append(curve_results)
 
             if out_folder and draw:
-                plt.savefig(out_folder + f"Trial_{i}.png")
+                plt.savefig(out_folder / f"Trial_{i}.png")
 
     return curve_estimates, data_estimates
 
@@ -82,12 +85,14 @@ def displayVerbose(True_Lag, data_values, data_sigmas, curve_values, curve_sigma
 
 
 def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
-    relative_path = f"\\TrialsResults\\ID_{inst}_{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
-    path = os.getcwd() + relative_path
+    relative_path = f"TrialsResults/ID_{inst}_{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
+    base_path = pathlib.Path(__file__).parent.resolve()
+    print(base_path)
+    path = base_path / relative_path
     if not os.path.exists(path):
         os.mkdir(path)
     print(f"\n\nOutput folder: {path}\n\n")
-    return path + "/"
+    return path
 
 
 def makeAppropriatePullDistribution(estimates, errors, True_Lag, name, out_folder):
@@ -98,7 +103,7 @@ def makeAppropriatePullDistribution(estimates, errors, True_Lag, name, out_folde
 
     # These are just guesses
     hist_range = (mean - 5 * std, mean + 5 * std)
-    bin_width = hist_range[1] - hist_range[0] / len(data_points)
+    bin_width = (hist_range[1] - hist_range[0]) / np.sqrt(len(data_points))
 
     PD.createDistribution(data_points, True_Lag, hist_range, bin_width, name, out_folder)
 
@@ -135,12 +140,6 @@ def main(data):
     # decide hist_range, bin-width and make pull distribution
     makeAppropriatePullDistribution(curve_values, curve_sigmas, True_Lag, "Curve Estimates", out_folder)
     makeAppropriatePullDistribution(data_values, data_sigmas, True_Lag, "Data Estimates", out_folder)
-
-
-
-
-
-
 
 
 

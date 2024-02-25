@@ -7,11 +7,10 @@ import argparse
 parser = argparse.ArgumentParser("Likelihood_Analysis")
 parser.add_argument("source_file", type=str)
 args = parser.parse_args()
-data_file_path = args.source_file
-detector_names = data_file_path.split('_')[1]
 
-# data_file_path = "ldist_SNOP-vs-SK_src=121_t=23-02-2024_01-23-49.json"
-# detector_names = "IC-vs-SK"
+data_file_path = args.source_file
+
+detector_names = data_file_path.split('_')[1]
 
 with open(data_file_path) as data_file: 
     data = json.load(data_file)

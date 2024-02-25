@@ -34,7 +34,7 @@ def createDistribution(data_points, True_value, hist_range, bin_width, name = ""
     # mean, std = normalDistributionFit(y_values, x_values, ax)
 
     if output_folder:
-        plt.savefig(output_folder + f"{name}_Pull_Distribution.png")
+        plt.savefig(output_folder / f"{name}_Pull_Distribution.png")
 
 
 

@@ -136,15 +136,16 @@ int main(int argc, char **argv) {
     // Create the variables needed. Let the background be generated in the Likelihood calculation
     Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
 
-    scalar sweep_start = -0.05;
-    scalar sweep_end = 0.05;
+    scalar sweep_start = -0.1;
+    scalar sweep_end = 0.1;
     scalar rel_accuracy = 1E-6;
     scalar bin_width = 2E-3;
-    bool poisson_vary_background = false;
+    bool poisson_vary_background = true;
 
     scalar front_buffer = 1;
     scalar window = 20;
-    int NumOfTrials = 20;
+
+    int NumOfTrials = 2000;
 
     // generate filename to store results
     std::string detector_names = "_" + detector_name(detector1) +"vs"+ detector_name(detector2) + "_";
