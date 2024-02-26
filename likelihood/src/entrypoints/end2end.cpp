@@ -19,9 +19,9 @@ int main(int argc, char* argv[]) {
     auto FULL_START = std::chrono::high_resolution_clock::now();
 
     // Test data to use
-    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
-    bool poisson_vary_background = false; // Use variable total background counts, according to poisson
+    bool poisson_vary_background = true; // Use variable total background counts, according to poisson
 
     // Extra space to include around true event (more realistic to application where edges are not known)
     scalar front_buffer = 1;
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]) {
 
     // Time difference sweep params
     size_t n_sweep_steps = 100;
-    scalar sweep_start = -0.2;
-    scalar sweep_end = 0.2;
+    scalar sweep_start = -0.1;
+    scalar sweep_end = 0.1;
     
-    scalar rel_accuracy = 1e-6;
+    scalar rel_accuracy = 1e-3;
 
     auto [test_case, true_d] = complete_test_case(
         detector1, detector2, inst,

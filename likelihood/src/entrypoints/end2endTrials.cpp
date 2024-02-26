@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
 
     scalar sweep_start = -0.1;
     scalar sweep_end = 0.1;
-    scalar rel_accuracy = 1E-6;
+    scalar rel_accuracy = 1E-3;
     scalar bin_width = 2E-3;
     bool poisson_vary_background = true;
 
