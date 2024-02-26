@@ -37,10 +37,18 @@ scalar log_likelihood(FactorialCache& fcache, DetectorRelation& detectors, Histo
     assert(signal_1.size() == signal_2.size());
     size_t n_bins = signal_1.size();
 
+    DetectorRelation flipped_detectors = detectors.flip();
+
     scalar likelihood = detectors.log_likelihood_prefactor(signal_1.n_data(), signal_2.n_data());
 
     for (size_t i_bin = 0; i_bin < n_bins; i_bin++) {
-        likelihood += bin_log_likelihood_unscaled(fcache, detectors, signal_1[i_bin], signal_2[i_bin], rel_precision);
+        size_t count_1 = signal_1[i_bin], count_2 = signal_2[i_bin];
+
+        if (count_1 > count_2) {
+            likelihood += bin_log_likelihood_unscaled(fcache, flipped_detectors, count_2, count_1, rel_precision);
+        } else {
+            likelihood += bin_log_likelihood_unscaled(fcache, detectors, count_1, count_2, rel_precision);
+        }
     }
 
     return likelihood;

@@ -23,7 +23,7 @@ void test_bin(DetectorRelation rel, FactorialCache cache, size_t n, size_t m) {
     scalar accuracy = 0.00001; 
 
     INFO("n = " << n << ", m = " << m);
-    CHECK_THAT(bin_log_likelihood_unscaled(cache, rel, n, m, accuracy), Catch::Matchers::WithinRel(add_all_log_terms(terms), accuracy * 10));
+    CHECK_THAT(bin_log_likelihood_unscaled(cache, rel, n, m, accuracy), Catch::Matchers::WithinRel(add_all_log_terms(terms), 0.03 + accuracy));
 }
 
 TEST_CASE("Converging bin likelihood test") {

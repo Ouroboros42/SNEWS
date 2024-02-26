@@ -3,21 +3,22 @@
 
 #include <cmath>
 
-DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_1, scalar sensitivity_2) : 
-    log_sensitivity_1(std::log(sensitivity_1)),
-    log_sensitivity_2(std::log(sensitivity_2)),
-    rate_const_1(bin_background_rate_1 / sensitivity_1),
-    rate_const_2(bin_background_rate_2 / sensitivity_2),
+DetectorRelation::DetectorRelation(scalar log_sensitivity_1, scalar log_sensitivity_2, scalar rate_const_1, scalar rate_const_2) :
+    log_sensitivity_1(log_sensitivity_1),
+    log_sensitivity_2(log_sensitivity_2),
+    rate_const_1(rate_const_1),
+    rate_const_2(rate_const_2),
     log_rate_const_1(std::log(rate_const_1)),
     log_rate_const_2(std::log(rate_const_2)),
     rate_const_ratio_2_to_1(rate_const_2 / rate_const_1)
 {}
 
 DetectorRelation::DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_ratio_2_to_1)
-: DetectorRelation (
-    bin_background_rate_1, bin_background_rate_2,
-    1 / (1 + sensitivity_ratio_2_to_1),
-    1 / (1 + 1 / sensitivity_ratio_2_to_1)
+: DetectorRelation(
+    -std::log(1 + sensitivity_ratio_2_to_1),
+    -std::log(1 + 1 / sensitivity_ratio_2_to_1),
+    bin_background_rate_1 * (1 + sensitivity_ratio_2_to_1),
+    bin_background_rate_2 * (1 + 1 / sensitivity_ratio_2_to_1)
 ) {}
 
 DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2)
@@ -37,6 +38,10 @@ DetectorRelation::DetectorRelation(scalar background_rate_1, scalar background_r
     background_rate_1 * signal_1.delta(), background_rate_2 * signal_1.delta(),
     (signal_2.mean_rate() - background_rate_2) / (signal_1.mean_rate() - background_rate_1)
 ) {}
+
+DetectorRelation DetectorRelation::flip() {
+    return DetectorRelation(log_sensitivity_2, log_sensitivity_1, rate_const_2, rate_const_1);
+}
 
 scalar DetectorRelation::log_likelihood_prefactor(size_t total_events_1, size_t total_events_2) {
     return log_sensitivity_1 * total_events_1 + log_sensitivity_2 * total_events_2;

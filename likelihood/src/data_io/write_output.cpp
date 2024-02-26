@@ -1,7 +1,5 @@
 #include "write_output.hpp"
 
-#include <json.hpp>
-
 #include <string>
 #include <fstream>
 

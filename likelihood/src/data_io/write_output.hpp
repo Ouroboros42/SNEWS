@@ -4,6 +4,8 @@
 #include "core.hpp"
 #include "data_io/histogram.hpp"
 
+#include <json.hpp>
+
 #include <string>
 
 template <typename T>

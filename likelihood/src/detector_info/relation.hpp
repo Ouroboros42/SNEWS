@@ -30,10 +30,10 @@ struct DetectorRelation {
         scalar log_rate_const_2;
 
         scalar rate_const_ratio_2_to_1;
-    
-        DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_ratio_2_to_1);
 
-        DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_1, scalar sensitivity_2);
+        DetectorRelation(scalar log_sensitivity_1, scalar log_sensitivity_2, scalar rate_const_1, scalar rate_const_2);
+
+        DetectorRelation(scalar bin_background_rate_1, scalar bin_background_rate_2, scalar sensitivity_ratio_2_to_1);
 
         DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram events_1, Histogram events_2);
         
@@ -41,6 +41,8 @@ struct DetectorRelation {
         
         DetectorRelation(scalar background_rate_1, scalar background_rate_2, Histogram signal_1, TimeSeries signal_2);
         
+        DetectorRelation flip();
+
         scalar log_likelihood_prefactor(size_t total_events_1, size_t total_events_2);
 
         size_t lead_index_1(size_t count_1, size_t count_2);
