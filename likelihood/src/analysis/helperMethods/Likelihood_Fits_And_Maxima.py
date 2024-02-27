@@ -3,6 +3,39 @@ import matplotlib.pyplot as plt
 import json
 import copy
 
+def suppressNoiseWithMovingAverage(L_data, T_data, window_half_width):
+    numPoints = len(L_data)
+    L_cleaned = []
+    T_cleaned = []
+    for i in range(window_half_width, numPoints - window_half_width):
+        new_point = np.mean(L_data[i - window_half_width: i + window_half_width])
+        L_cleaned.append(new_point)
+        T_cleaned.append(T_data[i])
+
+    return L_cleaned, T_cleaned
+
+
+def cleanMovingAverageAndNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma = 1.0):
+    # clean data with moving average
+    L_cleaned, T_cleaned = suppressNoiseWithMovingAverage(L_data, T_data, window_half_width)
+
+    L_data = L_data[window_half_width: -window_half_width]
+    T_data = T_data[window_half_width: -window_half_width]
+
+    deviation = [L_data[i] - L_cleaned[i] for i in range(len(L_cleaned))]
+    sigma = np.std(deviation)
+    bound = noise_bound_in_sigma * sigma
+
+    L_final = []
+    T_final = []
+    for i, dev in enumerate(deviation):
+        if abs(dev) < bound:
+            L_final.append(L_data[i])
+            T_final.append(T_data[i])
+
+    return L_final, T_final
+
+
 def findDataMaximaAndErrors(L_data, T_data, error_bound = 0.5, ax=None, True_T = None):
     max_L_position = np.argmax(L_data)
     max_L_value = L_data[max_L_position]
@@ -48,7 +81,8 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse):
         return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, degree=9, error_bound = 0.5, ax=None, True_T = None):
+def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000,
+                            degree=9, error_bound = 0.5, ax=None, True_T = None, plot_raw_data = False):
     coefficients = np.polyfit(T_data, L_data, degree)
     offset_points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
     L_fitted = np.polyval(coefficients, offset_points)
@@ -62,6 +96,8 @@ def LikelihoodFitPolynomial(L_data, T_data, number_of_points_to_evaluate=1000, d
         ax.axvline(x=error_right, linestyle="--")
         if True_T:
             ax.axvline(x=True_T, linestyle="--", label="True T", color="black")
+        if plot_raw_data:
+            ax.plot(T_data, L_data, "o", label="Likelihood data points")
         ax.set_xlabel("Time difference (s)")
         ax.set_ylabel("Likelihood")
         ax.legend()
