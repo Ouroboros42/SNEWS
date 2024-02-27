@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from helperMethods import Likelihood_Fits_And_Maxima as LFM
+from helperMethods import Likelihood_Fits_And_Maxima as fits
 
 def plotDataAndCurve(L_data, T_data, ax, number_of_points_to_evaluate = 1000, degree = 9):
     coefficients = np.polyfit(T_data, L_data, degree)
@@ -42,16 +42,16 @@ def plotDataZoomedAroundTrueValue(L_data, T_data, True_T, bound, ax):
     plt.show()
 
 
-def plotMovingAverageAndActualData(L_data, T_data, window_size = 5):
-    fig, ax = plt.subplots(1, 2, figsize=(8, 8))
-    L_cleaned, T_cleaned = LFM.suppressNoiseWithMovingAverage(L_data, T_data, window_size)
+def movingAverageAndNoiseFiltered(L_data, T_data, ax, plot_raw = False, window_half_width = 5, noise_bound = 1):
+
+    L_cleaned, T_cleaned = fits.cleanWithMovingAverage(L_data, T_data, averaging_window_half_width)
     ax[0].plot(T_cleaned, L_cleaned, "o", label="Moving Average")
     ax[0].plot(T_data, L_data, "o", label="Actual Data")
     ax[0].set_xlabel("Time difference (s)")
     ax[0].set_ylabel("Likelihood")
     ax[0].legend()
 
-    L_final, T_final = LFM.cleanMovingAverageAndNoiseFilter(L_data, T_data, window_size, 1)
+    L_final, T_final = fits.cleanWithNoiseFilter(L_data, T_data, averaging_window_half_width, 1)
     ax[1].plot(T_final, L_final, "o", label="Noise Filtered")
     ax[1].set_xlabel("Time difference (s)")
     ax[1].set_ylabel("Likelihood")
