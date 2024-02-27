@@ -84,14 +84,14 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse: 
         return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def LikelihoodFitPolynomial(L_data, T_data,
-                            number_of_points_to_evaluate = 1000,
-                            degree = 9,
-                            error_bound = 0.5,
-                            ax: plt.Axes = None,
-                            True_T = None,
-                            plot_raw_data = False
-                            ):
+def polynomialFit(L_data, T_data,
+                  number_of_points_to_evaluate = 1000,
+                  degree = 9,
+                  error_bound = 0.5,
+                  ax: plt.Axes = None,
+                  True_T = None,
+                  plot_raw_data = False
+                  ):
 
     coefficients = np.polyfit(T_data, L_data, degree)
     offset_points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)

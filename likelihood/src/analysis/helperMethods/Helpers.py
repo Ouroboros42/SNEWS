@@ -1,7 +1,9 @@
 import os
 import pathlib
 
-def display(True_Lag, values_1, values_1_errors, values_2, values_2_errors):
+def display(True_Lag, values_1, values_1_errors, values_2, values_2_errors, verbose=False):
+    if verbose:
+        displayVerbose(True_Lag, values_1, values_1_errors, values_2, values_2_errors)
     print("\n\n")
     print(f"True Lag: {True_Lag}")
     print(f"Average Lag from method 1: {np.mean(values_1)}")
