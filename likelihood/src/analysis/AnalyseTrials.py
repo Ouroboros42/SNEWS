@@ -112,8 +112,8 @@ def main(json_file):
 
     # analysis parameters
     num_samples_to_read = num_Trials # (max: numTrials)
-    num_plots_to_draw = 5
-    draw_every = num_samples_to_read // num_plots_to_draw
+    num_plots_to_draw = 0
+    draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
     # read data and make estimates
     estimates_1, estimates_2, method_ids = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag,
