@@ -31,15 +31,27 @@ def createDistribution(data_points, True_value, hist_range, bin_width, name = ""
     print(f"number of bins: {len(bins)} with bin width: {bin_width} and range: {hist_range}")
     print(f"Total number of events binned in the histogram: {np.sum(y_values)} out of {len(data_points)}")
 
-    # mean, std = normalDistributionFit(y_values, x_values, ax)
+    mean, std = normalDistributionFit(y_values, x_values, ax)
 
     if output_folder:
         plt.savefig(output_folder / f"{name}_Pull_Distribution.png")
+        return
+    else:
+        return mean, std
 
 
 
+def makeAppropriatePullDistribution(estimates, errors, True_Lag, name, out_folder):
+    data_points = [(estimate - True_Lag) / error for estimate, error in zip(estimates, errors)]
 
+    mean = np.mean(data_points)
+    std = np.std(data_points)
 
+    # These are just guesses
+    hist_range = (mean - 5 * std, mean + 5 * std)
+    bin_width = (hist_range[1] - hist_range[0]) / np.sqrt(len(data_points))
+
+    createDistribution(data_points, True_Lag, hist_range, bin_width, name, out_folder)
 
 
 
