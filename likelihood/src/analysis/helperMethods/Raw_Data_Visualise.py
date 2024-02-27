@@ -1,8 +1,9 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from helperMethods import Likelihood_Fits_And_Maxima as LFM
 
-def plot_data_and_evaluate_and_plot_polynomial_curve(L_data, T_data, ax, number_of_points_to_evaluate = 1000, degree = 9):
+def plotDataAndCurve(L_data, T_data, ax, number_of_points_to_evaluate = 1000, degree = 9):
     coefficients = np.polyfit(T_data, L_data, degree)
     points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
     L_fitted = np.polyval(coefficients, points)
@@ -12,9 +13,10 @@ def plot_data_and_evaluate_and_plot_polynomial_curve(L_data, T_data, ax, number_
     ax.set_xlabel("Time difference (s)")
     ax.set_ylabel("Likelihood")
     ax.legend()
+    plt.show()
 
 
-def plot_data_zoomed_in_around_True_T(L_data, T_data, True_T, bound, ax):
+def plotDataZoomedAroundTrueValue(L_data, T_data, True_T, bound, ax):
     upper_bound = True_T + bound
     lower_bound = True_T - bound
 
@@ -37,19 +39,25 @@ def plot_data_zoomed_in_around_True_T(L_data, T_data, True_T, bound, ax):
     ax.axvline(x=best_offset, linestyle="--", label=f"max 1: {best_offset}", color="red")
     ax.axvline(x=second_best_offset, linestyle="--", label=f"max 2: {second_best_offset}", color="green")
     ax.legend()
-
-
-def plotFirstNTrialsWithCurveFits_And_ZoomedInMaximas(data, num_plots, True_T):
-    for i in range(num_plots):
-        key = str(i)
-        if key in data:
-            Likelihoods = data[key]["Likelihoods"]
-            TimeDifferences = data[key]["Offsets"]
-
-            fig, ax = plt.subplots(2, 1, figsize=(8, 8))
-
-            plot_data_and_evaluate_and_plot_polynomial_curve(Likelihoods, TimeDifferences, ax[0])
-            plot_data_zoomed_in_around_True_T(Likelihoods, TimeDifferences, True_T, 0.01, ax[1])
-
     plt.show()
-    return
+
+
+def plotMovingAverageAndActualData(L_data, T_data, window_size = 5):
+    fig, ax = plt.subplots(1, 2, figsize=(8, 8))
+    L_cleaned, T_cleaned = LFM.suppressNoiseWithMovingAverage(L_data, T_data, window_size)
+    ax[0].plot(T_cleaned, L_cleaned, "o", label="Moving Average")
+    ax[0].plot(T_data, L_data, "o", label="Actual Data")
+    ax[0].set_xlabel("Time difference (s)")
+    ax[0].set_ylabel("Likelihood")
+    ax[0].legend()
+
+    L_final, T_final = LFM.cleanMovingAverageAndNoiseFilter(L_data, T_data, window_size, 1)
+    ax[1].plot(T_final, L_final, "o", label="Noise Filtered")
+    ax[1].set_xlabel("Time difference (s)")
+    ax[1].set_ylabel("Likelihood")
+    ax[1].legend()
+    plt.show()
+
+
+
+
