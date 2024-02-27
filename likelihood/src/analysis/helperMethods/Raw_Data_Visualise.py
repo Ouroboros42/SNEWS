@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 
-import Likelihood_Fits_And_Maxima as fits
+from helperMethods import Likelihood_Fits_And_Maxima as fits
 
 def plotDataAndCurve(L_data, T_data, ax, number_of_points_to_evaluate = 1000, degree = 9):
     coefficients = np.polyfit(T_data, L_data, degree)
@@ -53,7 +53,7 @@ def movingAverageAndNoiseFiltered(L_data, T_data, ax: List[plt.Axes], window_hal
     ax[0].set_ylabel("Likelihood")
     ax[0].legend()
 
-    L_final, T_final = fits.cleanWithNoiseFilter(L_data, T_data, averaging_window_half_width, noise_bound)
+    L_final, T_final = fits.cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound)
     ax[1].plot(T_final, L_final, "o", label="Noise Filtered")
     ax[1].set_xlabel("Time difference (s)")
     ax[1].set_ylabel("Likelihood")

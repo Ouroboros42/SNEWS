@@ -84,12 +84,11 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse: 
         return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def polynomialFit(L_data, T_data,
+def polynomialFit(L_data, T_data, True_Lag,
                   number_of_points_to_evaluate = 1000,
                   degree = 9,
                   error_bound = 0.5,
                   ax: plt.Axes = None,
-                  True_T = None,
                   plot_raw_data = False
                   ):
 
@@ -105,9 +104,8 @@ def polynomialFit(L_data, T_data,
         ax.axvline(x=best, linestyle="--", label="Best Lag")
         ax.axvline(x=err1, linestyle="--")
         ax.axvline(x=err2, linestyle="--")
+        ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")
 
-        if True_T:
-            ax.axvline(x=True_T, linestyle="--", label="True T", color="black")
         if plot_raw_data:
             ax.plot(T_data, L_data, "o", label="Likelihood data points")
 

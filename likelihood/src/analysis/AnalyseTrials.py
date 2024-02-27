@@ -2,6 +2,8 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import argparse
+import os
+import pathlib
 
 from helperMethods import Likelihood_Fits_And_Maxima as fits
 from helperMethods import Raw_Data_Visualise as visualise
@@ -21,14 +23,14 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, draw, ax = None):
     clean_window_half_width = 5
 
     L_cleaned, T_cleaned = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, clean_window_half_width)
-    res1 = fits.polynomialFit(L_cleaned, T_cleaned, ax = ax[0] if draw else None, plot_raw_data = True)
+    res1 = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[0] if draw else None, plot_raw_data = True)
 
     # method 4
     window_half_width = 5
     noise_bound = 1  # in units of sigma
 
-    L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, clean_window_half_width, noise_bound)
-    res2 = fits.polynomialFit(L_cleaned, T_cleaned, ax = ax[1] if draw else None, plot_raw_data = True)
+    L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, window_half_width, noise_bound)
+    res2 = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[1] if draw else None, plot_raw_data = True)
 
     return res1, res2
 
@@ -61,7 +63,7 @@ def readDataAndMakeEstimates(json_file, num_samples, True_Lag, draw_every = 1000
         if output_folder and draw:
             plt.savefig(output_folder / f"Trial_{i}.png")
 
-    return estimates_1, estimates_2. method_ids
+    return estimates_1, estimates_2, method_ids
 
 
 def unpackAndTestEstimates(estimates):
@@ -76,7 +78,7 @@ def unpackAndTestEstimates(estimates):
 
 
 def VisualiseRawData(json_file, True_Lag):
-    numTrials = 5
+    numTrials = 0 # set to a positive number for visual debugging
     for i in range(numTrials):
         key = str(i)
         Likelihoods = json_file[key]["Likelihoods"]
@@ -87,20 +89,30 @@ def VisualiseRawData(json_file, True_Lag):
         plt.show()
 
 
+def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
+    relative_path = f"TrialsResults/ID_{inst}_{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
+    base_path = pathlib.Path(__file__).parent.resolve()
+    print(base_path)
+    path = base_path / relative_path
+    if not os.path.exists(path):
+        os.mkdir(path)
+    print(f"\n\nOutput folder: {path}")
+    return path
+
 # ------------------- Main -------------------
 
 def main(json_file):
     # read parameters
     True_Lag, detector1, detector2, inst, num_Trials, sweep_range = helper.readParameters(json_file)
     # make output folder
-    out_folder = helper.makeOutputPath(inst, detector1, detector2, num_Trials, sweep_range)
+    out_folder = makeOutputPath(inst, detector1, detector2, num_Trials, sweep_range)
 
     # visualise some plots (only for debugging, no need to save plots)
     VisualiseRawData(json_file, True_Lag)
 
     # analysis parameters
-    num_samples_to_read = 10  # (max: numTrials)
-    num_plots_to_draw = 10
+    num_samples_to_read = num_Trials # (max: numTrials)
+    num_plots_to_draw = 5
     draw_every = num_samples_to_read // num_plots_to_draw
 
     # read data and make estimates
@@ -126,17 +138,17 @@ def main(json_file):
 
 
 
-# parser = argparse.ArgumentParser("Likelihood_Analysis")
-# parser.add_argument("source_file", type=str)
-# args = parser.parse_args()
-#
-# data_file_path = args.source_file
-#
-# if __name__ == "__main__":
-#     with open (data_file_path) as data_file:
-#         print(f"\nReading data from {data_file_path}")
-#         json_file = json.load(data_file)
-#         main(json_file)
+parser = argparse.ArgumentParser("Likelihood_Analysis")
+parser.add_argument("source_file", type=str)
+args = parser.parse_args()
+
+data_file_path = args.source_file
+
+if __name__ == "__main__":
+    with open (data_file_path) as data_file:
+        print(f"\nReading data from {data_file_path}")
+        json_file = json.load(data_file)
+        main(json_file)
 
 
 

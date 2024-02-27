@@ -1,11 +1,13 @@
 import os
 import pathlib
+import numpy as np
 
 def display(True_Lag, values_1, values_1_errors, values_2, values_2_errors, verbose=False):
     if verbose:
         displayVerbose(True_Lag, values_1, values_1_errors, values_2, values_2_errors)
     print("\n\n")
     print(f"True Lag: {True_Lag}")
+    print("\n")
     print(f"Average Lag from method 1: {np.mean(values_1)}")
     print(f"Average error from method 1: {np.mean(values_1_errors)}")
     print("\n")
@@ -29,16 +31,6 @@ def displayVerbose(True_Lag, values_1, errors_1, values_2, errors_2):
     print(f"method 2 sigmas: {xx2}")
     print("\n\n")
 
-
-def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
-    relative_path = f"TrialsResults/ID_{inst}_{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
-    base_path = pathlib.Path(__file__).parent.resolve()
-    print(base_path)
-    path = base_path / relative_path
-    if not os.path.exists(path):
-        os.mkdir(path)
-    print(f"\n\nOutput folder: {path}\n\n")
-    return path
 
 
 def readParameters(json_file):

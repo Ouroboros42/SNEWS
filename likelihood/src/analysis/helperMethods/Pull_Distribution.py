@@ -34,6 +34,10 @@ def createPlot(data_points, True_value, hist_range, bin_width, name ="", output_
     print("Pull Distribution for ", name)
     print(f"number of bins: {len(bins)} with bin width: {bin_width} and range: {hist_range}")
     print(f"Total number of events binned in the histogram: {np.sum(y_values)} out of {len(data_points)}")
+    print("\n")
+    print("y_values: ", y_values)
+    print("x_values: ", x_values)
+    print("\n")
 
     mean, std = normalCurveFit(y_values, x_values, ax)
 
