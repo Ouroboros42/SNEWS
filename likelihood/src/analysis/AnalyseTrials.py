@@ -1,87 +1,123 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
-import os
 import argparse
+import os
 import pathlib
+from typing import List, Tuple
 
-from helperMethods import Likelihood_Fits_And_Maxima as LFM
-from helperMethods import Raw_Data_Visualise as RDV
-from helperMethods import Pull_Distribution as PD
+from helperMethods import Likelihood_Fits_And_Maxima as fits
+from helperMethods import Raw_Data_Visualise as visualise
+from helperMethods import Pull_Distribution as dist
+from helperMethods import Helpers as helper
 
-parser = argparse.ArgumentParser("Likelihood_Analysis")
-parser.add_argument("source_file", type=str)
-args = parser.parse_args()
 
-data_file_path = args.source_file 
-print(data_file_path)
+# ------------------- Methods -------------------
 
-def makeEstimates(json_file, number_of_trials, draw_every = 1000, out_folder = None):
-    curve_estimates = []
-    data_estimates = []
-    True_Lag = json_file["True-Time-Diff"]
+def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw, ax = None):
+    ## Method 1: raw data
+    ## Method 2: Curve fitting on raw data
+    ## Method 3: Clean with moving average
+    ## Method 4: Clean with noise filter
+    ## Method 5: clean with noise filter and further take moving average
 
-    for i in range(number_of_trials):
+    results = []
+    i = 0;
+
+    if 1 in methods_ids:
+        res = fits.findRawDataMaximaAndError(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None)
+        ax[i].set_title("Method 1")
+        results.append(res)
+        i += 1
+
+    if 2 in methods_ids:
+        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        ax[i].set_title("Method 2")
+        results.append(res)
+        i += 1
+
+    if 3 in methods_ids:
+        L_cleaned, T_cleaned = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 4)
+        res = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        ax[i].set_title("Method 3")
+        results.append(res)
+        i += 1
+
+    if 4 in methods_ids:
+        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
+        res = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        ax[i].set_title("Method 4")
+        results.append(res)
+        i += 1
+
+    if 5 in methods_ids:
+        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 5, 1)
+        L_cleaned_again, T_cleaned_again = fits.cleanWithMovingAverage(L_cleaned, T_cleaned, 4)
+
+        res = fits.polynomialFit(L_cleaned_again, T_cleaned_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        ax[i].set_title("Method 5")
+        results.append(res)
+        i += 1
+
+    return results[0], results[1]
+
+
+def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_ids=[1, 2], draw_every=1000, output_folder=None):
+    estimates_1 = []
+    estimates_2 = []
+    fig = ax = None
+
+    for i in range(num_samples):
         key = str(i)
-        if key in json_file:
-            Likelihoods = json_file[key]["Likelihoods"]
-            TimeDifferences = json_file[key]["Offsets"]
+        if key not in json_file:
+            print(f"WARNING: Key {key} not found in the json file")
+            continue
 
-            fig = ax = draw = None
-            if i % draw_every == 0:
-                fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-                draw = True
+        Likelihoods = json_file[key]["Likelihoods"]
+        TimeDifferences = json_file[key]["Offsets"]
 
-            data_results = LFM.findDataMaximaAndErrors(Likelihoods, TimeDifferences,
-                                                       ax= ax[0] if draw else None, True_T=True_Lag)
-            curve_results = LFM.LikelihoodFitPolynomial(Likelihoods, TimeDifferences,
-                                                        ax=ax[1] if draw else None, True_T=True_Lag)
+        draw = (i % draw_every == 0)
+        if draw:
+            fig, ax = plt.subplots(1, 2, figsize=(20, 10))
 
-            data_estimates.append(data_results)
-            curve_estimates.append(curve_results)
+        res1, res2 = MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_ids, draw, ax)
+        estimates_1.append(res1)
+        estimates_2.append(res2)
 
-            if out_folder and draw:
-                plt.savefig(out_folder / f"Trial_{i}.png")
+        if output_folder and draw:
+            plt.savefig(output_folder / f"Trial_{i}.png")
 
-    return curve_estimates, data_estimates
+    return estimates_1, estimates_2
 
 
 def unpackAndTestEstimates(estimates):
-    values = []
-    sigmas = []
+    values: List[float] = []
+    bounds: List[Tuple(float, float)] = []
     for estimate in estimates:
-        values.append(estimate[0])
         assert estimate[1] <= estimate[0] <= estimate[2]
-        sigmas.append((estimate[2] - estimate[1]))
+        values.append(estimate[0])
+        bounds.append((estimate[1], estimate[2]))
 
-    return values, sigmas
+    return values, bounds
 
+def boundsToIntervalSize(bounds):
+    sigmas = [bound[1] - bound[0] for bound in bounds]
+    assert all([sigma >= 0 for sigma in sigmas])
+    return sigmas
 
-def display(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas):
-    print("\n\n")
-    print(f"True Lag: {True_Lag}")
-    print(f"Average Lag from data: {np.mean(data_values)}")
-    print(f"Average error from data: {np.mean(data_sigmas)}")
-    print("\n")
-    print(f"Average Lag from fitted curve: {np.mean(curve_values)}")
-    print(f"Average error from fitted curve: {np.mean(curve_sigmas)}")
-    print("\n\n")
-    return
+def VisualiseRawData(json_file, True_Lag):
+    numTrials = 0 # set to a positive number for visual debugging
+    for i in range(numTrials):
+        key = str(i)
+        Likelihoods = json_file[key]["Likelihoods"]
+        TimeDifferences = json_file[key]["Offsets"]
 
-
-def displayVerbose(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas):
-    # format upto 3 decimal places and display the actual numbers
-    print("\n\n")
-    xx1 = [f"{x:.5f}" for x in data_values]
-    xx2 = [f"{x:.5f}" for x in data_sigmas]
-    print(f"data estimates: {xx1}")
-    print(f"data sigmas: {xx2}")
-    print("\n\n")
-    xx1 = [f"{x:.5f}" for x in curve_values]
-    xx2 = [f"{x:.5f}" for x in curve_sigmas]
-    print(f"curve estimates: {xx1}")
-    print(f"curve sigmas: {xx2}")
-    print("\n\n")
+        fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+        visualise.movingAverageAndNoiseFiltered(Likelihoods, TimeDifferences, True_Lag, ax)
+        plt.show()
+    # exit after visualising
+    if numTrials:
+        exit(0)
 
 
 def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
@@ -91,63 +127,65 @@ def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
     path = base_path / relative_path
     if not os.path.exists(path):
         os.mkdir(path)
-    print(f"\n\nOutput folder: {path}\n\n")
+    print(f"\n\nOutput folder: {path}")
     return path
-
-
-def makeAppropriatePullDistribution(estimates, errors, True_Lag, name, out_folder):
-    data_points = [(estimate - True_Lag) / error for estimate, error in zip(estimates, errors)]
-
-    mean = np.mean(data_points)
-    std = np.std(data_points)
-
-    # These are just guesses
-    hist_range = (mean - 5 * std, mean + 5 * std)
-    bin_width = (hist_range[1] - hist_range[0]) / np.sqrt(len(data_points))
-
-    PD.createDistribution(data_points, True_Lag, hist_range, bin_width, name, out_folder)
 
 # ------------------- Main -------------------
 
+def main(json_file):
+    # read parameters
+    True_Lag, detector1, detector2, inst, num_Trials, sweep_range = helper.readParameters(json_file)
+    # make output folder
+    out_folder = makeOutputPath(inst, detector1, detector2, num_Trials, sweep_range)
 
-def main(data):
-    # read important values
-    True_Lag = data["True-Time-Diff"]
-    inst = data["inst"]
-    detector1 = data["detector1"]
-    detector2 = data["detector2"]
-    numTrials = data["num-Trials"]
-    sweep_range = data["sweep-range"]
+    # visualise some plots (only for debugging, no need to save plots)
+    VisualiseRawData(json_file, True_Lag)
 
-    # Visualise first few plots (close the figures to see the next one)
-    RDV.plotFirstNTrialsWithCurveFits_And_ZoomedInMaximas(data, 0, True_Lag);
+    # analysis parameters
+    num_samples_to_read = num_Trials # (max: numTrials)
+    num_plots_to_draw = 8
+    draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
-    # create folder to save the plots
-    out_folder = makeOutputPath(inst, detector1, detector2, numTrials, sweep_range)
+    # Look in MyFavouriteMethods above for the methods used. Pick Any 2 for comparison
+    method_ids = [1, 5]
 
-    # find peak and error bounds from curve and from actual data
-    num_samples_draw = 2
-    draw_every = numTrials // num_samples_draw
+    # read data and make estimates
+    estimates_1, estimates_2 = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag,
+                                                                    method_ids=method_ids,
+                                                                    draw_every=draw_every,
+                                                                    output_folder=out_folder
+                                                                    )
 
-    curve_estimates, data_estimates = makeEstimates(data, numTrials, draw_every=draw_every, out_folder=out_folder)
-    curve_values, curve_sigmas = unpackAndTestEstimates(curve_estimates)
-    data_values, data_sigmas = unpackAndTestEstimates(data_estimates)
+    values_1, bounds_1 = unpackAndTestEstimates(estimates_1)
+    values_2, bounds_2 = unpackAndTestEstimates(estimates_2)
+    intervalSizes_1 = boundsToIntervalSize(bounds_1)
+    intervalSizes_2 = boundsToIntervalSize(bounds_2)
 
     # print results
-    displayVerbose(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
-    display(True_Lag, data_values, data_sigmas, curve_values, curve_sigmas)
+    helper.display(True_Lag, values_1, bounds_1, intervalSizes_1, values_2, bounds_2, intervalSizes_2, method_ids)
 
-    # decide hist_range, bin-width and make pull distribution
-    makeAppropriatePullDistribution(curve_values, curve_sigmas, True_Lag, "Curve Estimates", out_folder)
-    makeAppropriatePullDistribution(data_values, data_sigmas, True_Lag, "Data Estimates", out_folder)
+    # make pull distributions
+    names = [f"method_{id}" for id in method_ids]
+    dist.makeDistribution(values_1, intervalSizes_1, True_Lag, name = names[0], out_folder=out_folder)
+    dist.makeDistribution(values_2, intervalSizes_2, True_Lag, name = names[1], out_folder=out_folder)
+
+
+# ------------------- Run -------------------
 
 
 
+
+parser = argparse.ArgumentParser("Likelihood_Analysis")
+parser.add_argument("source_file", type=str)
+args = parser.parse_args()
+
+data_file_path = args.source_file
 
 if __name__ == "__main__":
     with open (data_file_path) as data_file:
-        data = json.load(data_file)
-        main(data)
+        print(f"\nReading data from {data_file_path}")
+        json_file = json.load(data_file)
+        main(json_file)
 
 
 
