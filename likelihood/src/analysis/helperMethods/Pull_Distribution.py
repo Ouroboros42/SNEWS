@@ -9,13 +9,7 @@ def gaussian(x, mean, std):
 
 
 def normalCurveFit(y_values, x_values, ax):
-    # normalise y_values
-    N = np.sum(y_values)
-    y_normalised = y_values / N
-
-    assert np.isclose(np.sum(y_normalised), 1.0)
-
-    p, cov = curve_fit(gaussian, x_values, y_normalised, p0=[np.mean(x_values), np.std(x_values)])
+    p, cov = curve_fit(gaussian, x_values, y_values, p0=[np.mean(x_values), np.std(x_values)])
     mean, sigma = p[0], p[1]
     mean_error, sigma_error = np.sqrt(np.diag(cov))
 
@@ -36,15 +30,16 @@ def createPlot(data_points, True_value, hist_range, bin_width, name ="", output_
     y_values, x_bins, _ = ax.hist(data_points, bins=hist_bins, label=f"{name} Pull Distribution", density=True)
     x_values = 0.5 * (x_bins[1:] + x_bins[:-1])
 
-    # mean, std = normalCurveFit(y_values, x_values, ax)
-    mean, std = np.mean(data_points), np.std(data_points)
+    assert np.isclose(np.sum(y_values) * bin_width, 1.0)
+
+    mean, std = normalCurveFit(y_values, x_values, ax)
+    # mean, std = np.mean(data_points), np.std(data_points)
 
     # debug
     print("Pull Distribution for ", name)
     print(f"number of bins: {len(hist_bins)} with bin width: {bin_width} and range: {hist_range}")
-    print(f"Total number of events binned in the histogram: {np.sum(y_values)} out of {len(data_points)}")
+    print(f"Mean: {mean} and std: {std} of the raw data")
     print("\n")
-    print(f"Mean: {mean} and std: {std}")
 
     # plot details
     ax.set_xlabel("(estimate - actual value) / error")

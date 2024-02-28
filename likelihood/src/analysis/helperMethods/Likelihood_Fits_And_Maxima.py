@@ -37,17 +37,26 @@ def cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma
     return Likelihoods, Time_Diffs
 
 
-def findRawDataMaximaAndError(L_data, T_data, error_bound = 0.5, True_Lag = None, ax: plt.Axes = None):
+def findRawDataMaximaAndError(L_data, T_data, True_Lag, error_bound = 0.5, ax: plt.Axes = None):
     max_L_position = np.argmax(L_data)
     max_L_value = L_data[max_L_position]
     best_Lag = T_data[max_L_position]
 
-    i = max_L_position - 1
-    while i >= 0 and (L_data[i] > max_L_value - error_bound):
+    Avg_window = 3
+
+    # extreme horrible edge case (should not happen)
+    i = max(max_L_position - 1, 0)
+    while i >= Avg_window:
+        mean = np.mean(L_data[i - Avg_window : i])
+        if mean < max_L_value - error_bound:
+            break
         i -= 1
 
-    j = max_L_position + 1
-    while j < len(L_data) and (L_data[j] > max_L_value - error_bound):
+    j = min(max_L_position + 1, len(L_data) - 1)
+    while j < len(L_data) - Avg_window:
+        mean = np.mean(L_data[j : j + Avg_window])
+        if mean < max_L_value - error_bound:
+            break
         j += 1
 
     assert i <= max_L_position <= j
@@ -56,7 +65,7 @@ def findRawDataMaximaAndError(L_data, T_data, error_bound = 0.5, True_Lag = None
         ax.plot(T_data, L_data, "o", label="Likelihood data points")
         ax.axvline(x=best_Lag, linestyle="--", label="Best Lag")
         ax.axvline(x=T_data[i], linestyle="--", label="Error Bound")
-        ax.axvline(x=T_data[pos_right], linestyle="--")
+        ax.axvline(x=T_data[j], linestyle="--")
         if True_Lag:
             ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")
         ax.set_xlabel("Time difference (s)")
