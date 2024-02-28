@@ -51,8 +51,8 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw
         i += 1
 
     if 5 in methods_ids:
-        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 3, 1)
-        L_cleaned_again, T_cleaned_again = fits.cleanWithMovingAverage(L_cleaned, T_cleaned, 3)
+        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 5, 1)
+        L_cleaned_again, T_cleaned_again = fits.cleanWithMovingAverage(L_cleaned, T_cleaned, 4)
 
         res = fits.polynomialFit(L_cleaned_again, T_cleaned_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
         ax[i].set_title("Method 5")
@@ -106,17 +106,18 @@ def boundsToIntervalSize(bounds):
     return sigmas
 
 def VisualiseRawData(json_file, True_Lag):
-    numTrials = 5 # set to a positive number for visual debugging
+    numTrials = 0 # set to a positive number for visual debugging
     for i in range(numTrials):
         key = str(i)
         Likelihoods = json_file[key]["Likelihoods"]
         TimeDifferences = json_file[key]["Offsets"]
 
         fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-        visualise.movingAverageAndNoiseFiltered(Likelihoods, TimeDifferences, ax)
+        visualise.movingAverageAndNoiseFiltered(Likelihoods, TimeDifferences, True_Lag, ax)
         plt.show()
     # exit after visualising
-    exit(0)
+    if numTrials:
+        exit(0)
 
 
 def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
@@ -146,7 +147,7 @@ def main(json_file):
     draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
     # Look in MyFavouriteMethods above for the methods used. Pick Any 2 for comparison
-    method_ids = [3, 4]
+    method_ids = [1, 5]
 
     # read data and make estimates
     estimates_1, estimates_2 = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag,

@@ -55,11 +55,12 @@ def movingAverageAndNoiseFiltered(L_data, T_data, True_Lag, ax: List[plt.Axes], 
     ax[0].legend()
 
     L_final, T_final = fits.cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound)
+    L_clean_2, T_clean_2 = fits.cleanWithMovingAverage(L_final, T_final, 3)
     ax[1].axvline(x=True_Lag, linestyle="--", label=f"expected: {True_Lag}", color="black")
-    ax[1].plot(T_final, L_final, "o", label="Noise Filtered")
+    ax[1].plot(T_clean_2, L_clean_2, "o", label="Noise Filtered")
     ax[1].set_xlabel("Time difference (s)")
     ax[1].set_ylabel("Likelihood")
-    ax[1].set_title(f"number of points removed: {len(L_data) - len(T_final)} out of {len(L_data)}")
+    ax[1].set_title(f"number of points removed: {len(L_data) - len(L_clean_2)} out of {len(L_data)}")
     ax[1].legend()
 
 
