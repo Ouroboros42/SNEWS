@@ -106,7 +106,7 @@ def boundsToIntervalSize(bounds):
     return sigmas
 
 def VisualiseRawData(json_file, True_Lag):
-    numTrials = 0 # set to a positive number for visual debugging
+    numTrials = 5 # set to a positive number for visual debugging
     for i in range(numTrials):
         key = str(i)
         Likelihoods = json_file[key]["Likelihoods"]
@@ -115,6 +115,8 @@ def VisualiseRawData(json_file, True_Lag):
         fig, ax = plt.subplots(1, 2, figsize=(20, 10))
         visualise.movingAverageAndNoiseFiltered(Likelihoods, TimeDifferences, ax)
         plt.show()
+    # exit after visualising
+    exit(0)
 
 
 def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
