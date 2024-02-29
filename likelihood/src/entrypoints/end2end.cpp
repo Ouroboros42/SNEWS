@@ -7,6 +7,7 @@
 #include "fast_sum/sum_terms.hpp"
 #include "data_io/timestamp.hpp"
 #include "util/array_util.hpp"
+#include "mesh.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -19,21 +20,26 @@ int main(int argc, char* argv[]) {
     auto FULL_START = std::chrono::high_resolution_clock::now();
 
     // Test data to use
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
-    std::string inst = "121"; // Numerical identifier of test data (appears in file name)
-    bool poisson_vary_background = true; // Use variable total background counts, according to poisson
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SNOPlus;
+    std::string inst = "243"; // Numerical identifier of test data (appears in file name)
+    bool poisson_vary_background = false; // Use variable total background counts, according to poisson
 
     // Extra space to include around true event (more realistic to application where edges are not known)
     scalar front_buffer = 1;
     scalar window = 20;
 
-    scalar bin_width = 2e-3;
+    scalar bin_width = 0.04;
 
-    // Time difference sweep params
-    size_t n_sweep_steps = 100;
-    scalar sweep_start = -0.1;
-    scalar sweep_end = 0.1;
-    
+    scalar sweep_start = -0.2;
+    scalar sweep_end = 0.2;
+
+    size_t initial_sweep_steps = 100;
+    size_t resweep_steps = 50;
+    size_t max_points = 400;
+
+    scalar likelihood_range = 1/2;
+    scalar min_window_shrink = 0.001;
+
     scalar rel_accuracy = 1e-3;
 
     auto [test_case, true_d] = complete_test_case(
@@ -44,32 +50,12 @@ int main(int argc, char* argv[]) {
         bin_width
     );
 
-    // Will hold values of all calculated likelihoods
-    vec likelihoods(n_sweep_steps), time_differences(n_sweep_steps);
-
-    // An index and time information will be printed every nth likelihood
-    size_t print_every_n = 10;
-
-    for (size_t i = 0; i < n_sweep_steps; i++) {
-        // positive offset corresponds to signal 2 arriving after signal 1
-        scalar offset = sweep_start + ((sweep_end - sweep_start) * i / n_sweep_steps);
-
-        auto T1 = std::chrono::high_resolution_clock::now();
-
-
-        scalar likelihood = test_case.lag_log_likelihood(offset, rel_accuracy, true);
-
-        auto T2 = std::chrono::high_resolution_clock::now();
-        
-        // Display timing info
-        if (i % print_every_n == 0) {
-            int likelihood_time = std::chrono::duration_cast<std::chrono::milliseconds>(T2 - T1).count();
-            std::printf("i = %zu \nTime to compute likelihood: %u ms\n", i, likelihood_time);
-        }
-
-        time_differences[i] = offset;
-        likelihoods[i] = likelihood;
-    }
+    mesh log_likelihoods = make_recursive_likelihood_mesh(
+        test_case, rel_accuracy, sweep_start, sweep_end,
+        initial_sweep_steps, resweep_steps,
+        likelihood_range,
+        min_window_shrink, max_points
+    );
 
     // Examples of the signal 2 binnings, for debugging (possibly remove later)
     std::vector<Histogram> hist_2_samples {
@@ -80,12 +66,10 @@ int main(int argc, char* argv[]) {
 
     std::string outputname = "output/ldist_" + detector_name(detector1) + "-vs-" + detector_name(detector2) + "_src=" + inst + "_t=" + get_timestamp() + ".json";
 
-    save_likelihoods(outputname, time_differences, likelihoods,
-                     test_case.signal_1, hist_2_samples, test_case.signal_1.range(), true_d);
+    save_likelihoods(outputname, log_likelihoods, test_case.signal_1, hist_2_samples, test_case.signal_1.range(), true_d);
 
     // Identify max likelihood as heuristic
-    scalar max_likelihood = max(likelihoods);
-    scalar best = time_differences[index_of_max(likelihoods)];
+    auto [best_offset, max_likelihood] = most_likely_offset(log_likelihoods);
 
     // Display final timing information
     auto FULL_END = std::chrono::high_resolution_clock::now();
@@ -93,7 +77,7 @@ int main(int argc, char* argv[]) {
 
     std::printf(
         "\n\nMax likelihood = %.10f\n\nMost probable time difference = %.10f\n\nTrue time difference = %.10f\n\nSweep completed in: %u s\n\n",
-        max_likelihood, best, true_d, total_time
+        max_likelihood, best_offset, true_d, total_time
     );
 
     return 0;

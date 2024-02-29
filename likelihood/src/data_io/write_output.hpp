@@ -2,6 +2,7 @@
 #define WRITE_OUT_H
 
 #include "core.hpp"
+#include "mesh.hpp"
 #include "data_io/histogram.hpp"
 
 #include <json.hpp>
@@ -29,7 +30,7 @@ Json::Value json_2D_array(std::vector<T1> arr2D) {
 // Store a calculated likelihood distribution and associated information in specified filename
 void save_likelihoods(
     std::string output_filename,
-    vec time_diffs, vec likelihoods,
+    mesh likelihood_mesh,
     Histogram dist1, std::vector<Histogram> dist2s,
     scalar window_width, scalar true_time_difference
 );

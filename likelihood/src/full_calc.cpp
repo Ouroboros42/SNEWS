@@ -16,4 +16,12 @@ Histogram SignalAnalysis::bin_signal_2(scalar time_offset) {
 }
 
 
+scalar SignalAnalysis::lag_log_likelihood(scalar time_difference_2_after_1, scalar rel_precision, bool reevaluate_sensitivity) {
+    Histogram signal_2_binned = bin_signal_2(time_difference_2_after_1);
 
+    DetectorRelation trial_detectors = reevaluate_sensitivity ?
+        DetectorRelation(background_rate_1, background_rate_2, signal_1, signal_2_binned) : 
+        detectors;
+
+    return log_likelihood(cache, trial_detectors, signal_1, signal_2_binned, rel_precision);
+}

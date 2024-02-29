@@ -43,7 +43,6 @@ std::tuple<scalar, scalar, scalar, scalar> findMaxAndMinLikelihood(
     return std::make_tuple(max, max_offset, min, min_offset);
 }
 
-
 std::tuple<scalar, scalar> findNewMeshToSearch(std::map<scalar, scalar> Likelihoods, scalar threshold) {
     scalar max_offset_left = 0;
     scalar max_offset_right = 0;
@@ -77,7 +76,7 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
     size_t n_steps = 100;
     bool accuracyAchieved = false;
 
-    while(Likelihoods.size() < 300) {
+    while(Likelihoods.size() < 400) {
         scalar increment = (sweep_end - sweep_start) / n_steps;
 
         // calculate Likelihoods
@@ -120,11 +119,10 @@ std::map<scalar, scalar> doLikelihoodsWithOptimisedMesh(
 
 
 int main(int argc, char **argv) {
-
     std::string inst = "222";
 
     // Create the variables needed. Let the background be generated in the Likelihood calculation
-    Detector detector1 = Detector::SNOPlus, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
 
     scalar sweep_start = -0.15;
     scalar sweep_end = 0.15;
@@ -155,6 +153,7 @@ int main(int argc, char **argv) {
     // dummy variable
     scalar TrueTimeDiff = 0;
 
+    auto T0 = std::chrono::high_resolution_clock::now(); 
 
     for (size_t trial_number = 0; trial_number < NumOfTrials; trial_number++) {
         printf("Trial number %zu\n", trial_number);
@@ -203,5 +202,10 @@ int main(int argc, char **argv) {
     outfile << output_string;
     outfile.close();
     std::cout << "Output written to " << output_filename << std::endl;
+    
+    auto T3 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(T3 - T0).count();
+
+    std::printf("Time taken = %u s", duration);
 }
 
