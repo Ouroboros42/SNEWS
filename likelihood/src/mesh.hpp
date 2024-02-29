@@ -9,7 +9,7 @@
 /* A map of possible time differences (offsets) to their calculated likelihood */
 typedef std::map<scalar, scalar> mesh;
 
-/* Return the offsets with minimum and maximum likelihoods that are in range [start_offset, stop_offset] */
+/* Return the offsets (and corresponding likelihoods) with minimum and maximum likelihoods that are in range [start_offset, stop_offset] */
 std::tuple<scalar, scalar> min_max_likelihood_in_range(mesh likelihoods, scalar start_offset, scalar stop_offset);
 
 /* Return the minimum and maximum offset that have likelihoods higher than threshold */

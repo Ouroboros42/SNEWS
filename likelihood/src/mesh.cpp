@@ -36,7 +36,7 @@ std::tuple<scalar, scalar> min_max_likelihood_in_range(mesh likelihoods, scalar 
     if(extrema_uninitialised)
         throw std::invalid_argument("No offsets in specified range");
 
-    return { min_offset, max_offset };
+    return { min_likelihood, max_likelihood };
 }
 
 std::tuple<scalar, scalar> range_over_likelihood_threshold(mesh likelihoods, scalar threshold) {
@@ -98,8 +98,6 @@ mesh make_recursive_likelihood_mesh(
     size_t max_points
 ) {
     mesh likelihoods;
-    
-    bool accuracyAchieved = false;
 
     size_t sweep_steps = initial_sweep_steps;
 
@@ -119,7 +117,7 @@ mesh make_recursive_likelihood_mesh(
         // find max and min Likelihoods
         auto [min_likelihood, max_likelihood] = min_max_likelihood_in_range(likelihoods, sweep_start, sweep_stop);
 
-        bool accuracy_achieved = max_likelihood - min_likelihood < required_accuracy;
+        bool accuracy_achieved = (max_likelihood - min_likelihood) < required_accuracy;
         if(accuracy_achieved) {
             std::cout << "Accuracy achieved!" << std::endl;
             break;
@@ -145,7 +143,7 @@ mesh make_recursive_likelihood_mesh(
         sweep_steps = resweep_steps;
     }
     
-    std::cout << "Total number of likelihoods calculated = " << likelihoods.size() << std::endl;
+    std::cout << "Total number of likelihoods calculated: " << likelihoods.size() << std::endl;
     
     return likelihoods;
 }

@@ -35,10 +35,10 @@ int main(int argc, char* argv[]) {
 
     size_t initial_sweep_steps = 100;
     size_t resweep_steps = 50;
-    size_t max_points = 400;
+    size_t max_points = 500;
 
-    scalar likelihood_range = 1/2;
-    scalar min_window_shrink = 0.001;
+    scalar likelihood_range = 0.5;
+    scalar min_window_shrink = 0.0001;
 
     scalar rel_accuracy = 1e-3;
 
