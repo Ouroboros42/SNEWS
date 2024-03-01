@@ -41,7 +41,7 @@ BENCH_EXE_ROOT := $(EXE_ROOT)/$(BENCH_DIR)
 OUTPUT_ROOT := $(ROOT)/$(OUTPUT_DIR)
 
 # Paths to search for gcc includes
-C_INCLUDES := $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
+C_INCLUDES := $(SOURCE_ROOT) $(LIBS_ROOT) $(wildcard $(LIBS_ROOT)/*)
 
 # Command to compile c++
 C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
