@@ -2,7 +2,6 @@
 #include "core.hpp"
 #include "random.hpp"
 
-#include <format>
 #include <string>
 #include <iostream>
 #include <algorithm>
