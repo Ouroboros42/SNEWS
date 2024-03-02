@@ -6,7 +6,7 @@
 
 #include <json.hpp>
 
-Json::Value read_json_file(std::string path);
+Json::Value read_json_file(path filepath);
 
 template <typename T>
 std::vector<T> parse_json_array(Json::Value& array) {

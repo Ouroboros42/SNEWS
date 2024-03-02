@@ -3,6 +3,8 @@
 # Allows requesting specific tests etc.
 USER_TEST_ARGS :=
 
+C_COMPILER_FLAGS := -g
+
 # Location of whole project
 ROOT := .
 
@@ -44,7 +46,7 @@ OUTPUT_ROOT := $(ROOT)/$(OUTPUT_DIR)
 C_INCLUDES := $(SOURCE_ROOT) $(LIBS_ROOT) $(wildcard $(LIBS_ROOT)/*)
 
 # Command to compile c++
-C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
+C_COMPILE := g++ $(C_COMPILER_FLAGS) $(addprefix -I,$(C_INCLUDES))
 
 # Run python file
 RUN_PYTHON := python

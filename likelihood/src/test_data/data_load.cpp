@@ -6,19 +6,20 @@
 #include <iostream>
 #include <algorithm>
 
-std::string test_data_path(Detector detector, std::string file_id) {
-    return "../test-data/nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
+path test_data_file(Detector detector, std::string file_id) {
+    return "nlog-dump-" + detector_name(detector) + "-json-" + file_id + "-0.json";
+}
+
+path test_data_path(Detector detector, std::string file_id) {
+    path root = "../test-data";
+    return root / test_data_file(detector, file_id);
 }
 
 TestSignal::TestSignal(Json::Value data, std::string detector_name) : TimeSeries(parse_json_array<scalar>(data["timeseries"]["times"])),
     true_time(data["truth"]["dets"][detector_name]["true_t"].asDouble())
 {}
 
-TestSignal::TestSignal(Detector detector, std::string file_id) : TestSignal(read_json_file(test_data_path(detector, file_id)), detector_name(detector)) {};
-
-TestSignal::TestSignal(Detector detector, std::string file_id, scalar front_buffer, scalar end_buffer) : TestSignal(detector, file_id) {
-    reframe(start - front_buffer, stop + end_buffer);
-}
+TestSignal::TestSignal(Detector detector, path signal_file) : TestSignal(read_json_file(signal_file), detector_name(detector)) {};
 
 void TestSignal::filter_times() {
     std::remove_if(times.begin(), times.end(), [this](scalar time) { return start <= time && time <= stop; });
@@ -64,13 +65,14 @@ size_t add_background(Histogram& hist, scalar background_rate) {
 }
 
 std::pair<SignalAnalysis, scalar> complete_test_case(
-    Detector detector_1, Detector detector_2, std::string file_id,
+    Detector detector_1, Detector detector_2,
+    path signal_file_1, path signal_file_2,
     scalar start_buffer, scalar window_size,
     scalar min_offset, scalar max_offset,
     bool vary_background,
     scalar bin_width
 ) {
-    TestSignal signal_1(detector_1, file_id), signal_2(detector_2, file_id);
+    TestSignal signal_1(detector_1, signal_file_1), signal_2(detector_2, signal_file_2);
 
     scalar true_lag = signal_2.true_time - signal_1.true_time;
 
@@ -103,4 +105,21 @@ std::pair<SignalAnalysis, scalar> complete_test_case(
     SignalAnalysis analysis(binned_signal_1, signal_2, background_1, background_2);
 
     return { analysis, true_lag };
+}
+
+std::pair<SignalAnalysis, scalar> complete_test_case(
+    Detector detector_1, Detector detector_2, std::string file_id,
+    scalar start_buffer, scalar window_size,
+    scalar min_offset, scalar max_offset,
+    bool vary_background,
+    scalar bin_width
+) {
+    return complete_test_case(
+        detector_1, detector_2,
+        test_data_path(detector_1, file_id), test_data_path(detector_2, file_id),
+        start_buffer, window_size,
+        min_offset, max_offset,
+        vary_background,
+        bin_width
+    );
 }
