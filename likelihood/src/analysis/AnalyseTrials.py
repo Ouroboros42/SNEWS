@@ -100,7 +100,7 @@ def unpackAndTestEstimates(estimates):
 
     return values, bounds
 
-def boundsToIntervalSize(bounds, values):
+def boundsToSigmas(bounds, values):
     sigmas_1 = [bounds[i][1] - values[i] for i in range(len(values))]
     sigmas_2 = [values[i] - bounds[i][0] for i in range(len(values))]
 
@@ -126,8 +126,8 @@ def VisualiseRawData(json_file, True_Lag):
         exit(0)
 
 
-def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
-    relative_path = f"TrialsResults/ID_{inst}_{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
+def makeOutputPath(detector1, detector2, numTrials, sweep_range):
+    relative_path = f"TrialsResults/{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
     base_path = pathlib.Path(__file__).parent.resolve()
     print(base_path)
     path = base_path / relative_path
@@ -140,9 +140,9 @@ def makeOutputPath(inst, detector1, detector2, numTrials, sweep_range):
 
 def main(json_file):
     # read parameters
-    True_Lag, detector1, detector2, inst, num_Trials, sweep_range = helper.readParameters(json_file)
+    True_Lag, detector1, detector2, num_Trials, sweep_range = helper.readParameters(json_file)
     # make output folder
-    out_folder = makeOutputPath(inst, detector1, detector2, num_Trials, sweep_range)
+    out_folder = makeOutputPath(detector1, detector2, num_Trials, sweep_range)
 
     # visualise some plots (only for debugging, no need to save plots)
     VisualiseRawData(json_file, True_Lag)
@@ -165,16 +165,16 @@ def main(json_file):
 
     values_1, bounds_1 = unpackAndTestEstimates(estimates_1)
     values_2, bounds_2 = unpackAndTestEstimates(estimates_2)
-    intervalSizes_1 = boundsToIntervalSize(bounds_1, values_1)
-    intervalSizes_2 = boundsToIntervalSize(bounds_2, values_2)
+    sigmas_1 = boundsToSigmas(bounds_1, values_1)
+    sigmas_2 = boundsToSigmas(bounds_2, values_2)
 
     # print results
-    helper.display(True_Lag, values_1, bounds_1, intervalSizes_1, values_2, bounds_2, intervalSizes_2, method_ids)
+    helper.display(True_Lag, values_1, bounds_1, sigmas_1, values_2, bounds_2, sigmas_2, method_ids)
 
     # make pull distributions
     names = [f"method_{id}" for id in method_ids]
-    dist.makeDistribution(values_1, intervalSizes_1, True_Lag, name = names[0], out_folder=out_folder)
-    dist.makeDistribution(values_2, intervalSizes_2, True_Lag, name = names[1], out_folder=out_folder)
+    dist.makeDistribution(values_1, sigmas_1, True_Lag, name = names[0], out_folder=out_folder)
+    dist.makeDistribution(values_2, sigmas_2, True_Lag, name = names[1], out_folder=out_folder)
 
 
 # ------------------- Run -------------------

@@ -44,9 +44,8 @@ def displayVerbose(True_Lag, values_1, errors_1, values_2, errors_2):
 
 def readParameters(json_file):
     True_Lag = json_file["True-Time-Diff"]
-    inst = json_file["inst"]
     detector1 = json_file["detector1"]
     detector2 = json_file["detector2"]
     numTrials = json_file["num-Trials"]
     sweep_range = json_file["sweep-range"]
-    return True_Lag, detector1, detector2, inst, numTrials, sweep_range
+    return True_Lag, detector1, detector2, numTrials, sweep_range
