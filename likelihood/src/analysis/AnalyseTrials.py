@@ -37,24 +37,24 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw
         i += 1
 
     if 3 in methods_ids:
-        L_cleaned, T_cleaned = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 1)
-        res = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        L_smoothed, T_smoothed = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 3)
+        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
         ax[i].set_title("Method 3")
         results.append(res)
         i += 1
 
     if 4 in methods_ids:
-        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
-        res = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
+        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
         ax[i].set_title("Method 4")
         results.append(res)
         i += 1
 
     if 5 in methods_ids:
-        L_cleaned, T_cleaned = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 5, 1)
-        L_cleaned_again, T_cleaned_again = fits.cleanWithMovingAverage(L_cleaned, T_cleaned, 4)
+        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 5, 1)
+        L_smoothed_again, T_smoothed_again = fits.cleanWithMovingAverage(L_smoothed, T_smoothed, 4)
 
-        res = fits.polynomialFit(L_cleaned_again, T_cleaned_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        res = fits.polynomialFit(L_smoothed_again, T_smoothed_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
         ax[i].set_title("Method 5")
         results.append(res)
         i += 1
@@ -107,7 +107,7 @@ def boundsToSigmas(bounds, values):
     assert all([sigma >= 0 for sigma in sigmas_1])
     assert all([sigma >= 0 for sigma in sigmas_2])
 
-    sigma_estimate = [np.sqrt(sigma_1**2 + sigma_2**2) for sigma_1, sigma_2 in zip(sigmas_1, sigmas_2)]
+    sigma_estimate = [(sigma_1 + sigma_2)/2 for sigma_1, sigma_2 in zip(sigmas_1, sigmas_2)]
 
     return sigma_estimate
 
@@ -150,7 +150,7 @@ def main(json_file):
     # analysis parameters
     num_samples_to_read = num_Trials # (max: numTrials)
     print(f"\nReading {num_samples_to_read} samples")
-    num_plots_to_draw = 8
+    num_plots_to_draw = 5
     draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
     # Look in MyFavouriteMethods above for the methods used. Pick Any 2 for comparison

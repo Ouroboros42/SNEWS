@@ -13,15 +13,18 @@ def display(True_Lag, values_1, bounds_1, values_1_errors, values_2, bounds_2, v
     print("\n")
     print(f"Method {method_ids[0]}: {names[method_ids[0] - 1]}:")
     print(f"Average Lag: {np.mean(values_1)}")
-    print(f"Average interval size: {np.mean(values_1_errors)}")
+    print(f"Average sigma: {np.mean(values_1_errors)}")
     print(f"Success rate: {score_1}")
 
     print("\n")
     print(f"Method {method_ids[1]}: {names[method_ids[1] - 1]}:")
     print(f"Average Lag: {np.mean(values_2)}")
-    print(f"Average error: {np.mean(values_2_errors)}")
+    print(f"Average sigma: {np.mean(values_2_errors)}")
     print(f"Success rate: {score_2}")
     print("\n\n")
+
+    if verbose:
+        displayVerbose(True_Lag, values_1, values_1_errors, values_2, values_2_errors)
 
     return score_1, score_2
 

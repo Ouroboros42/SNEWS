@@ -95,7 +95,7 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse: 
 
 def polynomialFit(L_data, T_data, True_Lag,
                   number_of_points_to_evaluate = 1000,
-                  degree = 9,
+                  degree = 12,
                   error_bound = 0.5,
                   ax: plt.Axes = None,
                   plot_raw_data = False
