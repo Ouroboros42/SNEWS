@@ -34,16 +34,7 @@ struct SignalAnalysis {
 
     /* Calculate log likelihood of signal 2 arriving some time difference after signal 1
     rel_precision is maximum acceptable (proportional) error in calculated likelihood */
-    scalar lag_log_likelihood(scalar time_difference_2_after_1, scalar rel_precision, bool reevaluate_sensitivity) {
-        Histogram signal_2_binned = bin_signal_2(time_difference_2_after_1);
-
-        DetectorRelation trial_sensitivities = detectors;
-        if (reevaluate_sensitivity) {
-            trial_sensitivities = DetectorRelation(background_rate_1, background_rate_2, signal_1, signal_2_binned);
-        }
-
-        return log_likelihood(cache, trial_sensitivities, signal_1, signal_2_binned, rel_precision);
-    }
+    scalar lag_log_likelihood(scalar time_difference_2_after_1, scalar rel_precision, bool reevaluate_sensitivity);
 };
 
 #endif

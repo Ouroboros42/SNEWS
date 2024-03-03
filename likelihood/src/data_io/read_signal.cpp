@@ -4,9 +4,17 @@
 #include <fstream>
 #include <cmath>
 
-Json::Value read_json_file(std::string path) {
+Json::Value read_json_file(path filepath) {
     Json::Value data;
-    std::ifstream file(path, std::ifstream::binary);
+
+    std::cout << "Loading signal file " << filepath << std::endl;
+
+    if(!std::filesystem::exists(filepath)) {
+        throw std::invalid_argument("File does not exist");
+    }
+
+    std::ifstream file(filepath, std::ifstream::binary);
+
     file >> data;
     return data;
 }

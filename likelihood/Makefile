@@ -3,6 +3,8 @@
 # Allows requesting specific tests etc.
 USER_TEST_ARGS :=
 
+C_COMPILER_FLAGS := -g
+
 # Location of whole project
 ROOT := .
 
@@ -41,10 +43,10 @@ BENCH_EXE_ROOT := $(EXE_ROOT)/$(BENCH_DIR)
 OUTPUT_ROOT := $(ROOT)/$(OUTPUT_DIR)
 
 # Paths to search for gcc includes
-C_INCLUDES := $(SOURCE_ROOT) $(wildcard $(LIBS_ROOT)/*)
+C_INCLUDES := $(SOURCE_ROOT) $(LIBS_ROOT) $(wildcard $(LIBS_ROOT)/*)
 
 # Command to compile c++
-C_COMPILE := g++ $(addprefix -I,$(C_INCLUDES))
+C_COMPILE := g++ $(C_COMPILER_FLAGS) $(addprefix -I,$(C_INCLUDES))
 
 # Run python file
 RUN_PYTHON := python
@@ -113,8 +115,7 @@ $(OBJ_ROOT)/%.o : $(ROOT)/%.cpp
 
 ## Shennanigans to deduce which objects have which headers
 include_dot_root = $(addprefix $(ROOT)/,$(1:$(ROOT)/%=%))
-export OBJS DEPS
-get_direct_header_objs = $(filter $(OBJS),$(call obj_from_header,$(call include_dot_root,$(shell $(MAKE) -s -f get_headers.mk $1))))
+get_direct_header_objs = $(filter $(OBJS),$(call obj_from_header,$(call include_dot_root,$(shell "$(MAKE)" -s -f get_headers.mk OBJS="$1" DEPS="$(call deps_from_obj,$1)" $1))))
 extend_while_nonempty_internal = $(if $3,$(call extend_while_nonempty,$1,$2 $3),$2 $3)
 extend_while_nonempty = $(call extend_while_nonempty_internal,$1,$2,$(filter-out $2,$(call $1,$2)))
 get_header_objs = $(call extend_while_nonempty,get_direct_header_objs,$1)
