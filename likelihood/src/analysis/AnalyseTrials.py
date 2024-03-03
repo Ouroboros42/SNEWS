@@ -31,13 +31,13 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw
         i += 1
 
     if 2 in methods_ids:
-        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True, error_bound=1)
         ax[i].set_title("Method 2")
         results.append(res)
         i += 1
 
     if 3 in methods_ids:
-        L_cleaned, T_cleaned = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 4)
+        L_cleaned, T_cleaned = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 1)
         res = fits.polynomialFit(L_cleaned, T_cleaned, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
         ax[i].set_title("Method 3")
         results.append(res)
@@ -100,10 +100,16 @@ def unpackAndTestEstimates(estimates):
 
     return values, bounds
 
-def boundsToIntervalSize(bounds):
-    sigmas = [bound[1] - bound[0] for bound in bounds]
-    assert all([sigma >= 0 for sigma in sigmas])
-    return sigmas
+def boundsToIntervalSize(bounds, values):
+    sigmas_1 = [bounds[i][1] - values[i] for i in range(len(values))]
+    sigmas_2 = [values[i] - bounds[i][0] for i in range(len(values))]
+
+    assert all([sigma >= 0 for sigma in sigmas_1])
+    assert all([sigma >= 0 for sigma in sigmas_2])
+
+    sigma_estimate = [np.sqrt(sigma_1**2 + sigma_2**2) for sigma_1, sigma_2 in zip(sigmas_1, sigmas_2)]
+
+    return sigma_estimate
 
 def VisualiseRawData(json_file, True_Lag):
     numTrials = 0 # set to a positive number for visual debugging
@@ -143,11 +149,12 @@ def main(json_file):
 
     # analysis parameters
     num_samples_to_read = num_Trials # (max: numTrials)
+    print(f"\nReading {num_samples_to_read} samples")
     num_plots_to_draw = 8
     draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
     # Look in MyFavouriteMethods above for the methods used. Pick Any 2 for comparison
-    method_ids = [1, 5]
+    method_ids = [2, 3]
 
     # read data and make estimates
     estimates_1, estimates_2 = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag,
@@ -158,8 +165,8 @@ def main(json_file):
 
     values_1, bounds_1 = unpackAndTestEstimates(estimates_1)
     values_2, bounds_2 = unpackAndTestEstimates(estimates_2)
-    intervalSizes_1 = boundsToIntervalSize(bounds_1)
-    intervalSizes_2 = boundsToIntervalSize(bounds_2)
+    intervalSizes_1 = boundsToIntervalSize(bounds_1, values_1)
+    intervalSizes_2 = boundsToIntervalSize(bounds_2, values_2)
 
     # print results
     helper.display(True_Lag, values_1, bounds_1, intervalSizes_1, values_2, bounds_2, intervalSizes_2, method_ids)

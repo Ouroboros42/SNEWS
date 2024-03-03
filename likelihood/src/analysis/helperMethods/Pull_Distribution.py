@@ -33,12 +33,13 @@ def createPlot(data_points, True_value, hist_range, bin_width, name ="", output_
     assert np.isclose(np.sum(y_values) * bin_width, 1.0)
 
     mean, std = normalCurveFit(y_values, x_values, ax)
-    # mean, std = np.mean(data_points), np.std(data_points)
+    mean2, std2 = np.mean(data_points), np.std(data_points)
 
     # debug
     print("Pull Distribution for ", name)
-    print(f"number of bins: {len(hist_bins)} with bin width: {bin_width} and range: {hist_range}")
-    print(f"Mean: {mean} and std: {std} of the raw data")
+    print(f"{len(hist_bins)} bins of width: {bin_width:.4f} and range: {hist_range[0]:.4f} to {hist_range[1]:.4f}")
+    print(f"Mean: {mean:.3f} and std: {std:.3f} of the normal curve")
+    print(f"Mean: {mean2:.3f} and std: {std2:.3f} of the data")
     print("\n")
 
     # plot details

@@ -115,6 +115,20 @@ results = {
 for key, value in results.items():
     print(f"{key}: {value}")
 
+
+fid4, ax4 = plt.subplots(1, 2, figsize=(10, 5))
+
+h1 = data["Binned"]["Signal-1"]
+h2s = data["Binned"]["Signals-2"][0]
+
+ax4[0].plot(h1, label="Signal 1")
+ax4[0].set_title("Signal 1")
+ax4[1].plot(h2s, label="Signal 2")
+ax4[1].set_title("Signal 2")
+
+plt.show()
+
+
 directory = "src\\analysis\\singleRunResults\\"
 now = time.strftime("%Y%m%d-%H%M%S")
 fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{now}.png")

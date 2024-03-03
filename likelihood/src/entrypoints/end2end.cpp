@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     auto FULL_START = std::chrono::high_resolution_clock::now();
 
     // Test data to use
-    Detector detector1 = Detector::IceCube, detector2 = Detector::SuperK;
+    Detector detector1 = Detector::IceCube, detector2 = Detector::SNOPlus;
     std::string inst = "121"; // Numerical identifier of test data (appears in file name)
     bool poisson_vary_background = true; // Use variable total background counts, according to poisson
 
