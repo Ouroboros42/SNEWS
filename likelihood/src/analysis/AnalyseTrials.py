@@ -7,66 +7,47 @@ import pathlib
 from typing import List, Tuple
 
 from helperMethods import Likelihood_Fits_And_Maxima as fits
-from helperMethods import Raw_Data_Visualise as visualise
+from helperMethods import Visualise_Raw_Data as visualise
 from helperMethods import Pull_Distribution as dist
 from helperMethods import Helpers as helper
 
 
 # ------------------- Methods -------------------
 
-def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw, ax = None):
+def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_id: int, draw, ax = None):
     ## Method 1: raw data
     ## Method 2: Curve fitting on raw data
     ## Method 3: Clean with moving average
     ## Method 4: Clean with noise filter
     ## Method 5: clean with noise filter and further take moving average
 
-    # The Function accepts an 2-Tuple of method_ids and plots the analysis for both side by side
+    match methods_id:
+        case 1:
+            res = fits.findRawDataMaximaAndError(Likelihoods, TimeDifferences, True_Lag, ax = ax if draw else None)
 
-    results = []
-    i = 0;
+        case 2:
+            res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax if draw else None, error_bound=1)
 
-    if 1 in methods_ids:
-        res = fits.findRawDataMaximaAndError(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None)
-        ax[i].set_title("Method 1")
-        results.append(res)
-        i += 1
+        case 3:
+            L_smoothed, T_smoothed = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 4)
+            res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None)
 
-    if 2 in methods_ids:
-        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, error_bound=1)
-        ax[i].set_title("Method 2")
-        results.append(res)
-        i += 1
+        case 4:
+            L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
+            res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None)
 
-    if 3 in methods_ids:
-        L_smoothed, T_smoothed = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 4)
-        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None)
-        ax[i].set_title("Method 3")
-        results.append(res)
-        i += 1
+        case 5:
+            L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
+            L_smoothed_again, T_smoothed_again = fits.cleanWithMovingAverage(L_smoothed, T_smoothed, 4)
+            res = fits.polynomialFit(L_smoothed_again, T_smoothed_again, True_Lag, ax = ax if draw else None, plot_raw_data = True)
 
-    if 4 in methods_ids:
-        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
-        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None)
-        ax[i].set_title("Method 4")
-        results.append(res)
-        i += 1
-
-    if 5 in methods_ids:
-        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
-        L_smoothed_again, T_smoothed_again = fits.cleanWithMovingAverage(L_smoothed, T_smoothed, 4)
-
-        res = fits.polynomialFit(L_smoothed_again, T_smoothed_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
-        ax[i].set_title("Method 5")
-        results.append(res)
-        i += 1
-
-    return results[0], results[1]
+    ax.set_title(f"Method {methods_id}")
+    return res
 
 
-def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_ids=[1, 2], draw_every=1000, output_folder=None):
-    estimates_1 = []
-    estimates_2 = []
+
+def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_id=2, draw_every=1000, output_folder=None):
+    estimates = []
     fig = ax = None
 
     for i in range(num_samples):
@@ -80,16 +61,15 @@ def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_ids=[1, 2]
 
         draw = (i % draw_every == 0)
         if draw:
-            fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+            fig, ax = plt.subplots(1, 1, figsize=(20, 10))
 
-        res1, res2 = MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_ids, draw, ax)
-        estimates_1.append(res1)
-        estimates_2.append(res2)
+        res = MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_id, draw, ax)
+        estimates.append(res)
 
         if output_folder and draw:
             plt.savefig(output_folder / f"Trial_{i}.png")
 
-    return estimates_1, estimates_2
+    return estimates
 
 
 def unpackAndTestEstimates(estimates):
@@ -114,7 +94,9 @@ def boundsToSigmas(bounds, values):
     return sigma_estimate
 
 def VisualiseRawData(json_file, True_Lag):
-    numTrials = 0 # set to a positive number for visual debugging
+    # only used for visual debugging. change numTrials to a positive number to see some plots.
+    # The program will exit after visualising the plots, no analysis will be done.
+    numTrials = 0
     for i in range(numTrials):
         key = str(i)
         Likelihoods = json_file[key]["Likelihoods"]
@@ -131,22 +113,21 @@ def VisualiseRawData(json_file, True_Lag):
 def makeOutputPath(detector1, detector2, numTrials, sweep_range):
     relative_path = f"TrialsResults/{detector1}_vs_{detector2}_{numTrials}_Trials_Sweep_{sweep_range}"
     base_path = pathlib.Path(__file__).parent.resolve()
-    print(base_path)
     path = base_path / relative_path
     if not os.path.exists(path):
         os.mkdir(path)
-    print(f"\n\nOutput folder: {path}")
+    print(f"\nOutput Folder: {path}")
     return path
 
 # ------------------- Main -------------------
 
 def main(json_file):
-    # read parameters
+    # read parameters from the json_file
     True_Lag, detector1, detector2, num_Trials, sweep_range = helper.readParameters(json_file)
     # make output folder
     out_folder = makeOutputPath(detector1, detector2, num_Trials, sweep_range)
 
-    # visualise some plots (only for debugging, no need to save plots)
+    # visualise some plots (only for debugging, check method body for details)
     VisualiseRawData(json_file, True_Lag)
 
     # analysis parameters
@@ -155,28 +136,24 @@ def main(json_file):
     num_plots_to_draw = 5
     draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else num_Trials + 1
 
-    # Look in MyFavouriteMethods above for the methods used. Pick Any 2 for comparison
-    method_ids = [2, 3]
+    # Look in MyFavouriteMethods above for the definition of methods_ids. Pick Any to use for analysis
+    # id = 2 corresponds to simply cure fitting the raw data, and works best for pull distributions
+    # This will also produce 'num_plots_to_draw' plots of the analysis method used
+    method_id = 2
 
     # read data and make estimates
-    estimates_1, estimates_2 = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag,
-                                                                    method_ids=method_ids,
-                                                                    draw_every=draw_every,
-                                                                    output_folder=out_folder
-                                                                    )
+    estimates = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag, method_id, draw_every, out_folder)
 
-    values_1, bounds_1 = unpackAndTestEstimates(estimates_1)
-    values_2, bounds_2 = unpackAndTestEstimates(estimates_2)
-    sigmas_1 = boundsToSigmas(bounds_1, values_1)
-    sigmas_2 = boundsToSigmas(bounds_2, values_2)
+    # values are the best estimates, bounds are the 1-sigma bounds on both left and right
+    # sigmas are the average of the left and right bounds
+    values, bounds = unpackAndTestEstimates(estimates)
+    sigmas = boundsToSigmas(bounds, values)
 
     # print results
-    helper.display(True_Lag, values_1, bounds_1, sigmas_1, values_2, bounds_2, sigmas_2, method_ids)
+    helper.display(True_Lag, values, bounds, sigmas, method_id, verbose=False, precision = 6)
 
-    # make pull distributions
-    names = [f"method_{id}" for id in method_ids]
-    dist.makeDistribution(values_1, sigmas_1, True_Lag, name = names[0], out_folder=out_folder)
-    dist.makeDistribution(values_2, sigmas_2, True_Lag, name = names[1], out_folder=out_folder)
+    # make pull distribution
+    dist.makeDistribution(values, sigmas, True_Lag, method_id = method_id, out_folder=out_folder)
 
 
 # ------------------- Run -------------------
