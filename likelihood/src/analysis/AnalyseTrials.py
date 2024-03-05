@@ -21,6 +21,8 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw
     ## Method 4: Clean with noise filter
     ## Method 5: clean with noise filter and further take moving average
 
+    # The Function accepts an 2-Tuple of method_ids and plots the analysis for both side by side
+
     results = []
     i = 0;
 
@@ -31,27 +33,27 @@ def MyFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_ids, draw
         i += 1
 
     if 2 in methods_ids:
-        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True, error_bound=1)
+        res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax[i] if draw else None, error_bound=1)
         ax[i].set_title("Method 2")
         results.append(res)
         i += 1
 
     if 3 in methods_ids:
-        L_smoothed, T_smoothed = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 3)
-        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        L_smoothed, T_smoothed = fits.cleanWithMovingAverage(Likelihoods, TimeDifferences, 4)
+        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None)
         ax[i].set_title("Method 3")
         results.append(res)
         i += 1
 
     if 4 in methods_ids:
         L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
-        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
+        res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax[i] if draw else None)
         ax[i].set_title("Method 4")
         results.append(res)
         i += 1
 
     if 5 in methods_ids:
-        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 5, 1)
+        L_smoothed, T_smoothed = fits.cleanWithNoiseFilter(Likelihoods, TimeDifferences, 4, 1)
         L_smoothed_again, T_smoothed_again = fits.cleanWithMovingAverage(L_smoothed, T_smoothed, 4)
 
         res = fits.polynomialFit(L_smoothed_again, T_smoothed_again, True_Lag, ax = ax[i] if draw else None, plot_raw_data = True)
