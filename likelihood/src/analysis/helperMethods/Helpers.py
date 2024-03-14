@@ -2,20 +2,23 @@ import os
 import pathlib
 import numpy as np
 
-def display(True_Lag, values, bounds, sigmas, method_id, verbose=False, format_upto = 2):
-    score = np.sum(bound[0] <= True_Lag <= bound[1] for bound in bounds)
+def display(True_Lag, values, sigmas, score, method_id, verbose=False, format_upto = 2):
+    # All results and calculations are in seconds, but we display in ms for readability
     method_name = fetchMethodName(method_id)
 
     print("\n")
-    print(f"Method: {method_name} \n")
-    print(f"True Lag: {True_Lag * 1000:.{format_upto}f} ms \n")
-    print(f"Avg estimate: {np.mean(values) * 1000:.{format_upto}f} ms")
-    print(f"Avg error: {np.mean(sigmas) * 1000:.{format_upto}f} ms")
-    print(f"Success rate: {score}/{len(bounds)}")
-
+    print(f"Analysed {len(values)} samples")
+    print(f"Method Used: {method_name}")
+    print("\n")
+    print(f"True Lag: {True_Lag * 1000:.{format_upto}f} ms")
+    print("\n")
+    print(f"Average estimate: {np.mean(values) * 1000:.{format_upto}f} ms")
+    print(f"Avg error (sigma): {np.mean(sigmas) * 1000:.{format_upto}f} ms")
+    print(f"Success rate: {score * 100:.1f}%")
+    print("\n")
 
     if verbose:
-        print("\n Actual Estimate Values: ")
+        print("Actual Estimate Values: ")
         print(f"Estimates: {values}")
         print(f"Sigmas: {sigmas}")
 
@@ -32,7 +35,7 @@ def readParameters(json_file):
 
 def fetchMethodName(method_id):
     # method names array for display
-    names = ["Raw Data", "Curve Fitting", "Moving Average", "Noise Filter", "Noise Filter + Moving Average"]
+    names = ["Raw Data", "Curve Fitting", "Moving Average", "Noise Filter"]
 
     if method_id >= len(names):
         print(f"WARNING: Method {method_id} has no name. Check fetchMethodName method in Helpers.py")
