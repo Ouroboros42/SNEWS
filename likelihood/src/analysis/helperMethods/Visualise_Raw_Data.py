@@ -46,7 +46,7 @@ def plotDataZoomedAroundTrueValue(L_data, T_data, True_T, bound, ax):
 
 def movingAverageAndNoiseFiltered(L_data, T_data, True_Lag, ax: List[plt.Axes], window_half_width = 5, noise_bound = 1):
 
-    L_cleaned, T_cleaned = fits.cleanWithMovingAverage(L_data, T_data, window_half_width)
+    L_cleaned, T_cleaned = fits.smoothWithMovingAverage(L_data, T_data, window_half_width)
     ax[0].plot(T_cleaned, L_cleaned, "o", label="Moving Average")
     ax[0].plot(T_data, L_data, "o", label="Actual Data")
     ax[0].axvline(x=True_Lag, linestyle="--", label=f"expected: {True_Lag}", color="black")
@@ -54,8 +54,8 @@ def movingAverageAndNoiseFiltered(L_data, T_data, True_Lag, ax: List[plt.Axes], 
     ax[0].set_ylabel("Likelihood")
     ax[0].legend()
 
-    L_final, T_final = fits.cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound)
-    L_clean_2, T_clean_2 = fits.cleanWithMovingAverage(L_final, T_final, 3)
+    L_final, T_final = fits.smoothWithNoiseFilter(L_data, T_data, window_half_width, noise_bound)
+    L_clean_2, T_clean_2 = fits.smoothWithMovingAverage(L_final, T_final, 3)
     ax[1].axvline(x=True_Lag, linestyle="--", label=f"expected: {True_Lag}", color="black")
     ax[1].plot(T_clean_2, L_clean_2, "o", label="Noise Filtered")
     ax[1].set_xlabel("Time difference (s)")

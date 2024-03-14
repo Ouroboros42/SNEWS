@@ -4,26 +4,29 @@ import json
 import copy
 
 
-def cleanWithMovingAverage(L_data, T_data, window_half_width):
+## ------------------- Smoothing Methods -------------------
+
+def smoothWithMovingAverage(L_data, T_data, window_half_width):
     numPoints = len(L_data)
-    L_cleaned = []
-    T_cleaned = []
+    L_smoothed = []
+    T_smoothed = []
     for i in range(window_half_width, numPoints - window_half_width):
         new_point = np.mean(L_data[i - window_half_width: i + window_half_width])
-        L_cleaned.append(new_point)
-        T_cleaned.append(T_data[i])
+        L_smoothed.append(new_point)
+        T_smoothed.append(T_data[i])
 
-    return L_cleaned, T_cleaned
+    return L_smoothed, T_smoothed
 
 
-def cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma = 1.0):
-    # clean data with moving average before
-    L_cleaned, T_cleaned = cleanWithMovingAverage(L_data, T_data, window_half_width)
+def smoothWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma = 1.0):
+    # smooth data with moving average before
+    L_smoothed, T_smoothed = smoothWithMovingAverage(L_data, T_data, window_half_width)
 
     L_data = L_data[window_half_width: -window_half_width]
     T_data = T_data[window_half_width: -window_half_width]
 
-    deviation = [L_data[i] - L_cleaned[i] for i in range(len(L_cleaned))]
+    # data points too far away from the smoothed curve are considered noise and removed
+    deviation = [L_data[i] - L_smoothed[i] for i in range(len(L_smoothed))]
     sigma = np.std(deviation)
     bound = noise_bound_in_sigma * sigma
 
@@ -36,6 +39,9 @@ def cleanWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma
 
     return Likelihoods, Time_Diffs
 
+
+## ------------------- Raw Data Methods -------------------
+## Raw data analysis is not recommended because the error bounds are not reliable
 
 def findRawDataMaximaAndError(L_data, T_data, True_Lag, error_bound = 0.5, ax: plt.Axes = None):
     max_L_position = np.argmax(L_data)
@@ -75,6 +81,10 @@ def findRawDataMaximaAndError(L_data, T_data, True_Lag, error_bound = 0.5, ax: p
     return best_Lag, T_data[i], T_data[j]
 
 
+
+
+## ------------------- Curve Fitting and Error Methods -------------------
+
 def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse: int = 5):
     L_fitted = np.polyval(coefficients, points)
     max_L_position = np.argmax(L_fitted)
@@ -93,20 +103,26 @@ def findErrorOnCurveRecursively(coefficients, points, error_bound, max_recurse: 
         return best_Lag, points_within_error_bound[0], points_within_error_bound[-1]
 
 
-def polynomialFit(L_data, T_data, True_Lag,
-                  number_of_points_to_evaluate = 1000,
-                  degree = 10,
-                  error_bound = 0.5,
-                  ax: plt.Axes = None,
-                  plot_raw_data = True
-                  ):
+
+## Default degree of the polynomial is 10
+## Error-bound is the difference between the Likelihood values at the maximum and a small distance away
+## When this difference is 0.5, this distance is the 1-sigma error bound.
+def polynomialFit(
+        L_data,
+        T_data,
+        True_Lag,
+        number_of_points_to_evaluate = 500,
+        degree = 10,
+        error_bound = 0.5,
+        ax: plt.Axes = None,
+        plot_raw_data = True
+  ):
 
     coefficients = np.polyfit(T_data, L_data, degree)
     offset_points = np.linspace(T_data[0], T_data[-1], number_of_points_to_evaluate)
     L_fitted = np.polyval(coefficients, offset_points)
 
     best, err1, err2 = findErrorOnCurveRecursively(coefficients, copy.deepcopy(offset_points), error_bound)
-    assert err1 <= best <= err2
 
     if ax:
         ax.plot(offset_points, L_fitted, label="Fitted Curve")
@@ -114,10 +130,8 @@ def polynomialFit(L_data, T_data, True_Lag,
         ax.axvline(x=err1, linestyle="--")
         ax.axvline(x=err2, linestyle="--")
         ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")
-
         if plot_raw_data:
             ax.plot(T_data, L_data, "o", label="Likelihood data points")
-
         ax.set_xlabel("Time difference (s)")
         ax.set_ylabel("Likelihood")
         ax.legend()
