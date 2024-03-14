@@ -9,7 +9,7 @@ from typing import List, Tuple
 from helperMethods import Likelihood_Fits_And_Maxima as fits
 from helperMethods import Visualise_Raw_Data as visualise
 from helperMethods import Pull_Distribution as dist
-from helperMethods import Helpers as helper
+from helperMethods import Helpers as help
 
 ## Look at the end of the file for usage instructions and in the main method to customise analysis parameters
 
@@ -119,7 +119,7 @@ def checkPlots(json_file, True_Lag):
 
 def main(json_file):
     # read parameters and make output folder
-    True_Lag, detector1, detector2, numTrials, sweep_range = helper.readParameters(json_file)
+    True_Lag, detector1, detector2, numTrials, sweep_range = help.readParameters(json_file)
     out_folder = makeOutputPath(detector1, detector2, numTrials, sweep_range)
 
     # only for debugging (check method above for info)
@@ -130,7 +130,7 @@ def main(json_file):
     numPlotsToDraw = 5
 
     # draw every n-th sample (set numPlotsToDraw = 0 above to disable)
-    draw_every = (num_samples_to_read // num_plots_to_draw) if num_plots_to_draw > 0 else numTrials + 1
+    draw_every = (numSamplesToRead // numPlotsToDraw) if numPlotsToDraw > 0 else numTrials + 1
 
     # Look in 'yourFavouriteMethods' above for the definition of methods ids
     # id = 2 is simple curve fitting, and works best in most cases
@@ -138,11 +138,11 @@ def main(json_file):
 
     # read data and make estimates
     # also produces a plot every 'draw_every' samples
-    estimates = readDataAndMakeEstimates(json_file, num_samples_to_read, True_Lag, method_id, draw_every, out_folder)
+    estimates = readDataAndMakeEstimates(json_file,  numSamplesToRead, True_Lag, method_id, draw_every, out_folder)
 
     # unpack and display results
     values, sigmas, score = unpackAndTestEstimates(estimates, True_Lag)
-    helper.display(True_Lag, values, sigmas, score, method_id, verbose=False, format_upto=2)
+    help.display(True_Lag, values, sigmas, score, method_id, verbose=False, format_upto=2)
 
     dist.main(values, sigmas, True_Lag, method_id = method_id, out_folder=out_folder)
 

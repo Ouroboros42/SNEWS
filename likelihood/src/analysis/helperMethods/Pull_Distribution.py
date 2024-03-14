@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import norm
 
+from helperMethods import Helpers as help
+
 
 def gaussian(x, mean, std):
     return norm.pdf(x, mean, std)
@@ -37,7 +39,6 @@ def createHistogram(data_points, True_value, hist_range, bin_width, method_id, o
     mean_1, std_1 = normalCurveFit(y_values, x_values, ax)
     mean_2, std_2 = norm.fit(data_points)
 
-    print("\n")
     print("Pull distribution results:")
     print(f"Used {len(hist_bins)} bins of width: {bin_width:.4f}")
     print(f"Mean: {mean_1:.3f} and std: {std_1:.3f} of the normal curve using scipy.optimize.curve_fit")
@@ -45,6 +46,7 @@ def createHistogram(data_points, True_value, hist_range, bin_width, method_id, o
     print("\n")
 
     if output_folder:
+        name = help.fetchMethodName(method_id)
         plt.savefig(output_folder / f"{name}_pull_distribution.png")
 
 

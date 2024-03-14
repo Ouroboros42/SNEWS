@@ -13,7 +13,7 @@ def display(True_Lag, values, sigmas, score, method_id, verbose=False, format_up
     print(f"True Lag: {True_Lag * 1000:.{format_upto}f} ms")
     print("\n")
     print(f"Average estimate: {np.mean(values) * 1000:.{format_upto}f} ms")
-    print(f"Avg error (sigma): {np.mean(sigmas) * 1000:.{format_upto}f} ms")
+    print(f"Average error: {np.mean(sigmas) * 1000:.{format_upto}f} ms")
     print(f"Success rate: {score * 100:.1f}%")
     print("\n")
 
