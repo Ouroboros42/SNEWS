@@ -126,7 +126,7 @@ def polynomialFit(
 
     if ax:
         ax.plot(offset_points, L_fitted, label="Fitted Curve")
-        ax.axvline(x=best, linestyle="--", label="Best Lag")
+        ax.axvline(x=best, linestyle="--", label="Best Lag and Error Bounds")
         ax.axvline(x=err1, linestyle="--")
         ax.axvline(x=err2, linestyle="--")
         ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")

@@ -40,7 +40,7 @@ def yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_id: int
             L_smoothed, T_smoothed = fits.smoothWithNoiseFilter(Likelihoods, TimeDifferences, hw, bound)
             res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None)
 
-    ax.set_title(f"Method {methods_id}")
+    # ax.set_title(f"Method {methods_id}")
     return res
 
 
