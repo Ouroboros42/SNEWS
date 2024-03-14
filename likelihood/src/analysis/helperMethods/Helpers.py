@@ -2,15 +2,15 @@ import os
 import pathlib
 import numpy as np
 
-def display(True_Lag, values, bounds, sigmas, method_id, verbose=False, precision = 6):
+def display(True_Lag, values, bounds, sigmas, method_id, verbose=False, format_upto = 2):
     score = np.sum(bound[0] <= True_Lag <= bound[1] for bound in bounds)
     method_name = fetchMethodName(method_id)
 
     print("\n")
     print(f"Method: {method_name} \n")
-    print(f"True Lag: {True_Lag:.{precision}f} \n")
-    print(f"Avg estimate: {np.mean(values):.{precision}f}")
-    print(f"Avg error: {np.mean(sigmas):.{precision}f}")
+    print(f"True Lag: {True_Lag * 1000:.{format_upto}f} ms \n")
+    print(f"Avg estimate: {np.mean(values) * 1000:.{format_upto}f} ms")
+    print(f"Avg error: {np.mean(sigmas) * 1000:.{format_upto}f} ms")
     print(f"Success rate: {score}/{len(bounds)}")
 
 

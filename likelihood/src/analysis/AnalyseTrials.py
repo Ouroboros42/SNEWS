@@ -150,7 +150,7 @@ def main(json_file):
     sigmas = boundsToSigmas(bounds, values)
 
     # print results
-    helper.display(True_Lag, values, bounds, sigmas, method_id, verbose=False, precision = 6)
+    helper.display(True_Lag, values, bounds, sigmas, method_id, verbose=False, format_upto= 2)
 
     # make pull distribution
     dist.makeDistribution(values, sigmas, True_Lag, method_id = method_id, out_folder=out_folder)
