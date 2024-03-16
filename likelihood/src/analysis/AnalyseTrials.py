@@ -10,6 +10,7 @@ from helperMethods import Likelihood_Fits_And_Maxima as fits
 from helperMethods import Visualise_Raw_Data as visualise
 from helperMethods import Pull_Distribution as dist
 from helperMethods import Helpers as help
+from helperMethods import Bias_Testing as biasTest
 
 ## Look at the end of the file for usage instructions and in the main method to customise analysis parameters
 
@@ -113,8 +114,6 @@ def checkPlots(json_file, True_Lag):
 
     if numTrials:
         exit(0)
-
-
 # ------------------- Main -------------------
 
 def main(json_file):
@@ -124,6 +123,9 @@ def main(json_file):
 
     # only for debugging (check method above for info)
     checkPlots(json_file, True_Lag)
+    #
+    # Bias Testing
+    # biasTest.main(json_file, True_Lag, numTrials, out_folder)
 
     # analysis parameters (read between 0 - numTrials samples, and draw roughly 5-10 plots for visualisation)
     numSamplesToRead = numTrials
