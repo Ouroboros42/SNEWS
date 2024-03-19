@@ -123,9 +123,6 @@ def main(json_file):
 
     # only for debugging (check method above for info)
     checkPlots(json_file, True_Lag)
-    #
-    # Bias Testing
-    # biasTest.main(json_file, True_Lag, numTrials, out_folder)
 
     # analysis parameters (read between 0 - numTrials samples, and draw roughly 5-10 plots for visualisation)
     numSamplesToRead = numTrials
@@ -144,12 +141,22 @@ def main(json_file):
 
     # unpack and display results
     values, sigmas, score = unpackAndTestEstimates(estimates, True_Lag)
+
+    values = np.asarray(values)
+
+    b1, b2, b3 = biasTest.main(json_file, True_Lag, values, True_Lag, numTrials, out_folder)
+
+    errs = values - True_Lag
+
+    br1 = np.mean(b1 / errs)
+    br2 = np.mean(b2 / errs)
+    br3 = np.mean(b3 / errs)
+
+    print(f"{br1=}\n{br2=}\n{br3=}\n"
+
     help.display(True_Lag, values, sigmas, score, method_id, verbose=False, format_upto=2)
 
     dist.main(values, sigmas, True_Lag, method_id = method_id, out_folder=out_folder)
-
-
-
 
 # ------------------- Run -------------------
 

@@ -3,133 +3,85 @@ from numpy.polynomial import Polynomial
 from numpy.polynomial.polynomial import polypow
 from numpy.polynomial.polynomial import polymul
 
+from helperMethods.Likelihood_Fits_And_Maxima import polynomialFit
+
 import json
 import matplotlib.pyplot as plt
 
-def averageFitCoefficients(json_file, num_samples, degree=10):
-    coefficients = np.zeros(degree + 1)
+def fitCoefficients(json_file, sample_i, degree):
+    key = str(sample_i)
+    L_data = json_file[key]["Likelihoods"]
+    T_data = json_file[key]["Offsets"]
+    return Polynomial.fit(T_data, L_data, degree)
 
+def allFitCoefficients(json_file, num_samples, degree=10):
+    coefficients = np.ndarray(num_samples, Polynomial)
     for i in range(num_samples):
-        key = str(i)
-        L_data = json_file[key]["Likelihoods"]
-        T_data = json_file[key]["Offsets"]
-        coefficients += np.polyfit(T_data, L_data, degree)
+        coefficients[i] = fitCoefficients(json_file, i, degree)
+    return coefficients
 
-    return coefficients / num_samples
+vderiv = np.vectorize(Polynomial.deriv)
 
+def main(json_file, true_val, values, True_Lag, num_samples=1000, output_folder=None, plot = False):
+    coeffs = allFitCoefficients(json_file, num_samples)
 
-def normalise(p, x_min, x_max):
-    norm = p.integ()(x_max) - p.integ()(x_min)
-    return p / norm
+    n = len(coeffs)
 
+    # Method 1
 
-def expectedValue(f, pdf, x_min, x_max):
-    integrand = polymul(f, pdf)[0]
-    norm = pdf.integ()(x_max) - pdf.integ()(x_min)
-    if np.isclose(norm, 1):
-        print("pdf was normalised")
-    else:
-        print("pdf was not normalised")
-    return (integrand.integ()(x_max) - integrand.integ()(x_min)) / norm
+    U = vderiv(coeffs)
+    U1 = vderiv(U)
+    U2 = vderiv(U1)
 
+    i = - np.mean(U1)
 
-def getLogLikelihood(Likelihood, x_min, x_max, num_points = 1000, degree=10) -> Polynomial:
-    points = np.linspace(x_min, x_max, 1000)
-    L_points = [Likelihood(p) for p in points]
-    Log_points = np.log(L_points)
-    Log_coeffs = np.polyfit(points, Log_points, 10)
-    return Polynomial(Log_coeffs[::-1])
+    denom = 2 * n * i * i 
 
+    B1 = - (np.mean(U * U1) + np.mean(U) * i + np.mean(U ** 3))
 
-def getLikelihood(Log_coeffs, x_min, x_max, num_points = 1000, degree=10) -> Polynomial:
-    Log_Likelihood = Polynomial(Log_coeffs[::-1])
-    points = np.linspace(x_min, x_max, num_points)
+    B2 = np.mean(2 * U * U1 + U2)
 
-    delta = (x_max - x_min) / num_points
+    bias1 = B1(values) / denom(values)
+    bias2 = B2(values) / denom(values)
 
-    # create Log_Likelihood points with a constant factor removed to avoid overflow
-    Log_points = [Log_Likelihood(p) for p in points]
-    factor_max = max(Log_points)
-    Log_points = [Log_point - factor_max for Log_point in Log_points]
+    # Method 2
 
-    # create Likelihood points by exponentiation and get the coefficients
-    L_points = np.exp(Log_points)
-    L_points = L_points / (np.sum(L_points) * delta)
-    L_coeffs = np.polyfit(points, L_points, 10)
+    avg_coeffs = np.mean(coeffs)
 
+    k = avg_coeffs.deriv().deriv().deriv()
 
-    # create the polynomial object and normalise it
-    return normalise(Polynomial(L_coeffs[::-1]), x_min, x_max)
+    bias3 = - 1 / k(values) / 2
 
+    return bias1, bias2, bias3
 
+    # fig, ax = plt.subplots(1, 1, figsize=(20, 10))
 
-def findExpectedBias(Log_coeffs, x_min, x_max, num_samples=1000):
-    Likelihood = getLikelihood(Log_coeffs, x_min, x_max)
-    Log_Likelihood = getLogLikelihood(Likelihood, x_min, x_max)
+    # ax.plot(T_points_zero, L_points_zero, "o", label="Example points")
+    # ax.plot(points, L_fitted, label="Average Curve")
+    
+    # plt.legend()
 
-    # required functions
-    U = Log_Likelihood.deriv()
-    U_1 = U.deriv(1)
-    U_2 = U.deriv(2)
+    # plt.show()
 
-    # Calculate the expected bias
-    pdf = Likelihood
-    i = -1 * expectedValue(U_1, pdf, x_min, x_max)
-    Term1 = 2 * expectedValue(polymul(U, U_1)[0], pdf, x_min, x_max)
-    Term2 = expectedValue(U_2, pdf, x_min, x_max)
-    bias = (Term1 + Term2) / (2 * num_samples * (i ** 2))
-    print(f"Expected Bias: {bias:.10f}")
+    # findExpectedBias(avg_coefficients, T_points_zero[0], T_points_zero[-1], num_samples)
+    # findExpectedBias2(avg_coefficients, T_points_zero[0], T_points_zero[-1], num_samples)
 
-    return
+    # if plot:
+    #     points = np.linspace(T_points_zero[0], T_points_zero[-1], 1000)
+    #     L_fitted = np.polyval(avg_coefficients, points)
+    #     max_L_position = np.argmax(L_fitted)
 
+    #     fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+    #     ax.plot(T_points_zero, L_points_zero, "o", label="Likelihood data points")
+    #     ax.plot(points, L_fitted, label="Fitted Curve")
 
-def findExpectedBias2(Log_coeffs, x_min, x_max, num_samples=1000):
-    Likelihood = getLikelihood(Log_coeffs, x_min, x_max)
-    Log_Likelihood = getLogLikelihood(Likelihood, x_min, x_max)
+    #     ax.axvline(x=True_Lag, linestyle="--", color="black")
+    #     ax.axvline(x=points[max_L_position], linestyle="--", color="red")
+    #     ax.axvline(x=expected_bias, linestyle="--", color="green")
 
-    # required functions
-    U = Log_Likelihood.deriv()
-    U_1 = U.deriv(1)
-    U_cubed = polypow(U, 3)[0]
+    #     plt.show()
 
-    # Calculate the expected bias
-    pdf = Likelihood
-    i = -1 * expectedValue(U_1, pdf, x_min, x_max)
-    k_30 = expectedValue(U_cubed, pdf, x_min, x_max)
-    k_11 = expectedValue(polymul(U, U_1)[0], pdf, x_min, x_max) + i * expectedValue(U, pdf, x_min, x_max)
-    bias = -1 * (k_30 + k_11) / (2 * num_samples * (i ** 2))
-    print(f"Expected Bias 2: {bias:.10f}")
-
-    return
-
-
-
-def main(json_file, True_Lag, num_samples=1000, output_folder=None, plot = False):
-    Test_key = "0"
-    L_points_zero = json_file[Test_key]["Likelihoods"]
-    T_points_zero = json_file[Test_key]["Offsets"]
-
-    avg_coefficients = averageFitCoefficients(json_file, num_samples)
-
-    findExpectedBias(avg_coefficients, T_points_zero[0], T_points_zero[-1], num_samples)
-    findExpectedBias2(avg_coefficients, T_points_zero[0], T_points_zero[-1], num_samples)
-
-    if plot:
-        points = np.linspace(T_points_zero[0], T_points_zero[-1], 1000)
-        L_fitted = np.polyval(avg_coefficients, points)
-        max_L_position = np.argmax(L_fitted)
-
-        fig, ax = plt.subplots(1, 1, figsize=(20, 10))
-        ax.plot(T_points_zero, L_points_zero, "o", label="Likelihood data points")
-        ax.plot(points, L_fitted, label="Fitted Curve")
-
-        ax.axvline(x=True_Lag, linestyle="--", color="black")
-        ax.axvline(x=points[max_L_position], linestyle="--", color="red")
-        ax.axvline(x=expected_bias, linestyle="--", color="green")
-
-        plt.show()
-
-    exit(0)
+    # exit(0)
 
 
 
