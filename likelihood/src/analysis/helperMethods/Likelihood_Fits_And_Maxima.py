@@ -102,18 +102,36 @@ def findErrorUsingDifferenceFromMaxValue(coefficients, points, error_bound, max_
 
 ## ------------------- Curve Fitting and Error Methods -------------------
 
-
 def validationDebug(f, max, err1, err2):
     print(f"Left {f(max) - f(err1)} and Right {f(max) - f(err2)}")
 
+def showCoefficients(coefficients, error_coefficients):
+    for c, e in zip(coefficients, error_coefficients):
+        r = e / c * 100
+        print(f"coefficient is {c:.4f} with relative error {r:.4f}%")
 
-def findErrorUsingSecondDerivative(coefficients, points, coeffs_errors, maxima_guess):
+
+
+
+def getQuadraticFit(Likelihood, bounds, max_pos, error_bound = 0.5):
+    points = np.linspace(bounds[0], bounds[1], 5000)
+    L_points = Likelihood(points)
+    L_max = Likelihood(max_pos)
+
+    rangeForQuadratic = [p for i, p in enumerate(points) if (L_max - L_points[i]) <= error_bound]
+    dataForQuadratic = [Likelihood(p) for p in rangeForQuadratic]
+
+    quad_coefficients, quad_cov = np.polyfit(rangeForQuadratic, dataForQuadratic, 2, cov=True)
+
+    quad_error = np.sqrt(quad_cov[0][0])
+    if quad_error / quad_coefficients[0] > 0.5:
+        print("WARNING: Relative error of the quadratic coefficient is too high")
+
+    return quad_coefficients
+
+
+def findErrorUsingSecondDerivative(coefficients, points, maxima_guess, quadratic_approx = False):
     # info is Fisher's information. variance of the maximum likelihood estimator is 1/Fisher's information
-
-    # for c, error in zip(coefficients, coeffs_errors):
-    #     relative_error = error / c
-    #     print(f"Relative error : {relative_error * 100:.4f}%")
-
 
     Likelihood = np.polynomial.polynomial.Polynomial(coef=coefficients[::-1])
     Likelihood_prime = Likelihood.deriv()
@@ -128,12 +146,15 @@ def findErrorUsingSecondDerivative(coefficients, points, coeffs_errors, maxima_g
     else:
         closest_value = min(roots, key= lambda x : abs(x - maxima_guess))
 
+    if quadratic_approx:
+        quad_coefficients = getQuadraticFit(Likelihood, (points[0], points[-1]), closest_value)
+        info = -1 * 2 * quad_coefficients[0]
+    else:
+        info = -1 * Likelihood_double_prime(closest_value)
 
-    info = -1 * Likelihood_double_prime(closest_value)
     if info < 0:
         print("WARNING: Second derivative is positive, but expected to be negative at the maximum")
 
-    # validationDebug(Likelihood, closest_value, closest_value - info, closest_value + info)
     return closest_value, np.sqrt(1/np.abs(info))
 
 
@@ -160,10 +181,12 @@ def polynomialFit(
     # Legacy method based on function falling off from the maximum by 0.5
     # best, err1, err2 = findErrorUsingDifferenceFromMaxValue(coefficients, copy.deepcopy(offset_points), error_bound)
 
+    # showCoefficients(coefficients, np.sqrt(np.diag(cov)))
+
     # New method based on second derivative
     maxima_guess = offset_points[np.argmax(L_fitted)]
     error_on_coeffs = np.sqrt(np.diag(cov))
-    best, error = findErrorUsingSecondDerivative(coefficients, offset_points, error_on_coeffs, maxima_guess)
+    best, error = findErrorUsingSecondDerivative(coefficients, offset_points, maxima_guess, False)
     err1, err2 = best - error, best + error
 
     if ax:

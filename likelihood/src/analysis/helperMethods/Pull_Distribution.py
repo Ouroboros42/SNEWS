@@ -11,7 +11,18 @@ def gaussian(x, mean, std):
 
 
 def normalCurveFit(y_values, x_values, ax):
-    p, cov = curve_fit(gaussian, x_values, y_values, p0=[np.mean(x_values), np.std(x_values)])
+    error_bars = False
+
+    if error_bars:
+        sigmas = [np.sqrt(y) if y > 0 else 0 for y in y_values]
+        minError = np.min([s for s in sigmas if s > 0])
+        sigmas = [s if s > 0 else minError for s in sigmas]
+        assert all([s > 0 for s in sigmas]), print(f"y_values: {y_values}, sigmas: {sigmas}")
+        p, cov = curve_fit(gaussian, x_values, y_values, p0=[np.mean(x_values), np.std(x_values)],
+                           sigma=sigmas, absolute_sigma=True)
+    else:
+        p, cov = curve_fit(gaussian, x_values, y_values, p0=[np.mean(x_values), np.std(x_values)])
+
     mean, sigma = p[0], p[1]
     mean_error, sigma_error = np.sqrt(np.diag(cov))
 
@@ -37,12 +48,9 @@ def createHistogram(data_points, True_value, hist_range, bin_width, method_id, o
 
     # fit a normal curve to the histogram using 2 different scipy methods
     mean_1, std_1 = normalCurveFit(y_values, x_values, ax)
-    mean_2, std_2 = norm.fit(data_points)
 
-    print("Pull distribution results:")
     print(f"Used {len(hist_bins)} bins of width: {bin_width:.4f}")
     print(f"Mean: {mean_1:.3f} and std: {std_1:.3f} of the normal curve using scipy.optimize.curve_fit")
-    print(f"Mean: {mean_2:.3f} and std: {std_2:.3f} of the normal curve using scipy.stats")
     print("\n")
 
     if output_folder:
@@ -58,6 +66,11 @@ def main(values, sigmas, True_Lag, method_id, out_folder):
     # guess an appropriate range and bin width for the pull distribution
     mean = np.mean(data_points)
     std = np.std(data_points)
+
+    print("Pull Distribution results:")
+    print(f"Raw data mean: {mean:.3f} and std: {std:.3f}")
+    print("\n")
+
     hist_range = (mean - 5 * std, mean + 5 * std)
     bin_width = (hist_range[1] - hist_range[0]) / np.sqrt(len(data_points))
 

@@ -126,7 +126,7 @@ def main(json_file):
 
     # analysis parameters (read between 0 - numTrials samples, and draw roughly 5-10 plots for visualisation)
     numSamplesToRead = numTrials
-    numPlotsToDraw = 0
+    numPlotsToDraw = 5
 
     # draw every n-th sample (set numPlotsToDraw = 0 above to disable)
     draw_every = (numSamplesToRead // numPlotsToDraw) if numPlotsToDraw > 0 else numTrials + 1
