@@ -28,10 +28,10 @@ def yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_id: int
             res = fits.findRawDataMaximaAndError(Likelihoods, TimeDifferences, True_Lag, ax = ax if draw else None)
 
         case 2:
-            res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax if draw else None, error_bound=1)
+            res = fits.polynomialFit(Likelihoods, TimeDifferences, True_Lag, ax = ax if draw else None, error_bound=0.5)
 
         case 3:
-            hw = 3
+            hw = 1
             L_smoothed, T_smoothed = fits.smoothWithMovingAverage(Likelihoods, TimeDifferences, hw)
             res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None)
 
@@ -126,7 +126,7 @@ def main(json_file):
 
     # analysis parameters (read between 0 - numTrials samples, and draw roughly 5-10 plots for visualisation)
     numSamplesToRead = numTrials
-    numPlotsToDraw = 5
+    numPlotsToDraw = 0
 
     # draw every n-th sample (set numPlotsToDraw = 0 above to disable)
     draw_every = (numSamplesToRead // numPlotsToDraw) if numPlotsToDraw > 0 else numTrials + 1
@@ -141,18 +141,6 @@ def main(json_file):
 
     # unpack and display results
     values, sigmas, score = unpackAndTestEstimates(estimates, True_Lag)
-
-    values = np.asarray(values)
-
-    b1, b2, b3 = biasTest.main(json_file, True_Lag, values, True_Lag, numTrials, out_folder)
-
-    errs = values - True_Lag
-
-    br1 = np.mean(b1 / errs)
-    br2 = np.mean(b2 / errs)
-    br3 = np.mean(b3 / errs)
-
-    print(f"{br1=}\n{br2=}\n{br3=}\n"
 
     help.display(True_Lag, values, sigmas, score, method_id, verbose=False, format_upto=2)
 
