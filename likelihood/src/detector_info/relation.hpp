@@ -45,15 +45,17 @@ struct DetectorRelation {
 
         scalar log_likelihood_prefactor(size_t total_events_1, size_t total_events_2);
 
-        size_t lead_index_1(size_t count_1, size_t count_2);
+        size_t lead_index_1(size_t count_1, size_t count_2) const;
+
+        size_t lead_index_1(size_t count_1, size_t count_2, size_t index_1) const;
 
         size_t lead_index_2(size_t count_1, size_t count_2, size_t index_1) const;
 };
 
 // For a = 1
-scalar quadratic_low_root(scalar b, scalar c);
+std::pair<scalar, scalar> quadratic_roots(scalar b, scalar c);
 
 // Assumes real roots
-scalar quadratic_low_root(scalar a, scalar b, scalar c);
+std::pair<scalar, scalar> quadratic_roots(scalar a, scalar b, scalar c);
 
 #endif

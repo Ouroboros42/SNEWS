@@ -13,10 +13,12 @@ void test_quadratic(scalar root_1, scalar root_2, scalar a) {
     scalar c = a * root_1 * root_2;
 
     scalar low_root = std::min(root_1, root_2);
+    scalar high_root = std::max(root_1, root_2);
 
-    scalar solution = quadratic_low_root(a, b, c);
+    std::pair<scalar, scalar> solution = quadratic_roots(a, b, c);
 
-    CHECK_THAT(solution, approx_match(low_root));
+    CHECK_THAT(solution.first, approx_match(low_root));
+    CHECK_THAT(solution.second, approx_match(high_root));
 }
 
 TEST_CASE("Quadratic solutions") {

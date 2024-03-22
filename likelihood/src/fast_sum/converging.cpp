@@ -10,6 +10,7 @@ inline scalar exp_scaled(scalar log_x, scalar log_rescale) {
     scalar result = fastExp(log_x - log_rescale);
 
     if (std::isinf(result)) {
+        std::cerr << "log_x = " << log_x << "\n" << "log_rescale = " << log_rescale << std::endl;
         throw std::runtime_error("Rescaling did not suppress large term");
     }
     
