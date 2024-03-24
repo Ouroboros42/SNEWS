@@ -17,6 +17,15 @@ def smoothWithMovingAverage(L_data, T_data, window_half_width):
 
     return L_smoothed, T_smoothed
 
+def smoothWithNewMovingAverage(L_data, T_data, sample_spacing, sample_spread):
+    window_start = T_data[0]
+    window_end = T_data[-1]
+
+    T_samples = np.arange(window_start, window_end, sample_spacing)
+    sample_indices = [(T_data >= sample_point - sample_spread) & (T_data < sample_point + sample_spread) for sample_point in T_samples]
+    L_samples = np.asarray([np.mean(L_data[sample_index]) for sample_index in sample_indices])
+
+    return L_samples, T_samples
 
 def smoothWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigma = 1.0):
     # smooth data with moving average before
@@ -43,12 +52,12 @@ def smoothWithNoiseFilter(L_data, T_data, window_half_width, noise_bound_in_sigm
 ## ------------------- Legacy Methods -------------------
 ## Raw data analysis is not recommended because the error bounds are not reliable
 
-def findRawDataMaximaAndError(L_data, T_data, True_Lag, error_bound = 0.5, ax: plt.Axes = None):
+def findRawDataMaximaAndError(L_data, T_data, True_Lag, error_bound = 0.5, ax: plt.Axes = None, do_avg = True):
     max_L_position = np.argmax(L_data)
     max_L_value = L_data[max_L_position]
     best_Lag = T_data[max_L_position]
 
-    Avg_window = 3
+    Avg_window = 3 if do_avg else 1
 
     # extreme horrible edge case (should not happen)
     i = max(max_L_position - 1, 0)

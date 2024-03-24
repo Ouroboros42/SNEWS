@@ -13,7 +13,8 @@ def display(True_Lag, values, sigmas, score, method_id, verbose=False, format_up
     print(f"True Lag: {True_Lag * 1000:.{format_upto}f} ms")
     print("\n")
     print(f"Average estimate: {np.mean(values) * 1000:.{format_upto}f} ms")
-    print(f"Average error: {np.mean(sigmas) * 1000:.{format_upto}f} ms")
+    print(f"Standard devs of errs: {np.std(np.asarray(values) - True_Lag) * 1000:.{format_upto}f} ms")
+    print(f"Average uncertainty: {np.mean(sigmas) * 1000:.{format_upto}f} ms")
     print(f"Success rate: {score * 100:.1f}%")
     print("\n")
 
@@ -35,9 +36,9 @@ def readParameters(json_file):
 
 def fetchMethodName(method_id):
     # method names array for display
-    names = ["Raw Data", "Curve Fitting", "Moving Average", "Noise Filter"]
+    names = ["Raw Data", "Curve Fitting", "Moving Average", "Noise Filter", "New Moving Average"]
 
-    if method_id >= len(names):
+    if method_id > len(names):
         print(f"WARNING: Method {method_id} has no name. Check fetchMethodName method in Helpers.py")
         return "Unknown"
 

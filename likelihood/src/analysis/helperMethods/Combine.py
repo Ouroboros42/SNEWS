@@ -7,18 +7,19 @@ import pathlib
 
 def combine():
     # SET PARAMETERS PLEASE
-    detector1 = "IC"
+    detector1 = "SK"
     detector2 = "SNOP"
     numTrialsExpected = 1000
-    sweepRange = 0.3
+    sweepRange = 0.2
     base_path = pathlib.Path(__file__).parent.parent.resolve()
-    abs_path = base_path / f"output/{detector1}-vs-{detector2}_{numTrialsExpected}.json"
+    abs_path = base_path / f"TrialsData/{detector1}-vs-{detector2}_{numTrialsExpected}.json"
 
+    data_path = pathlib.Path('./output/bigbatches')
 
     # get all files
     # change to the directory where the files are in os.listdir
     # read all files that have the detector names in them and end with .json
-    file_names = [f for f in os.listdir('.') if (f.endswith('.json') and detector1 in f and detector2 in f)]
+    file_names = [f for f in os.listdir(data_path) if (f.endswith('.json') and detector1 in f and detector2 in f)]
 
     assert len(file_names) == numTrialsExpected, f"Expected {numTrialsExpected} files, got {len(file_names)}"
 
@@ -32,7 +33,7 @@ def combine():
         srcs_processed.append(src)
 
         # open and read file
-        with open(name, 'r') as file:
+        with open(data_path / name, 'r') as file:
             cur_data = json.load(file)
 
             # add extra info once
@@ -61,9 +62,6 @@ def combine():
         json.dump(data, file)
 
     print(f"Data has been combined and saved to {abs_path}")
-
-
-
 
 if __name__ == "__main__":
     combine()

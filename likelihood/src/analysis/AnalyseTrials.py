@@ -41,6 +41,13 @@ def yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, methods_id: int
             L_smoothed, T_smoothed = fits.smoothWithNoiseFilter(Likelihoods, TimeDifferences, hw, bound)
             res = fits.polynomialFit(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None)
 
+        case 5:
+            bin_width = 2e-3
+            sample_spacing = bin_width / 8
+            sample_spread = bin_width * 3
+            L_smoothed, T_smoothed = fits.smoothWithNewMovingAverage(np.asarray(Likelihoods), np.asarray(TimeDifferences), sample_spacing, sample_spread)
+            res = fits.findRawDataMaximaAndError(L_smoothed, T_smoothed, True_Lag, ax = ax if draw else None, do_avg=False)
+
     # ax.set_title(f"Method {methods_id}")
     return res
 
@@ -61,13 +68,13 @@ def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_id=2, draw
 
         draw = (i % draw_every == 0)
         if draw:
-            fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+            fig, ax = plt.subplots(1, 1, figsize=(7, 3), dpi=1000)
 
         estimate = yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_id, draw, ax)
         estimates.append(estimate)
 
         if output_folder and draw:
-            plt.savefig(output_folder / f"Trial_{i}.png")
+            plt.savefig(output_folder / f"Trial_{i}.png", bbox_inches="tight")
 
     return estimates
 
@@ -79,7 +86,10 @@ def unpackAndTestEstimates(estimates, True_Lag):
     for estimate in estimates:
         assert estimate[1] <= estimate[0] <= estimate[2], f"Estimate is not consistent with its bounds: {estimate}"
         values.append(estimate[0])
-        sigmas.append((estimate[2] - estimate[1]) / 2)
+        err_from_range = (estimate[2] - estimate[1]) / 2
+        err_from_larger_bound = max(estimate[2] - estimate[0], estimate[0] - estimate[1])
+        sigmas.append(err_from_range)
+        
         score += (estimate[1] <= True_Lag <= estimate[2])
 
     score /= len(estimates)

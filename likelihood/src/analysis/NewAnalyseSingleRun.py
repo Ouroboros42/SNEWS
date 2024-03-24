@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import json
 import argparse
 
+from helperMethods.Likelihood_Fits_And_Maxima import smoothWithNewMovingAverage
+
 parser = argparse.ArgumentParser("Likelihood_Analysis")
 parser.add_argument("source_file", type=str)
 args = parser.parse_args()
@@ -29,11 +31,11 @@ h2s = data["Binned"]["Signals-2"]
 # ------------------- Likelihood Fitting -------------------
 
 # can select a smaller window to fit the likelihood distribution, currently use all the data
-L_data = Likelihoods - np.min(Likelihoods)
-offsets_data = offsets
+O_data = np.asarray(offsets)
+L_data = np.asarray(Likelihoods - np.min(Likelihoods))
 degree = 9
 
-coefficients, cov = np.polyfit(offsets_data, L_data, degree, cov=True)
+coefficients, cov = np.polyfit(O_data, L_data, degree, cov=True)
 errors = np.sqrt(np.diag(cov))
 
 # print the coefficients upto 5 decimal places
@@ -45,7 +47,14 @@ number_of_points_to_evaluate = 1000
 points = np.linspace(offsets[0], offsets[-1], number_of_points_to_evaluate)
 L_fitted = np.polyval(coefficients, points)
 
+# Frequency shennanigans
 
+bin_width = 2e-3
+
+sample_spacing = bin_width / 8
+sample_spread = bin_width * 3
+
+L_samples, offset_samples = smoothWithNewMovingAverage(L_data, O_data, sample_spacing, sample_spread)
 # ------------------- Plotting -------------------
 
 fig1, ax1 = plt.subplots(2, 1, figsize=(10, 10))
@@ -59,24 +68,28 @@ ax1[0].legend()
 
 ax1[1].plot(offsets, L_data, label="Likelihood data points", color="blue")
 ax1[1].plot(points, L_fitted, label="Likelihood fit", linestyle="--", color="red")
+ax1[1].plot(offset_samples, L_samples, label="Moving Average", color="yellow")
 # ax1[1].axvline(x=True_Lag, color="black", linestyle="--", label="Expected Maxima")
 ax1[1].set_xlabel("Time difference (s)")
 ax1[1].set_ylabel("Likelihood")
 ax1[1].legend()
 
 
+
 # ------------------- Find Actual Lag Time -------------------
 
 # Estimate from the original likelihoods
-Lag_from_actual_data = offsets_data[np.argmax(L_data)]
+Lag_from_actual_data = O_data[np.argmax(L_data)]
 
 # Easy estimate from the curve
 Lag_estimate_from_curve = points[np.argmax(L_fitted)]
 
+Lag_estimate_from_moving_average = offset_samples[np.argmax(L_samples)]
+
 # Estimate from the derivative
 curve_derivative1 = np.polyder(coefficients)
 roots = np.roots(curve_derivative1)
-roots_to_consider = [root.real for root in roots if (np.isreal(root) and offsets_data[0] <= root.real <= offsets_data[-1])]
+roots_to_consider = [root.real for root in roots if (np.isreal(root) and O_data[0] <= root.real <= O_data[-1])]
 # print(f"Roots: {roots}")
 # print(f"Real roots: {real_roots}")
 possible_extrema = [np.polyval(coefficients, root) for root in roots_to_consider]
@@ -108,7 +121,8 @@ results = {
     "True-Lag": True_Lag,
     "Estimated-Lag-from-actual-data": Lag_from_actual_data,
     "Estimated-Lag-from-curve-maximum-value": Lag_estimate_from_curve,
-    "Estimated-Lag-from-derivative": Lag_estimate_from_derivative
+    "Estimated-Lag-from-derivative": Lag_estimate_from_derivative,
+    "Estimaed-Lag-from-moving-average": Lag_estimate_from_moving_average
 }
 
 # print results in a newline
@@ -116,33 +130,20 @@ for key, value in results.items():
     print(f"{key}: {value}")
 
 
-fig4, ax4 = plt.subplots(1, 2, figsize=(10, 5))
+fid4, ax4 = plt.subplots(1, 2, figsize=(10, 5))
 
 h1 = data["Binned"]["Signal-1"]
-h2 = data["Binned"]["Signals-2"][0]
+h2s = data["Binned"]["Signals-2"][0]
+
+ax4[0].plot(h1, label="Signal 1")
+ax4[0].set_title("Signal 1")
+ax4[1].plot(h2s, label="Signal 2")
+ax4[1].set_title("Signal 2")
+
+plt.show()
+
 
 directory = "src\\analysis\\singleRunResults\\"
 now = time.strftime("%Y%m%d-%H%M%S")
-
-for h, det_name in zip((h1, h2), detector_names.split("-vs-")):
-    hfig = plt.figure()
-    hax = plt.axes()
-    # bin_width = window_width / len(h)    
-    # hax.bar(tleadedge, h, width = bin_width, align='edge')
-    t_edges = np.linspace(0, window_width, len(h) + 1)
-    t_midpoints = (t_edges[:-1] + t_edges[1:]) / 2
-    n_bins = int(len(h) / 20)
-    t_subsample = np.linspace(0, window_width, n_bins + 1)
-    y_rescale = window_width / n_bins
-    hax.hist(t_midpoints, t_subsample, weights=h)
-    hax.set_title(f"Neutrinos detected at {det_name}")
-    hax.set_ylabel("Neutrino Count / Hz")
-    hax.set_xlabel("Time / s")
-    hax.yaxis.set_major_formatter(lambda x, _: f"{x / y_rescale}")
-    hfig.savefig(directory + f"Histograms_{det_name}_{now}.png", bbox_inches="tight")
-
-fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{now}.png", bbox_inches="tight")
-fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{now}.png", bbox_inches="tight")
-# fig4.savefig(directory + f"Histograms_{detector_names}_{now}.png")
-
-# plt.show()
+fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{now}.png")
+fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{now}.png")
