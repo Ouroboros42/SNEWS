@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
             bin_width
         );
 
+        std::printf("Detector Sensitivity Ratio = %.10f\n", test_signals.detectors.rate_const_ratio_2_to_1);
+
         auto SWEEP_START = mark_time();
 
         std::printf("Data loaded and prepared in %us\n", TIME_BETWEEN(sec, FULL_START, SWEEP_START));
