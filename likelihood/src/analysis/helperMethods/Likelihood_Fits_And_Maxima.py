@@ -194,7 +194,7 @@ def polynomialFit(
         ax.axvline(x=best, linestyle="--", label="Best Lag and Error Bounds")
         ax.axvline(x=err1, linestyle="--")
         ax.axvline(x=err2, linestyle="--")
-        ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")
+        ax.axvline(x=True_Lag, linestyle="--", label="True Lag", color="black")
         if plot_raw_data:
             ax.plot(T_data, L_data, "o", label="Likelihood data points")
         ax.set_xlabel("Time difference (s)")

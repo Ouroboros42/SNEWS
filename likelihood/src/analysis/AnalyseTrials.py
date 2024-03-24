@@ -61,7 +61,7 @@ def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_id=2, draw
 
         draw = (i % draw_every == 0)
         if draw:
-            fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+            fig, ax = plt.subplots(1, 1, figsize=(12, 7), dpi = 100)
 
         estimate = yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_id, draw, ax)
         estimates.append(estimate)
@@ -126,7 +126,7 @@ def main(json_file):
 
     # analysis parameters (read between 0 - numTrials samples, and draw roughly 5-10 plots for visualisation)
     numSamplesToRead = numTrials
-    numPlotsToDraw = 5
+    numPlotsToDraw = 10
 
     # draw every n-th sample (set numPlotsToDraw = 0 above to disable)
     draw_every = (numSamplesToRead // numPlotsToDraw) if numPlotsToDraw > 0 else numTrials + 1
