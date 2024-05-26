@@ -9,6 +9,7 @@ enum Detector {
     IceCube,
     SuperK,
     SNOPlus,
+    DarkSide
 };
 
 std::string detector_name(Detector detector);

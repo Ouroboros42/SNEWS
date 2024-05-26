@@ -10,7 +10,8 @@
 CLI::Transformer detector_validator(std::map<std::string, Detector>{
     { "SNOP", Detector::SNOPlus },
     { "SK", Detector::SuperK },
-    { "IC", Detector::IceCube }
+    { "IC", Detector::IceCube },
+    { "DS-20K", Detector::DarkSide }
 });
 
 int main(int argc, char** argv) {
