@@ -12,6 +12,11 @@ from helperMethods import Pull_Distribution as dist
 from helperMethods import Helpers as help
 from helperMethods import Bias_Testing as biasTest
 
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
+
 ## Look at the end of the file for usage instructions and in the main method to customise analysis parameters
 
 # ------------------- Methods -------------------
@@ -66,9 +71,11 @@ def readDataAndMakeEstimates(json_file, num_samples, True_Lag, method_id=2, draw
         Likelihoods = json_file[key]["Likelihoods"]
         TimeDifferences = json_file[key]["Offsets"]
 
+        wide = True # json_file["detector1"] == "IC" and json_file["detector2"] == "SK"
+
         draw = (i % draw_every == 0)
         if draw:
-            fig, ax = plt.subplots(1, 1, figsize=(7, 3), dpi=1000)
+            fig, ax = plt.subplots(1, 1, figsize=(8, 3), dpi=1000)
 
         estimate = yourFavouriteMethods(Likelihoods, TimeDifferences, True_Lag, method_id, draw, ax)
         estimates.append(estimate)

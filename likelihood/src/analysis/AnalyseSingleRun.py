@@ -124,25 +124,50 @@ h2 = data["Binned"]["Signals-2"][0]
 directory = "src\\analysis\\singleRunResults\\"
 now = time.strftime("%Y%m%d-%H%M%S")
 
-for h, det_name in zip((h1, h2), detector_names.split("-vs-")):
-    hfig = plt.figure()
-    hax = plt.axes()
-    # bin_width = window_width / len(h)    
-    # hax.bar(tleadedge, h, width = bin_width, align='edge')
+def plot_hist(h, ax, *args, **kwargs):
     t_edges = np.linspace(0, window_width, len(h) + 1)
     t_midpoints = (t_edges[:-1] + t_edges[1:]) / 2
     n_bins = int(len(h) / 20)
     t_subsample = np.linspace(0, window_width, n_bins + 1)
     y_rescale = window_width / n_bins
-    hax.hist(t_midpoints, t_subsample, weights=h)
+    ax.hist(t_midpoints, t_subsample, weights=h, *args, **kwargs)
+    ax.set_ylabel("Neutrino Count / Hz")
+    ax.set_xlabel("Time / s")
+    ax.yaxis.set_major_formatter(lambda x, _: f"{int(x / y_rescale)}")
+
+def plot_hist2(h, ax, det1, det2, offset=0, *args, **kwargs):
+    ax2 = ax.twinx()
+    t_edges = np.linspace(0, window_width, len(h) + 1)
+    t_midpoints = (t_edges[:-1] + t_edges[1:]) / 2
+    n_bins = int(len(h) / 20)
+    t_subsample = np.linspace(0, window_width, n_bins + 1)
+    y_rescale = window_width / n_bins
+    ax2.hist(t_midpoints+offset, t_subsample, weights=h, color="orange", *args, **kwargs)
+    ax.set_ylabel(f"Neutrino Count {det1} / Hz")
+    ax2.set_ylabel(f"Neutrino Count {det2} / Hz")
+    ax2.yaxis.set_major_formatter(lambda x, _: f"{int(x / y_rescale)}")
+
+det_names = detector_names.split("-vs-")
+
+for h, det_name in zip((h1, h2), det_names):
+    hfig = plt.figure()
+    hax = plt.axes()
+    plot_hist(h, hax)
     hax.set_title(f"Neutrinos detected at {det_name}")
-    hax.set_ylabel("Neutrino Count / Hz")
-    hax.set_xlabel("Time / s")
-    hax.yaxis.set_major_formatter(lambda x, _: f"{x / y_rescale}")
     hfig.savefig(directory + f"Histograms_{det_name}_{now}.png", bbox_inches="tight")
 
 fig1.savefig(directory + f"Likelihood_Points_And_Curve_{detector_names}_{now}.png", bbox_inches="tight")
 fig3.savefig(directory + f"Likelihood_Curve_And_Different_Maxima_{detector_names}_{now}.png", bbox_inches="tight")
 # fig4.savefig(directory + f"Histograms_{detector_names}_{now}.png")
 
-# plt.show()
+d = 1
+for ((i, h2), o) in zip(enumerate(h2s), [-d, 0, d]):
+    ofig = plt.figure(figsize =(6, 2.5), dpi=500)
+    oax = plt.axes()
+
+    plot_hist(h1, oax, label=det_names[0])
+    plot_hist2(h2, oax, *det_names, o, label=f"{det_names[1]}")
+
+    ofig.legend(loc=(0.75, 0.73))
+
+    ofig.savefig(directory + f"/../histcompare/{i}.png", bbox_inches="tight")

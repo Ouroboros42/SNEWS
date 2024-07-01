@@ -12,9 +12,9 @@ def combine():
     numTrialsExpected = 1000
     sweepRange = 0.2
     base_path = pathlib.Path(__file__).parent.parent.resolve()
-    abs_path = base_path / f"TrialsData/{detector1}-vs-{detector2}_{numTrialsExpected}.json"
+    abs_path = base_path / f"TrialsData/{detector1}-vs-{detector2}_{numTrialsExpected}_v2.json"
 
-    data_path = pathlib.Path('./output/bigbatches')
+    data_path = pathlib.Path('./output/bigbatch2')
 
     # get all files
     # change to the directory where the files are in os.listdir

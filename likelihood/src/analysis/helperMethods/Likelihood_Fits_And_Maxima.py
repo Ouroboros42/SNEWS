@@ -199,15 +199,19 @@ def polynomialFit(
     err1, err2 = best - error, best + error
 
     if ax:
-        ax.plot(offset_points, L_fitted, label="Fitted Curve")
-        ax.axvline(x=best, linestyle="--", label="Best Lag and Error Bounds")
-        ax.axvline(x=err1, linestyle="--")
-        ax.axvline(x=err2, linestyle="--")
-        ax.axvline(x=True_Lag, linestyle="--", label="True T", color="black")
+        ax.plot(offset_points, L_fitted, label="Polynomial Fit", color="C1")
+        ax.axvspan(err1, err2, label=r"Confidence Interval", color="peachpuff") # $\hat\tau \pm \sigma_{\hat\tau}$
+        ax.axvline(x=best, linestyle="--", label=r"Estimated Lag", color="darkorange") # $\hat\tau$
+        ax.axvline(x=True_Lag, linestyle="--", label=r"True Lag", color="indigo") # $\tau_0$
         if plot_raw_data:
-            ax.plot(T_data, L_data, "o", label="Likelihood data points")
-        ax.set_xlabel("Time difference (s)")
-        ax.set_ylabel("Likelihood")
-        ax.legend()
+            ax.plot(T_data, L_data, ".", label=r"Calculated Likelihoods", color="C0")
+        ax.set_xlabel("Time Lag / s")
+        ax.set_ylabel("Log-Likelihood")
+
+        order = [4, 0, 2, 1, 3]
+
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left')
+
 
     return best, err1, err2
